@@ -1,8 +1,9 @@
-Version 36: BBR Viewer Cards is now a proper Windows program.
+Version 37: a new look for the dashboard.
 
-- Installs like any program: no Node.js, no black window, starts with Windows in the tray.
-- First run brings your old folder over (cards, settings, logins, clips, music). The old folder isn't changed.
-- Nothing changes in OBS: still http://localhost:3000.
-- Updates itself from this page, never while you're live, with a full backup first.
-- Setup › App & updates: go back a version, install from a file, backups and restore, start-up options.
-- Tray: dashboard, dock, overlay link, giveaway entries, battles on/off, PANIC, restart, quit.
+- Calm dark colours with one blue accent, and clearer text throughout.
+- One menu down the left. Eight groups instead of six crowded tabs: Live, Scenes, Viewers, Giveaways, Game night, Battles, Sports News, Setup. Nothing removed, only moved.
+- Live now has just the 4 pages you use while streaming. Starting Soon, BRB, Big Cam, End credits and the other full screens are together under Scenes. Giveaways has its own group.
+- Top bar: search, your Twitch / Kick / YouTube / overlay status, and a Panic button (hide everything on stream; press again to bring it back).
+- Each page shows where you are (group and page name).
+- Overlays look exactly the same as before.
+- Fixed: an empty purple bar on the Live desk (the hidden Raid Night box).

@@ -1,3 +1,26 @@
+WHAT'S NEW IN v37 (a new look for the dashboard)
+   - Calm dark colours with one blue accent. Your overlays look exactly the same as before.
+   - ONE MENU DOWN THE LEFT, eight groups. Click a group to see its pages:
+       Live         Live desk, On screen, Replay, Buttons & Stream Deck
+       Scenes       Starting Soon, Be right back, Big Cam, End credits, Scenes & goals,
+                    Links & stingers, Photos & music, Camera studio, Theme
+       Viewers      Viewer cards, Edit a card, Leaderboards, Viewers + streaks,
+                    Viewer of the Stream, Rewards, Tangia bits, Card calculator, Stream stats
+       Giveaways    Giveaway list, Giveaway meter (+ Giveaways, tickets & prize pot when it's on)
+       Game night   Team results, GODFATHER meter, Blood pressure, Matchday squad,
+                    Red card rule, Challenges
+       Battles      Battles, Beat the Boss, Team shootout, Raid Night, Game tuning,
+                    Truck race, Battle screen
+       Sports News  News desk, Squad & stories, Leagues & alerts
+       Setup        System check, Platforms, Settings, App & updates, Move plugin,
+                    Testing, Diagnostics
+     Nothing was removed, only moved. A group opens on the page you were last on.
+     Can't find something? Type it in the search box at the top.
+   - TOP BAR: search, Twitch / Kick / YouTube / overlay status (green = connected,
+     amber = not), PANIC (hide everything on stream; press again to bring it back) and Advanced.
+   - Each page shows its group and name at the top.
+   - Fixed: an empty purple bar on the Live desk (the hidden Raid Night box).
+
 WHAT'S NEW IN v36 (BBR Viewer Cards is now a proper Windows program)
    INSTALL IT
    - Run BBR-Viewer-Cards-Setup-36.0.0.exe. Windows will say "Windows protected your PC" because the
