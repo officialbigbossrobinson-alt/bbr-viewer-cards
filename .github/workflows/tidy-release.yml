@@ -1,0 +1,46 @@
+# Fixes a version that ended up with two releases for the same tag (the installer build can race):
+# keeps the release that has latest.yml, moves any other files into it, deletes the duplicates.
+name: Tidy a release
+on:
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: 'Version tag, e.g. v37.0.0'
+        required: true
+permissions:
+  contents: write
+jobs:
+  tidy:
+    runs-on: ubuntu-latest
+    env:
+      GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      R: ${{ github.repository }}
+      TAG: ${{ inputs.tag }}
+    steps:
+      - name: Merge duplicate releases
+        shell: bash
+        run: |
+          set -euo pipefail
+          gh api "repos/$R/releases?per_page=100" --jq ".[] | select(.tag_name==\"$TAG\") | .id" > ids.txt
+          echo "Releases for $TAG: $(tr '\n' ' ' < ids.txt)"
+          KEEP=""
+          for id in $(cat ids.txt); do
+            if gh api "repos/$R/releases/$id/assets" --jq '.[].name' | grep -qx latest.yml; then KEEP=$id; fi
+          done
+          [ -n "$KEEP" ] || { echo "No release with latest.yml for $TAG"; exit 1; }
+          echo "Keeping $KEEP"
+          HAVE=$(gh api "repos/$R/releases/$KEEP/assets" --jq '.[].name')
+          for id in $(cat ids.txt); do
+            [ "$id" = "$KEEP" ] && continue
+            gh api "repos/$R/releases/$id/assets" --jq '.[] | "\(.id) \(.name)"' | while read aid name; do
+              if ! grep -qx "$name" <<< "$HAVE"; then
+                gh api -H "Accept: application/octet-stream" "repos/$R/releases/assets/$aid" > "$name"
+                curl -sfS -X POST -H "Authorization: Bearer $GH_TOKEN" -H "Content-Type: application/octet-stream" --data-binary @"$name" "https://uploads.github.com/repos/$R/releases/$KEEP/assets?name=$name" > /dev/null
+                echo "Moved $name"
+              fi
+            done
+            gh api --method DELETE "repos/$R/releases/$id"
+            echo "Deleted duplicate release $id"
+          done
+          gh api "repos/$R/releases/$KEEP" -X PATCH -f draft=false > /dev/null
+          echo "Latest is now: $(gh api repos/$R/releases/latest --jq '.tag_name + " " + ([.assets[].name]|join(", "))')"

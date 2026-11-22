@@ -37,6 +37,11 @@ jobs:
           V=v$(node -p "require('./package.json').version")
           if git ls-remote --exit-code --tags origin "refs/tags/$V" >/dev/null; then echo "$V already tagged"; else
             git tag "$V" && git push origin "$V"; fi
+          # make the (draft) release now, so the build uploads into ONE release instead of racing to create two
+          if ! gh release view "$V" >/dev/null 2>&1; then
+            gh release create "$V" --draft --title "$V" --notes-file build/release-notes.md $([[ "${{ inputs.test_version }}" == "true" ]] && echo --prerelease); fi
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       - name: Build and publish
         shell: bash
         run: |
