@@ -1,0 +1,1034 @@
+WHAT'S NEW IN v36 (BBR Viewer Cards is now a proper Windows program)
+   INSTALL IT
+   - Run BBR-Viewer-Cards-Setup-36.0.0.exe. Windows will say "Windows protected your PC" because the
+     app isn't signed: press "More info", then "Run anyway". Pick where it goes (or leave it), Install.
+   - No Node.js, no black window, no "Start BBR Cards.bat". It's in the Start menu and on the desktop.
+   - FIRST TIME: it finds your old BBR-Viewer-Cards folder (Downloads, Desktop, Documents, OneDrive) and
+     shows how many cards, logins, clips and songs are in it. Close the old black window first, then press
+     "Bring it all over". It makes a copy: your old folder isn't changed. "Choose a folder…" if it's
+     somewhere else. Then "Start the app" and OPEN THE DASHBOARD.
+   - Windows may ask "Allow BBR Viewer Cards on networks?": tick Private networks and Allow, so your phone
+     on the same Wi-Fi can still open the dock.
+   - NOTHING CHANGES IN OBS: it still runs on http://localhost:3000 (overlay, Starting Soon, BRB, Big Cam,
+     giveaway meter, dock, phone, Stream Deck links all stay the same).
+   WHERE YOUR STUFF IS NOW
+   - %APPDATA%\BBR Viewer Cards (Setup › App › Open the folder): config.json (settings + logins),
+     data\ (cards, clips, photos, music), your own sounds\ and textures\. Updates never touch it.
+   THE TRAY (the BBR icon by the clock)
+   - Open the dashboard, open the dock in a small window, copy the overlay link, giveaway open / close
+     entries, battles off / on, PANIC (hide everything on stream), update, restart, quit.
+   - Closing the window keeps it running in the tray, so the overlay keeps working. Quit from the tray.
+     If you're live it asks first.
+   - Starts with Windows (in the tray). Only one copy runs at a time: opening it again shows the window.
+   UPDATES (Setup › App & updates)
+   - It checks your GitHub release page by itself, downloads in the background and tells you. A green
+     "Update ready" bar shows on the dashboard: What's new, Update now (about 20 seconds; OBS can stay
+     open), After my stream, Skip this version.
+   - NEVER WHILE YOU'RE LIVE: with "Never install while I'm live" ticked (it is), Update now waits and
+     installs by itself about a minute after you end the stream. Untick it and it asks you instead.
+   - A FULL BACKUP IS MADE BEFORE EVERY UPDATE (settings, logins, cards, photos, music; not clips).
+   - GO BACK TO VERSION <the one before>: downloads that version from the release page, checks it, backs up,
+     installs it. Tick "also put my cards and settings back" to go back to the backup from before the
+     update too (anything since, like tonight's stream, would be undone).
+   - INSTALL FROM A FILE: pick a BBR-Viewer-Cards-Setup-<version>.exe that Claude gave you.
+   - Which updates: Normal (tested) or Test versions too.
+   BACKUPS (Setup › App & updates)
+   - Before every update + at the start of every stream (keep the last 20), or before updates only.
+     Back up now, Restore a backup… (a backup of right now is made first, so it can be undone),
+     Open the folder. Not while you're live.
+   IF SOMETHING'S WRONG
+   - Save a report for Claude: one file with the system check and the app's log (no logins). Attach it.
+   - Restart the app. If it ever crashes it starts again by itself; if it keeps crashing it asks you.
+   - Port: leave it at 3000 (changing it changes every OBS link).
+   - "The old BBR Cards window is still running": close the black window, press Try again.
+   STILL WORKS THE OLD WAY
+   - "Start BBR Cards.bat" in a folder still works exactly as before (data next to server.js), if you
+     ever need it. Don't run both at once.
+
+WHAT'S NEW IN v35 (simple !giveaway list, battles off, search, earnings fixes)
+   SIMPLE GIVEAWAY (dock › Giveaway tab, and Live › Giveaway list)
+   - OPEN ENTRIES, then chat types !giveaway: their Twitch name goes in the list on the dock. Each name shows
+     how long they've watched this stream. Copy the names (one per line, "a, b, c" or "a b c"), add a name,
+     delete a name (✕), find a name, clear the list, PICK A WINNER (re-roll picks someone else).
+   - The bot answers in chat. When lots of people enter at once it sends ONE message with all their names,
+     so the chat bot doesn't get flood-limited. Edit every message (entered, already in, needs more watch
+     time, closed, open, close, winner, !watchtime) and use {user} {count} {have} {need} {left} {cmd}.
+   - Watch time needed (minutes this stream, 0 = none): editable on the dock and the dashboard. People who
+     haven't watched long enough are told how much they have and how many minutes to go.
+     !watchtime tells anyone their watch time this stream. Watch time is counted every 5 minutes from
+     Twitch's viewer list (lurkers count).
+   - Options: Twitch only (Kick / YouTube can be ticked too), subs only, followers only, rename the command.
+   - The giveaway meter / timer shows how many have entered and "TYPE !GIVEAWAY TO ENTER", and the winner.
+   BATTLES OFF COMPLETELY
+   - Battles page: untick "Battles on" (or dock › Games › BATTLES OFF COMPLETELY, Stream Deck
+     /control/battles-switch). Nothing can start, !join and the game commands are ignored, and the
+     next-battle timer is gone from stream. Tick it / TURN BATTLES ON to bring them back.
+   SEARCH
+   - Dashboard: the search box at the top (or press /). Type a word, press Enter: it opens the page and
+     highlights the setting (switching Advanced on if it's an advanced setting).
+   - Dock › Search: buttons (tap "Do it"), dashboard settings (opens the dashboard on them) and viewers
+     (show their card on stream, or add them to the giveaway).
+   EARNINGS
+   - Fixed: anonymous gift subs and anonymous cheers were not counted at all (earnings, stream stats).
+   - Fixed: after restarting the app mid-stream, THIS STREAM could start again from 0.
+   - Stream stats now shows what each stream earned (same rates), and "Best streams" no longer says (Unknown).
+   - Stream stats › Check the money log: every sub / gift / bit / Kick / Super Chat the app counted, with
+     Delete for a wrong one and Add for one it missed. Remember to set your own rates (Your rates).
+
+WHAT'S NEW IN v34 (giveaway timer, giveaway meter on / off)
+   - Live › Giveaway meter › Type: "Meter + countdown", "Countdown only (no target)" or "Meter only (no clock)".
+     Countdown only is just a giveaway timer: e.g. GIVEAWAY IN 4:00:00, then GIVEAWAY TIME! at 0:00.
+     Nothing fills it; your title, prize and words still show, and chat can still enter if you want.
+   - The clock now takes hours (up to 72), and "or ends at" sets it to a time of day (e.g. 21:00).
+     Clock buttons: -10 min, -1 min, +1 min, +10 min, +1 hour. Dock: -10 min, +10 min, +1 hour.
+   - "Giveaway meter turned on" tick box: untick it and the meter/timer never shows (the dock buttons
+     and Stream Deck keys do nothing) until you tick it again.
+   - Stream Deck: /control/gmeter-off, /control/gmeter-on, /control/gmeter-mode?m=timer (or meter),
+     /control/gmeter-addtime?mins=10, /control/gmeter-addtime?hours=1, /control/gmeter-at?time=21:00,
+     /control/gmeter-time?hours=4.
+
+WHAT'S NEW IN v33 (giveaway meter, music on Starting Soon / BRB)
+   GIVEAWAY METER (Live › Giveaway meter)
+   - A meter on stream with a countdown. It fills from: subs (gift subs count too), gift subs only,
+     bits / Kicks / Super Chats (per 100), follows, chat entries (people typing a word, e.g. !enter),
+     everything as points (you set the points), or only when you change it. Twitch, Kick and YouTube all count.
+   - Your words: title, prize, the line under the meter, how to enter, what it counts, above the clock,
+     when the goal is hit, when time's up. Leave a box empty for the game's own words.
+   - The look follows the game: football, Euro Truck (motorway sign + lorry), American Truck, GTA
+     (Sunset Heist + cash), Arc Raiders, Metal Gear, neon. Or pick one. Choose where it sits and its size.
+   - START, PAUSE (clock stops and nothing counts until you resume), STOP (hidden, number kept),
+     RESTART (back to 0, entries cleared, clock from the top). Change the meter: -5 -1 +1 +5 +10, set
+     it to a number, change the goal. Change the clock: -1 / +1 / +5 minutes, or set it.
+   - Entries: one each, optional subs-only, "Pick a winner" picks at random and shows them on stream.
+   - On the dock (Live tab) and Stream Deck: GW ON/OFF, PAUSE, STOP, RESTART, +1, -1, +5, +1 MIN, -1 MIN, WINNER.
+   - Shows on the BBR overlay, or as its own Browser Source http://localhost:3000/gmeter (1920 x 1080).
+   MUSIC
+   - Starting Soon music is now on the Starting soon page (it used to be on Be right back).
+   - Starting Soon, BRB and Big Cam: "+ Add songs" right there (it uploads, ticks it and saves),
+     "Listen" to hear it in the dashboard, "Play on screen now" to put a song on straight away,
+     and Next song / Stop this song / Mute for that screen.
+
+WHAT'S NEW IN v32 (camera fix, Starting Soon words per game, replay clips + scrub)
+   CAMERA
+   - Fixed: a cropped webcam could jump to the wrong place when an effect started, and a camera left
+     moved by a crash or an OBS hiccup stayed off screen.
+   - Live › Camera studio › "Save camera spot": put your camera where you like it in OBS, press it once.
+     From then on RESET CAMERA (dashboard, dock › Fix it, Stream Deck /control/cam-reset) stops any
+     effect straight away and puts the camera back on that spot. "Save cam spot" is on the dock and
+     Stream Deck too (/control/cam-savespot). Saved per scene.
+   - Guard (on by default): when the app starts it puts the camera back where it was, and if the camera
+     ever ends up off screen it puts it back on your spot (or pulls it fully onto the screen).
+   - Effects now hand the camera back exactly as you set it up, and a battle waits for a camera effect to
+     finish before moving the game into the corner.
+   STARTING SOON WORDS
+   - The words follow the game: football KICK-OFF IN / PRE-MATCH, Euro Truck ENGINE ON IN / IN THE DEPOT,
+     American Truck WHEELS ROLL IN / AT THE YARD, GTA THE JOB STARTS IN / LAYING LOW, Arc Raiders
+     DROPPING IN / IN THE BUNKER, Metal Gear INSERTION IN / STANDING BY. The top bar, the title, the
+     arrivals board, the chat box and the kick-off splash change too, and trucks / GTA get their own look.
+   - Live › Starting soon › Words on the screen: change any word for any game, or lock the words to one
+     game. Leave a box empty for the default.
+   REPLAYS
+   - Clips Twitch is slow with no longer get lost: the app keeps trying for up to 15 minutes (also after
+     a restart). Each clip shows "Waiting for Twitch" and a Try again button on the dock.
+   - ON YOUR TWITCH (dock › Replay, and Live › Replay): every clip on your channel from the last week,
+     yours, the app's and chat's. "Get + play" downloads it and plays it; "Get tonight's" pulls them all
+     in. With "Pull in clips made on Twitch" on, clips made while you're live come in by themselves.
+   - "Check clips" tries every step on your newest clip and says exactly where it stops (permissions,
+     download, folder). If it says reconnect, do Setup › Twitch › Connect Twitch once.
+   - Pause / play, back 2 s, forward 2 s, one frame back / forward, and a scrub bar while a replay plays
+     (dock, dashboard, Stream Deck /control/replay-pause, /control/replay-back, /control/replay-fwd).
+   - The replay matches the game: Boss Sports News for football, a dashcam with REC clock for the trucks,
+     CCTV "caught on camera" for GTA, raider cam with hazard stripes for Arc Raiders, a mission log for
+     Metal Gear. Live › Replay › Style can lock it to one.
+
+WHAT'S NEW IN v31 (Sunset Heist: a GTA-style theme for everything)
+   An original sun-drenched, neon crime-caper look in the style of GTA. It uses none of Rockstar's
+   logos, artwork or catchphrases, it just has the same vibe. Turn it on: Live › Theme › Sunset Heist › Use, dock / Stream Deck
+   "GTA" key (/control/theme-heist), or tick "Switch by itself" and it comes on whenever your game on
+   Twitch / Kick is Grand Theft Auto (V, VI, Online). What changes:
+   - CARDS become a "crew file": sunset sky, palm trees, tilted mugshot photo, rank STREET / CREW / BOSS /
+     KINGPIN by tier, REP number, and a HEAT meter (more heat for higher tiers and 3+ in a row).
+     Stats read HUSTLE / SUB / SUP / CHAT / LOY / CREW / STK. Live › Viewers › Card style also has
+     "Always the Sunset Heist ID".
+   - STARTING SOON: "THE JOB STARTS SOON" over a striped sunset with a city skyline, sea and swaying
+     palms, neon road; chat becomes a BURNER PHONE, arrivals = CREW CHECK-IN, kick-off = "IT'S GO TIME!".
+   - OVERLAY: alerts in sunset panels ("WORD ON THE STREET"), burner-phone chat, a COAST NEWS 24
+     breaking-news ticker that reports your subs / gifts / raids, and a big SUNSET HEIST banner when the
+     theme switches on. The football ticker and scores hide (like the ETS theme).
+   - BE RIGHT BACK: "LAYING LOW" at the safehouse: sunset, skyline, a police helicopter sweeping its
+     light, your photos taped up like surveillance shots.
+   - BIG CAM: two new sets. Beach safehouse (sunset window with palms + the sea, a heist planning board
+     with photos and red string, glass desk with cash and a burner phone) and Penthouse (night city
+     through floor-to-ceiling glass, marble desk with a gold edge). "Match the game" picks the safehouse.
+   - STINGER: new "Comic panels" style: three slanted comic panels slam in (your photo in one), the title
+     stamps on, they fly off. Auto for GTA; you can pick it for any game too.
+   - LAYOUT: GTA gets its own layout group (Live › On screen), so widgets can sit somewhere else in GTA.
+
+WHAT'S NEW IN v30 (BRB screen, Big Cam backdrops, links flash, game stingers, music, Stream Deck)
+   - PHOTOS & MUSIC (Live › Photos & music): upload your photos and songs once and use them anywhere.
+     Only use music you're allowed to play on stream (royalty-free or your own).
+   - BE RIGHT BACK (Live › Be right back): new Browser Source http://localhost:3000/brb (1920 x 1080) in
+     your BRB scene. Its look follows the game: football = HALF-TIME, Euro Truck = DRIVER ON A BREAK
+     (motorway sign + road), American Truck = REST AREA (green interstate sign, desert sunset), Arc
+     Raiders = bunker, Metal Gear = codec, anything else = neon. Your photos rotate in a frame, your
+     music plays, chat shows, a timer counts down. One tap (dock / Stream Deck "BRB") plays the stinger,
+     cuts OBS to the BRB scene and starts it all; tap again and you're back on the scene you left.
+     Timer: START / STOP / +1 / -1 / 5:00 / 10:00.
+   - STARTING SOON MUSIC (Live › Be right back, second box): plays while the countdown runs, fades out at
+     kick-off.
+   - BIG CAM (Live › Big Cam): a set behind you and a desk in front of you, made for each game:
+       Pundit studio (football) · Haulage office (ETS: window onto the motorway with lorries going past,
+       route map, CB radio and a brew on the desk) · Truck cab (windscreen + dashboard) · Roadside diner
+       (ATS: neon OPEN 24 HRS, desert interstate, red counter) · Raider bunker (Arc Raiders) · Command
+       room (Metal Gear) · Neon den (anything) · or YOUR OWN PHOTO as the wall (darken / blur it).
+     "Match the game" picks the set for you. Press "Set it up in OBS": it adds the wall at the bottom
+     and the desk on top of your Big Cam scene, with your camera in between. On the camera add
+     Filters › NVIDIA Background Removal (or green screen + Chroma Key) so the set shows behind you.
+     Music in Big Cam too. Dock / Stream Deck: next set, previous set, stinger to Big Cam, music on/off.
+   - LINKS FLASH (Live › Links & stingers): your Twitch / YouTube / Kick (and TikTok, X, Instagram,
+     Discord if you want) pop up on stream every N minutes for N seconds. Pick the corner, nudge it,
+     size it, style it (flip in / one at a time / neon). "LINKS" on the dock shows them right now.
+   - STINGERS (Live › Links & stingers): a full-screen transition that covers the cut while the app
+     switches scene. Euro Truck: a BBR HAULAGE lorry drives across the screen (your photo on the
+     trailer). American Truck: a long-nose BBR FREIGHT LINES rig with an interstate shield. Also: a giant
+     motorway sign (blue in Europe, green in the US), a tachograph dial, and Sports News / Arc / Metal Gear
+     bands. Pick the words, colour, length, photo and sound. Keep the BBR overlay in every scene
+     (in OBS: copy it, then Paste (Reference) into each scene) so the stinger carries on across the cut.
+     A stinger key for every OBS scene is on the Stream Deck page.
+   - STREAM DECK (Live › Buttons & Stream Deck › "Stream Deck: every button"): 80+ keys page by page
+     (Live, Screens, Timers, Replay, Games, Boss kick, Fix it, Scenes). "Download all key pictures (.zip)"
+     gives you a picture for every key plus links.txt. On each key: Website action, paste the link,
+     tick "GET request in background", set the picture.
+   - FIXED: several dashboard buttons that had stopped working because two buttons shared a name:
+     "Show this board now" (Leaderboards), "Save and remove bot cards" (Settings), the Viewer of the
+     Stream table, the Rewards status line, the Scenes "Save", and the System check status line.
+
+WHAT'S NEW IN v29 (fixes + a simpler dock + Euro Truck Simulator theme + 9-zone penalties)
+   FIXES
+   - BLUE FLAME "10 IN A ROW" KEPT POPPING UP: anyone on a 10 streak with a streak saver set it off with
+     every chat message. Now a streak alert shows once per viewer per stream.
+   - STREAM MONEY WAS WRONG: every gifted sub was counted twice (once in the gift, once again as a "sub"
+     for whoever received it), and "this stream" only counted from the last restart. Both fixed, and
+     the old doubled gift subs are taken out of your totals once (Stream stats › Earnings says how many).
+   - !JOIN FOR YOU: your !join always counted, but the 1 v 1 draw picks 2 names at random and last game's
+     players go to the back, so it could look like it didn't work. Now:
+       · chat confirms joins ("@you @KTB you're in! (5 joined)"), grouped so it never spams
+       · "Let me play" (dock › Games, on by default): when you !join you're always in the game
+   - GAMES START STRAIGHT AWAY: the moment a game is full (8 trucks, every team slot, 2 players without
+     the draw), or when nobody new has joined for 10 seconds. START NOW button on the dock. The 10
+     seconds is in Battles › Game tuning › All battles.
+   - THE OLD OBS REPLAY BUFFER CODE IS GONE COMPLETELY: replays are Twitch clips only.
+   - CARDS MATCH THE REAL DATA: Viewers › Edit a card › CARD CHECK compares every card with the
+     per-stream history (who was really in which stream, with restarts / reconnects joined back into
+     one stream) and lists streaks that were counted too high. "Fix them all" (a backup is saved first).
+     Streaks also no longer break over stream numbers that were only restarts.
+   NEW
+   - THE DOCK IS 4 TABS WITH BIG BUTTONS: Live (what needs you right now + your quick buttons + W/D/L),
+     Replay (CLIP · VIEW LAST · SLOW-MO · STOP + tonight's clips), Games (who's joined, START NOW, start
+     any game, Let me play), Fix it (see below). Everything else stays in the dashboard.
+   - FIX IT (when things go wrong live): FREEZE ALL CARDS (changes are held, then "apply" or "throw away"),
+     UNDO THE LAST 10 MINUTES of card points (subs, gifts and bits stay), CARDS BACK TO START OF STREAM,
+     mute the bot, hide all overlays, reconnect everything, stop all games, and a light for each of
+     Twitch / Kick / YouTube / OBS / overlay / cards.
+   - CARD GUARD: if a card jumps 5+ OVR in 10 minutes and nobody paid for it, card changes pause by
+     themselves and the dock asks you ("Looks fine, apply" / "Throw them away").
+   - EDIT A CARD (Viewers › Edit a card): search a viewer, see what each stat is made of (earned from real
+     data, card points, streak boost, your edits), type the number you want on the card, set streak /
+     best / savers / tickets, rebuild the streak from history, lock a card, undo. Everything is logged.
+   - THEME TAB (Live › Theme): Football (Boss Sports News) or EURO TRUCK SIMULATOR: Starting Soon becomes
+     a motorway departure sign ("DEPARTING SOON", ENGINE ON IN countdown, convoy arrivals board, CB radio
+     chat, TRAFFIC NEWS strip), card alerts arrive as NEW DELIVERY notes, chat becomes CB RADIO, the
+     football results box hides and the truck race is the default game. "Switch by itself" picks the
+     theme from the game you're playing on Twitch / Kick. Dock / Stream Deck: /control/theme-ets,
+     /control/theme-football.
+   - STARTING SOON TIMER: START and STOP buttons (STOP freezes the clock, START carries on), −1 / +1 min,
+     5:00, 10:00, Go live now. On the dashboard (Starting soon + Theme), the dock and Stream Deck
+     (/control/starting-start, starting-stop, starting-plus1, starting-minus1, starting-set?secs=300).
+   - PENALTIES HAVE 9 SHOTS: L / C / R plus T or B for top / bottom. LT = top left, RB = bottom right,
+     T = top centre, B = bottom centre, plain L / C / R = middle height. 1-9 works like a number pad.
+     The keeper now guesses a side AND a height. Top corners are the hardest to save but go over the
+     bar most; middle height is the safest on target but the easiest to save; the odds were checked
+     over 180,000 test kicks and land within 1% of the settings (Battles › Game tuning › Penalty
+     Shootout shows the goal chance for every zone). Beat the Boss buttons on the dock have all 9.
+   - THE BALL SPINS in flight (3D stadium), and every penalty game gets a RANDOM TIME OF DAY: afternoon,
+     golden hour, dusk or night under the lights (Battles › Team shootout › 3D stadium to pick one).
+
+WHAT'S NEW IN v28.4 (FIX: streaks still climbing + reset cards to before tonight)
+   - WHAT WAS STILL BROKEN: viewers were matched to a stream by the platform's own stream id. When
+     Twitch reconnected mid-stream it handed out a new id, so the same night counted again (extra
+     streak steps and loyalty XP). Streak 10 gives +3 to every stat, which is the jump you saw.
+   - FIXED: attendance now uses the app's own stream number, which only goes up once per real stream.
+   - A BACKUP IS SAVED AT THE START OF EVERY STREAM, so you can always roll back to before a stream.
+   - RESET CARDS TO BEFORE THIS STREAM: Live desk > Chat bot > "Reset cards to before this stream".
+     The backup marked "last one before tonight" is picked for you. Press Preview to see each viewer's
+     OVR and streak before/after, then Reset. A backup of right now is saved first, so it can be undone.
+     Tonight's subs, gifts and bits are kept; everyone who chatted tonight gets one normal check-in.
+
+WHAT'S NEW IN v28.3 (URGENT FIX: cards boosting on every chat message + the app spamming chat)
+   - WHAT WENT WRONG: every time the app restarted during a stream (e.g. installing an update) or the
+     stream dropped and came back, it counted as a NEW stream. So everyone's next message was a fresh
+     "check-in": +1 card point, another streak step (which boosts every stat), tickets, and a
+     "STREAK!" line posted in chat as you.
+   - FIXED: a restart, a dropped stream or a Twitch reconnect within 45 minutes is the SAME stream.
+     Going offline only counts after 3 minutes.
+   - THE APP IGNORES ITS OWN MESSAGES when they come back through chat (no points, no commands).
+   - FLOOD LIMIT: the app posts at most 8 chat messages a minute (you can change it), and the STREAK
+     line at most every 10 minutes. The dock warns you if it was held back.
+   - MUTE BUTTON: Live desk > Chat bot > "Mute the chat bot", or /control/bot-mute (dock button and
+     Stream Deck). While muted nothing is posted in chat.
+   - REPAIR: Live desk > Chat bot shows the duplicate "streams" it found and how many viewers got
+     extra points. "Take the extra points back" removes the extra check-in points, streak steps and
+     tickets (a backup is saved first).
+
+WHAT'S NEW IN v28.2 (Replays use Twitch clips: no more OBS Replay Buffer)
+   - ONE-TAP TWITCH CLIPS: the Replay button now makes a Twitch clip of the last 10-60 seconds.
+     Twitch records it on its side, the app downloads it (about 15-60 seconds later) and plays it
+     with the same Sky Sports replay look as before (clip full screen, game + camera in boxes,
+     slow-mo finish, music, studio look, analysis desk). Nothing extra is recorded in OBS.
+   - NOTHING RECORDS IN OBS: replays are Twitch clips only (since v29 the old OBS buffer code is gone
+     completely). If OBS still has it ticked, untick Settings > Output > Replay Buffer.
+     >> RECONNECT TWITCH ONCE (Setup > Twitch > Connect Twitch) and say yes: the app now asks to
+        make and download clips. Until you do, the dock says "Reconnect Twitch".
+   - CLIP LIST on the dock and the Replay page: thumbnails, tap to play, star, "on Twitch" and
+     "trim / rename" links. "Clip only (play later)" saves without playing.
+   - AUTOMATIC CLIPS (each has its own switch): a gift bomb (5+ subs, you choose), a blood pressure
+     MELTDOWN, a red card (plays it). Automatic ones go in the clip list; you choose when to play.
+   - CHAT !clip (or !replay) for mods, or mods and subs: goes in the clip list, one every 45 s.
+   - Optional: post every new clip's link in your Discord.
+   - Clip files are kept in data/clips for 30 days (you choose; starred ones are kept).
+   - Clips only work while you're live on Twitch. They show the stream as viewers saw it.
+   - The replay load test now plays your newest clip.
+
+WHAT'S NEW IN v28.1
+   - PENALTY GAMES START QUICKER: the window to buy ON TARGET shots before kick-off is now 5 seconds
+     (1 v 1, Beat the Boss and team shootouts). Change it on Battles > Game tuning > All battles.
+   - LESS CLUTTER WHEN A PLAYER STEPS UP: new camera angle so the shooter, his name and the ball sit
+     above the chat bar; smaller chat bar, cards and scoreboard; the fun counters and the blood
+     pressure meter shrink into the space above the game while it's on.
+   - FASTER 3D: 3D quality setting (High / Balanced / Performance). Balanced (default) draws at 85%
+     sharpness and 30 fps while chat aims, 60 fps when the ball moves. Parts of the stadium off camera
+     aren't drawn, waiting players update less often, shirts are prepared during the line-up.
+     About 60% less work per frame for the overlay with 11 players on screen.
+   - Beat the Boss uses the 3D players (the Boss in Bosshausens, #BOSS on his back).
+
+WHAT'S NEW IN v28 (3D stadium for the penalty games: Battles > Team shootout > 3D stadium)
+   - 3D STADIUM: the 1 v 1 shootout, Beat the Boss and the 3 v 3 / 5 v 5 team shootouts are now
+     played in your stadium with real animated players (your Mixamo pack). Night lighting,
+     floodlights, a crowd in the stands, and the ad boards say BIGBOSSROBINSON / BSN /
+     !JOIN THE SHOOTOUT. The scoreboard, cards and chat bars sit on top as before.
+   - YOUR PRO CLUBS KITS: all 12 of your clubs (Pogs in Net, Pogs on Wing, All Ireland, The
+     Bosshausens, The Danhausens, Mr Esports, 1916 Rising, The Elitehausens, The Diamond Dogs,
+     PasstheBall UTD, Liquid Snakers, Belfast Ocelots) have their kit on the players. The shooter's
+     name and card rating are printed on the back of the shirt. The Boss always wears Bosshausens.
+   - NO MORE "TEAM RED v TEAM BLUE": team shootouts draw two of your clubs at random (or the two
+     you choose). Chat joins with the club's word: !join boss, !join dogs, !join net, !join wing,
+     !join ireland, !join dan, !join esports, !join rising, !join elite, !join ptb, !join snakers,
+     !join ocelots. The full list is on the Team shootout tab.
+   - THE KEEPER REALLY SAVES IT: he dives the way the game decided (high dive, low dive, jump,
+     catch), reaches the ball on saves, and is beaten to the corner on goals.
+   - CAMERA DIRECTOR + REPLAYS: behind-the-shooter camera while chat aims, push in on the kick,
+     cut to the scorer or the keeper, then a slow-motion replay (ball cam for goals, reverse
+     angle through the net for saves and misses). Each can be switched off.
+   - TEAM LINE-UPS: team games open with both teams lined up and every viewer's name over
+     their head.
+   - LIGHT ON OBS: the stadium files were shrunk (13.8 MB to 5 MB) and the 3D only draws while a
+     penalty game is on screen. If OBS can't do 3D, or Light graphics is on, the classic scene
+     is used by itself. System check has a new "3D stadium" line.
+   - CREDIT: the stadium is "Soccer Stadium" by nermin (Sketchfab, CC-BY 4.0). Its licence needs a
+     credit, so it's in the corner of the game (or put it in your panels and switch it off).
+     >> In OBS, right-click the BBR overlay Browser Source > Refresh once after updating.
+     >> OBS: Settings > Advanced > "Browser Source Hardware Acceleration" must be on for 3D.
+
+WHAT'S NEW IN v27.1 (Blood pressure extras: each one has its own switch on Game night > Blood pressure)
+   - RED CAMERA: your camera turns red when you're BOILING (or from FUMING / only at MELTDOWN),
+     stronger at MELTDOWN, back to normal when you calm down. The app adds an OBS filter called
+     "BBR Blood Pressure" to your camera for it.
+   - MELTDOWN BETS: chat types !meltdown yes or !meltdown no. A meltdown settles it (YES wins), or
+     the end of the stream (NO wins). Right = +1 card point. !meltdown on its own shows the count.
+   - END CREDITS: "The Boss's Blood Pressure" with tonight's peak reading and any meltdowns.
+   - CALM AWARDS: never got past HEATED = "COOL AS ICE"; your lowest peak this season =
+     "CALMEST STREAM OF THE SEASON". On the ticker and in the credits.
+   - RAGE REWARD: any Twitch channel point reward or custom Power-up with "rage" or "blood pressure"
+     in its name winds you up (+10, you choose). Make one called e.g. "RAGE BAIT".
+
+WHAT'S NEW IN v27
+   - CARDS FIXED: since v26 no card showed on stream. The Starting Soon screen's new messages were
+     treated as card alerts by the overlay, one crashed it, and the card queue stayed stuck. Now only
+     real card alerts go in the queue, one bad alert can never stop the rest, and a watchdog clears
+     anything that gets stuck (an alert, a battle screen or a replay that never closed).
+     Also: bits, Kicks, Super Chats, subs, gifts and raids now ALWAYS show the card as a thank-you
+     (before, it only showed if a stat went up).
+     >> In OBS, right-click the BBR overlay Browser Source > Refresh once after updating.
+   - SYSTEM CHECK (Setup > System check): tests everything for real, quietly (nothing in chat or on
+     stream): every card builds, follow / sub / gift / bits / !card each reach the overlay, the
+     overlay's card queue isn't stuck (and why, if it is), every chat command answers, every battle
+     plays to the end, the replay clips and your OBS settings. "Full check + a test card on stream"
+     also proves a card really appears. Run it before you go live.
+   - !top: works for every way of typing it (!top, !top 10, !top20, !top gifts / support / streaks /
+     battles / watch / checkins), and Twitch no longer drops it when typed twice in 30 seconds.
+   - BATTLES IN ONE PLACE: Battles > Battles now starts with "All battles": 1 v 1 shootout,
+     Team shootout 3 v 3, Team shootout 5 v 5, Beat the Boss, Truck race, Queen Raid, each with
+     Start and Test, plus Cancel.
+   - BOSS BLOOD PRESSURE (Game night > Blood pressure): a medical-monitor meter on stream (move it
+     on the On screen page). 120/75 CHILLED up to 220/120 MELTDOWN, with a heartbeat line that
+     speeds up. Up from the dock (+5 / +15), Stream Deck (/control/bp-up, bp-up15, bp-down, bp-melt,
+     bp-reset) or the dashboard, and by itself on a red card, two yellows, GODFATHER +1, a loss or a
+     draw, losing Beat the Boss (a win calms you down). Cools down on its own. Chat: !bp shows it,
+     !calm lowers it. Bits saying "rage" wind you up. MELTDOWN takes over the screen and goes on the
+     Sports News ticker. All the amounts can be changed.
+   - REPLAYS (Live > Replay, the OBS dock, Stream Deck, phone): one tap saves the last 10 / 20 / 30 /
+     60 seconds and plays them like a TV replay (blue REPLAY wipe, label like GOAL · WILL RKO, slow-mo
+     badge, progress bar) while your game keeps running live underneath. Normal, 0.5x or 0.25x,
+     once / twice / three times. Looks: big window over the live game, full screen with the live game
+     in a corner, or split. Every replay is kept as a clip: play it again, star the best one and it
+     plays as "Replay of the night" before the credits. Optional: replay by itself after a red card;
+     mods can type !replay.
+     SETUP: Setup > Twitch > Connect Twitch and allow clips. Nothing to set up in OBS (replays are
+     Twitch clips since v28.2).
+   - EARNINGS (Viewers > Stream stats, top): this stream / week / month / year, each with "so far" and
+     "on pace for", a breakdown by source, a month-by-month chart, your best streams and an optional
+     monthly goal line. Open "Your rates" first and type what YOU get per sub, bit, Kick, membership
+     and Super Chat (the starting numbers are only a guess). Dashboard only: never on stream or in chat.
+   - EDIT THE TEAM SHEET (Game night > Matchday squad): change the team name on screen (tap a club or
+     type one), the match number, names, order (arrows) and positions (GK, CB, ST...). Add someone from
+     the bench or type any name. "Save + show on screen". Whoever you take off still goes first next
+     match and gets the bench point. Positions are remembered.
+   - MAN OF THE MATCH + SEASON TABLE (Matchday squad): after each result you log, chat votes !motm and a
+     number or name for 60 seconds. Winner gets +1 card point and a ticker headline. Tap "Goal: NAME"
+     when someone scores. The season table shows games, W/D/L, goals, MOTMs and red cards per player.
+     Chat: !stats NAME.
+   - ALL-TIME RED CARD OFFENDERS (Red card rule page): straight reds, two yellows, matches banned, worst
+     night and last card, for all time / this season / this month / tonight. Edit or delete any card
+     (its ban comes off too). "Show Hall of Shame on stream". Chat: !shame. A new No.1 gets a headline.
+   - CHALLENGE EDITOR (Game night > Challenges): − and + for games left, current game and total, rename
+     it, change who it's from, and Pause (hides the box, keeps the count). The box now reads
+     "game 4 of 10 · 7 left". Done / +1 / Pause are on the dock too.
+   - CAMERA STUDIO FOR SMALL SCREENS: a new "quick controls" panel at the top: camera picture (tick
+     "Live picture" to keep it updating), STOP ALL EFFECTS, teeth / follow mouth / chat can buy / lock
+     switches, and every effect as a big one-tap tile in tabs (Effects, Face, Position). Compact mode
+     switches on by itself on screens under 1400 px wide and hides the long settings ("All settings"
+     shows them). "Pop out" opens it in its own small window to put next to OBS.
+   - BATTLE GRAPHICS PACKAGE: every battle now opens with a TV intro sting (BBR shield, title, who's
+     playing), each penalty shows a "who's up" banner (rating, kick number, score, composure) and the
+     winner gets a banner at the end.
+   - LIGHT GRAPHICS (On screen page): Full, Light, or Auto (the app switches to Light if OBS starts
+     dropping frames) so FC 27 stays smooth.
+   - READY TO GO LIVE? (top of the Live desk): OBS, overlay, overlay in the scene on air, chat
+     platforms, Twitch clips, teeth tracker, camera, panic and battles, with "Fix it" buttons.
+   - UNDO PANEL (Live desk): the last 15 things you pressed (results, red cards, +1s, game done, goals)
+     each with Undo. "Undo the last thing" is also a Stream Deck / dock / phone button.
+   - NIGHTLY BACKUP: a backup file is saved by itself 10 minutes after each stream and once a day
+     (data/backups, the last 14 kept). Logins and keys are never in it.
+   - DISCORD RECAP now adds the Pro Clubs results, man of the match leaders, red cards tonight and the
+     replay of the night.
+   - PHONE PAGE: new buttons for replays, two yellows / straight red, challenge pause, man of the match
+     and undo. Stop replay / clear the card appear by themselves when needed.
+
+WHAT'S NEW IN v21.1
+   - TICKER FIXED PROPERLY: player and club names no longer show as [p] / {P}. Placeholders written
+     any way ([p], (club), {player}, [team]...) now fill in, and anything the ticker doesn't know
+     is hidden instead of shown. Your own headlines fill in names too.
+   - CHECK THE TICKER (Sports News > Squad & stories): shows 10 headlines it could print right now
+     and lists anything wrong (missing names, odd placeholders, repeats). "Fix it" tidies them.
+   - GODFATHER NO LONGER TAKES OVER THE TICKER: each penalty used to add a new headline 3 times
+     over. Now there's one GODFATHER headline (the latest), and app headlines (GODFATHER, red
+     cards, your own) are never more than 1 in 4 stories. The old repeats go when you press Fix it.
+   - RED CARD RULE BANS: TWO YELLOWS (1 match ban) and STRAIGHT RED (2 match ban) buttons on the
+     Red card rule page, the dock, Stream Deck and phone. The flash shows the ban and the ban
+     table. The match it happens in doesn't count: each result you log after that takes one match
+     off. Banned players are skipped on the Matchday squad team sheet (no bench points) but keep
+     their place. Lift a ban any time. Pressed it on the dock without a name? Pick the player on
+     the dock and press Give. Ban lengths are in the red card Settings. Chat: !bans.
+   - CARDS ARE FOR FOLLOWERS (Setup > Settings > Who gets a card): only followers get a card (subs,
+     mods and VIPs always do). Non-followers are told to follow when they type !card, and they
+     don't check in, show in leaderboards or win Viewer of the Stream. Their watch time and chat
+     still count, so the card opens with everything when they follow (with the pack opening).
+     Twitch followers are checked by themselves every 30 minutes. Kick: new follows are seen live,
+     older Kick followers can be added with Platforms > paste a list. YouTube doesn't tell apps who
+     subscribed, so YouTube chatters get a card (or switch to channel members only).
+
+WHAT'S NEW IN v21
+   - TICKER NAMES FIXED: the Sports News ticker now shows proper player names. Gamer tags are
+     cleaned up (BigBossRobinson -> BIG BOSS ROBINSON, L0veS05a -> LOVE SOSA, numbers dropped).
+     Want a nickname instead? Sports News > Squad: write "tag = NAME" (e.g. WillRKO = WILL).
+     Untick "Tidy gamertags" to use them exactly as typed.
+   - CHAT ON STREAM (Live > On screen, switch "Chat overlay" on): your Twitch, Kick and YouTube
+     chat in one tidy box, names in their card colours with their rating. It steps aside when an
+     alert, battle or big moment covers it. Move it on the On screen layout. Type the name of your
+     old chat source in OBS and the app hides it while this one is on. Off by default.
+   - VIEWER OF THE STREAM (Live > Viewer of the Stream): everyone's support, chat, battles, time
+     watched and raids add up into one score. The winner gets a big gold reveal just before the
+     credits (or press the button), +2 card points and the MVP ribbon. Change how much each
+     thing counts, or pick the winner yourself.
+   - BEAT THE BOSS (Battles > Beat the Boss): a penalty shootout against YOU. Chat types !join,
+     one name is drawn (subs first if you want). They shoot and dive with L / C / R in chat; you
+     press L / C / R on the dock, phone or Stream Deck, or leave it and the AI picks (it learns
+     where you like to go). Your Boss card now has FORM: lose and your rating drops, win and it
+     climbs back (never below the floor you set). Each win grows a bounty of card points that
+     the next Boss Slayer takes. New ribbons: BOSS SLAYER, MVP, SUPER SUB.
+   - RED CARD RULE (Game night > Red card rule): one tap flashes your rule big on screen, then
+     keeps a small reminder in the corner until you clear it. Pick the player and it counts their
+     red cards (and the ticker reports it). Upload your own red card picture there. On the dock,
+     Stream Deck and phone.
+   - OBS DOCK: in OBS go to Docks > Custom Browser Docks, name it BBR and paste
+     http://localhost:3000/dock . Your most used buttons, plus Queen, Beat the Boss and squad
+     controls that appear only when you need them.
+   - BUTTONS & STREAM DECK (Live > Buttons & Stream Deck): build your own buttons (what it does,
+     label, icon, colour, group). They show on the dock. For a Stream Deck key: add a Website
+     action, paste the button's link (Copy link), tick "GET request in background", and drag the
+     Key picture onto the key's icon.
+   - TEETH TRACKING: now follows the inside of your lips (not an oval), so only the teeth are
+     whitened and it switches off when your mouth is closed. Faster too. New: "Learn my teeth
+     colour" in Camera studio: click on your teeth in the preview and it only whitens that shade.
+   - MATCHDAY SQUAD (Game night > Matchday squad): too many players for one match? Twitch subs
+     type !squad to get in the list (non-subs are told it's for subs). Press "Next team sheet":
+     whoever sat out last time goes first, then fewest games, then sub tier. Nobody plays more
+     than 2 in a row while others wait. Sitting out pays card points (SUPER SUB at 5). The bench
+     can !predict 2-1 for points. !squad shows your place, !out leaves. Kick subs and YouTube
+     channel members (paid) can be switched on later. Optional second club for the overflow.
+   - FAIR QUEEN: the Queen is now sized to how many are in the raid, so a small squad still has
+     a chance. Switch off on the Raid Night page.
+   - QUEEN STIRRING PING: when your viewers get close to waking the Queen (15 by default) the
+     app posts "The Queen is stirring!" with your Twitch link in Discord (needs the Discord
+     webhook already set). Switch it off next to the Discord webhook.
+   - BACKUP (Setup > Settings > Backup): download all viewer data and settings in one file, and
+     restore it. Logins and keys are never put in the backup.
+
+WHAT'S NEW IN v20
+   - NEW DASHBOARD LAYOUT: the tabs are now across the top in 6 groups (Live, Game night, Battles,
+     Sports News, Viewers, Setup) with the pages for each group underneath. Pages sit in two
+     columns so there's much less scrolling. Ctrl+K still finds anything.
+   - CHAT BOTS NO LONGER GET CARDS: StreamElements, Nightbot, Streamlabs, Moobot, Fossabot,
+     Sery_Bot, SoundAlerts, TangiaBot, Botrix and more. Their old cards are removed when the app
+     starts. Add any other bot names in Setup > Settings > Chat bots.
+   - GODFATHER METER (Game night > GODFATHER meter): a fun meter on stream for GODFATHER's
+     penalties. Tap +1 (also on the Live desk and the phone): the meter goes up, a red card pops
+     up, a headline goes on the ticker, and his level climbs (Careless, Liability, Penalty
+     Merchant, Public Enemy No.1, Sack Him). -1, Undo, or type the numbers. Tonight + season +
+     worst night. Chat: !pens. Move it on the On screen page. Change the name, what it counts,
+     the levels and the command, or add up to 4 meters.
+   - RAID NIGHT NOW WAKES UP WITH YOUR VIEWERS: no more Queen at the end of every stream. When
+     your viewers (Twitch + Kick + YouTube added up) reach 20 and stay there for 2 minutes, THE
+     QUEEN IS AWAKE: chat is warned and the briefing starts 90 seconds later. In a match? Press
+     "After this game" and it starts when you log the result on Team results. Or "Later (+10)"
+     or "Not tonight". Close to 20 she taunts chat to share the stream. The number, the wait,
+     "warn then start" or "wait for me", and "not before X minutes live" are on the Raid Night
+     page. The briefing is now 5 minutes. Credits no longer roll after the raid (switch it back
+     on if you want).
+   - TEETH WHITENING (Game night > Camera studio, top): a filter that stays on your camera and only
+     whitens teeth, inside a small oval around your mouth. Sliders for how white, how bright,
+     how picky and the oval size, plus a pink preview to see exactly what it changes. Needs the
+     Shaderfilter plugin (same as face effects). To follow your mouth when you move: tick
+     "Follow my mouth" and add the Teeth Tracker page as a Browser Source (off the edge of the
+     canvas) or keep it open in a tab. It needs the internet the first time to load the face finder.
+
+WHAT'S NEW IN v19.1
+   - REWARDS PAGE FIX: the table broke after changing a challenge reward (you couldn't pick
+     options and "Show" was covered). Each reward is now its own box that fits the screen.
+   - A reward with a challenge running shows "ON SCREEN NOW" with a "Take it off screen" button.
+     Unticking "Show on screen" also hides the one already running. "Delete from list" removes it.
+   - "Eyepatch for FIVE GAMES" now reads as 5 games (number words count).
+
+WHAT'S NEW IN v19
+   - AFTER UPDATING: press "Reconnect Twitch" once (Platforms page). It adds stream markers,
+     Predictions and your schedule.
+   - ON SCREEN PAGE (Stream > On screen): one switch for EVERYTHING the app can put on stream,
+     plus a PANIC button: it hides the lot, pauses battles and locks camera effects. Tap it
+     again to bring it all back. Panic is also a Live desk button and a phone button.
+   - MOVE THINGS AROUND (bottom of On screen): drag the challenge tracker, Raid Night pill,
+     results box, score bug, sub goal bar and next battle timer anywhere, with snapping to the
+     edges, centre and a grid (or free). Each box can be made bigger or smaller. Football, trucks,
+     Arc Raiders and everything else each keep their own layout; it changes with your category.
+   - CARDS (all three ideas, each with its own switch):
+       A. A facts strip in the tip of the shield: their best two numbers (bits, gifted, sub
+          months, raids or streams) plus their best streak.
+       B. On !card the card turns over to show its back, the PLAYER FILE (member since, streams,
+          watch time, best streak, sub, bits, gifted, battles, Queen kills, club rank), then
+          turns back.
+       C. !card shows a wide PLAYER PROFILE: the card, a stat shape and their big numbers.
+     The first person to chat each stream wears a CROWN on their card all night.
+   - CHECK-INS now show each person's card with the stat that went up ("+1 WAT").
+   - CHANNEL POINTS no longer show who redeemed them on screen (Power-ups still thank the
+     person). Switch "Show who redeemed channel points" on if you want names back.
+   - TEAM RESULTS (Stream > Team results): big WIN / DRAW / LOSS buttons, or log a score
+     (3-1 v Rovers). A box on stream shows the team, record and form, a FULL TIME card pops
+     after each one, it goes on the ticker and into the credits. Arc Raiders and trucks use your
+     own counters (Extracted / Downed, Deliveries / Crashes); add any team you like. Tonight only
+     or the whole season, fix the numbers by hand, Undo. Chat: !record. Live desk and phone have
+     Win / Draw / Loss buttons.
+   - LIVE SCORES (News desk): a LIVE score bug in the corner while real games are on (AC Milan
+     first) and a scores round-up panel every 10 minutes or when you press it. Chat: !scores.
+   - WRITE YOUR OWN STORIES (Squad & stories): type a story or an idea ("Make it a headline"
+     gives you versions), pick the kind, keep it for this stream or for good, and flash it as a
+     BREAKING banner. Mods can type !news <idea>: it waits for your Approve.
+   - CARD CALCULATOR (Viewers > Card calculator): type bits, gifted subs, sub months, Kicks,
+     Super Chats or nudge any stat, see the card before and after, then add it (now or spread
+     over the next days like normal) and show it on stream if you want. It all goes in their
+     history (undo in Viewer cards).
+   - TANGIA BITS (Viewers > Tangia bits): three ways to count them. 1) paste one message Tangia
+     posts in chat and the app learns it; 2) every 30 minutes it compares Twitch's all-time bits
+     list with what it saw and adds the difference (TEST THIS: Twitch may or may not count
+     extension bits there); 3) quick add by name.
+   - MOVE PLUGIN (Stream > Move plugin): in OBS set your Move filter's Start trigger to "Enable".
+     Press "Find my Move filters" and pick one for: goal, battle start / end, gift bomb, raid,
+     tier-up, Raid Night briefing / win / loss, challenge done, win, loss, check-ins, hype, panic.
+     Tick the box to use your own Move for the battle corner instead of the app's.
+   - SCENES & GOALS (Stream > Scenes & goals):
+       Starting soon / BRB / Ending pages to add as Browser Sources (countdown, tonight's plan,
+       top cards, check-ins, results, thank-yous, next stream from your Twitch schedule).
+       A SUB GOAL bar with rewards at numbers you pick. POST TO DISCORD after the credits (paste
+       a webhook). A PRE-STREAM CHECK (also on the Live desk).
+   - MORE: HYPE meter (3 alerts in a minute = glowing border), "NOW PLAYING" banner when your
+     category changes, click any chat message on the Live desk to put it on stream next to their
+     card, "Mark this moment" (a Twitch stream marker), VIEWER OF THE STREAM in the credits (and
+     a shout-out), "Tonight's results" in the credits, and Twitch Predictions on shootouts
+     (affiliates / partners, switch on in On screen).
+
+WHAT'S NEW IN v18
+   - AFTER UPDATING: press "Reconnect Twitch" once (Platforms page) so the app can read your
+     channel point rewards and the all-time bits leaderboard.
+   - LIVE DESK (the first page): a status bar (live time, platforms, OBS scene), one-tap switches
+     (battles, hold alerts, ticker in front of the camera, chat camera effects, lock effects,
+     Raid Night), the next battle with Start now / +5 min / Swap game, your own big buttons
+     ("Choose buttons"), a "what just happened" feed and Undo. Press Ctrl+K anywhere to jump to
+     any page or press any button. "Run it from your phone" gives a private link (needs a secret
+     key, same Wi-Fi) that only presses those buttons. The Sports News page is now "News desk".
+   - REWARDS PAGE (Stream > Rewards): every Power-up and channel point reward in one list, found
+     from Twitch and from what chat buys. Each is matched from its name: "Eyepatch for 5 games" =
+     challenge EYEPATCH, 5 games; "No HUD 10 minutes" = 10-minute timer; "Spin the camera" = that
+     camera effect; Twitch's own Power-ups = a normal alert. Change what it does, the name shown,
+     the number of games, colour, show on screen, and what happens if it's bought again. "Test".
+   - PENALTY KEEPER: centre was the easy pick (about 77% vs 67% on the sides). The keeper now stays
+     in the middle more (34%), and new settings in Game tuning > Penalty Shootout: centre save
+     chance, side save chance, how much safer centre is from going wide, and "keeper reads you"
+     (more likely to stay after centre kicks in a row). Goals by side show live as you change them.
+   - GIFT ALERTS show the gifter's ALL-TIME total, their rank ("#2 of all time") and how many more
+     to the next milestone: 10 Supporter, 25 Benefactor, 50 Patron, 100 Legend, 250 Hall of Fame
+     (each one is also a ribbon on their card). Twitch sends their all-time total with each gift,
+     so older gifts count from day one.
+   - CARDS: the stats are much bigger (with a bar each) and fill the lower half of the shield.
+     Anyone subscribed gets a band across their card: TIER 1 SUB · 14 MONTHS, PRIME SUB, KICK SUB,
+     YOUTUBE MEMBER or GIFTED SUB.
+   - SUPPORT FROM BEFORE THE CARDS (Viewers > Viewer cards): fetch the all-time bits leaderboard
+     from Twitch (top 100) or paste a list (name, bits, gifted subs, sub months). It shows what it
+     will add before you press Apply. Click any viewer to adjust any stat with + / -, set their
+     bits / gifted subs / sub months, add a reason, and Undo. Everything goes in their history.
+   - LEADERBOARDS (Viewers > Leaderboards): top cards, gift subs, bits + support, bits/Kicks/Super
+     Chats, sub months, streaks, watch time, battle points, race wins, Queen slayers, check-ins,
+     drone hunters, raids. Week / month / all time, CSV, click a name to open the card.
+     "Show this board now" puts it on stream: top 3 as cards on a podium, then the rest of the top
+     20. Options: rotate through all boards, show the Top 20 90 seconds into every stream, let chat
+     ask with !leaderboard (once every 10 minutes).
+   - CAMERA STUDIO: set how long every effect lasts. NEW FACE EFFECTS: big head, tiny head, mega
+     forehead, big nose, face shatter, melt, swirl, squash, fish-eye, pixel face, bobblehead and
+     mirror twins. They need the free "Shaderfilter" plugin for OBS (obs-shaderfilter); press "Get
+     a picture from OBS" and drag the circle onto your face once. Chat can buy them too.
+     The ticker is now a simple switch: in front of / behind the camera.
+   - TRUCK RACE 3.0: a 5-lane road with bends, and a FORK in the middle: L for the short cut
+     (2 lanes, faster, roadworks) or R for the motorway (3 lanes, fuel pads); a barrier keeps you on
+     your side. The camera is now a "pack cam": high up over the pack, pulling back so everyone
+     near the leader fits, and a "back of the pack" card for anyone further behind. The route strip
+     shows the fork. Trucks drive straight through the finish line and brake to a stop.
+
+WHAT'S NEW IN v17
+   - AFTER UPDATING: press "Reconnect Twitch" once (Platforms page). It adds the permission to
+     read channel point redemptions and Power-ups.
+   - FIXES
+       * Penalty shootout: about 70% of kicks now go in (was too hard), composure drops more gently.
+         A miss now flies wide or over on the side the player picked. YouTube shooters get 8 extra
+         seconds to pick (their stream delay is longer).
+       * YouTube !link: replies are rationed so the daily YouTube allowance doesn't run out. Live
+         link codes also show on screen and on the Account links page.
+       * Twitch Power-ups (including the new custom Power-ups) now count as bits for cards,
+         battles and the War Chest.
+   - CHALLENGES (Stream > Challenges): "eyepatch for 5 games" style challenges start from a matching
+     custom Power-up or channel point reward (or by hand). On screen: the running challenge with
+     games left, and what's next. "Game done" button + Stream Deck links. Chat: !challenges
+   - CHECK-INS: a viewer's first message of each stream = +1 card point and a "checked in" strip
+     on screen. First-time chatters get a WELCOME box.
+   - ALERTS WAIT FOR YOUR SCENE: while you're on a scene without the overlay (Just Chatting, BRB),
+     alerts are saved up. When you're back they play in order, 8 seconds apart, with check-ins
+     and follows merged into one strip. Battles wait too. Home page: "Play anyway" / "Clear".
+   - CAMERA STUDIO (Stream > Camera studio): move your camera to any corner or big in the middle,
+     size slider, hide, mirror, tilt, zoom, spin, upside down, shake, bounce, Goal cam, spotlight,
+     Wanted poster, black and white, night vision. "Reset everything" puts it back exactly.
+     Chat can buy effects with bits (exact amount) or channel points, with a cooldown and a lock.
+   - SPORTS NEWS TICKER LAYER: keep it inside the overlay, or put it in its own OBS source in
+     front of / behind your camera (the app adds the "BBR Sports News" source for you).
+   - STREAM STATS (Viewers > Stream stats): every stream's follows, subs (Prime / Tier 2 / 3),
+     gifts, bits, Kicks, Super Chats, raids, check-ins, new faces, watch time and messages.
+     Sortable per-viewer table, chart of the last 10 streams, timeline, CSV download.
+   - TRUCK RACE 2.0: three lanes. Drivers steer with L / R (L2 / R2 = two lanes, M = middle).
+     Obstacles appear in the lanes a few seconds ahead (cones, broken-down cars, tyres, potholes,
+     puddles), green FUEL pads refill your tank. Every truck has a fuel bar and a damage bar:
+     empty tank = crawling, 100% damage = limping. Every truck carries a different cargo and
+     !special uses it once: Log drop, Chemical slick, Cows loose, Stone shower, Drop a car,
+     Ice patch, Fireworks show, Box avalanche, Rolling bales, Fuel top-up, Pit stop, Wet concrete.
+     Also !horn (moves the truck in front of you over), !turbo, !dodge.
+     Battles > Truck race: tick the times of day (Day, Sunrise, Sunset, Night, Golden hour) and set
+     weather chances (Clear, Rain, Fog, Snow, Thunderstorm, Black ice).
+   - END CREDITS (Stream > End credits): add http://localhost:3000/credits as a Browser Source
+     (1920x1080) ABOVE your end video. When that scene goes on air the credits roll, timed to your
+     video: Executive producers (subs), Patrons (gifters), Special effects (bits / Kicks / Super
+     Chats / Power-ups), Raid party, Queen slayers, Drone hunters, New signings, Battle cast and
+     everyone who chatted, then a post-credits line. "Picture to share" makes a Discord image.
+   - RAID NIGHT (Stream > Raid Night): the Queen Raid becomes the last thing every stream.
+     Set the time you plan to end. All stream the War Chest fills: subs = armour, bits / Kicks /
+     Super Chats / Power-ups = firepower, gifted subs = extra time. 2-3 scout drones fly over and
+     chat types !shoot together. 30 minutes before the end the Queen taunts, at the briefing time
+     chat types !enlist (roll call, countdown, intel, optional OBS scene switch and a red
+     Commander frame on your camera). No shootouts or races in the last 20 minutes. Then the raid
+     with the War Chest buffs, then the credits. Every time she wins she gets 10% stronger (season
+     story). Showing up earns a RAID NIGHT 5 / 10 / 25 / 50 ribbon. Chat: !raidnight
+   - The Discord rule pictures (discord folder) are updated with everything above.
+
+WHAT'S NEW IN v16
+   - STREAM STREAKS. Every stream in a row now counts (once per stream, any platform).
+     New 7th stat STK, plus a boost to EVERY stat: 3 in a row +1 (Ember), 5 +2 (Flame),
+     10 +3 (Blue Flame), 20 +4 (Inferno), 40 +5 (Phoenix). Cards glow and catch fire to match,
+     and new levels get a "STREAK!" roll-call on stream. Every 10 in a row earns a streak saver
+     that covers one missed stream. Lurkers on Kick / YouTube can type !here to check in.
+   - NEW PAGE Viewers > Viewers + streaks: who is on what streak, who is subbed (Tier 1/2/3,
+     Prime, gifted, Kick sub, YouTube member), who gifts, and who is "at risk" of losing a streak.
+   - SUPPORT IS REBALANCED. The BIT stat is now SUP (Support): bits, Kicks, Super Chats AND gift
+     subs. A gift sub = 500 support for the gifter (about twice its cash value, because gifts grow
+     the channel). Tier 2 subs count as 2 months, Tier 3 as 5. Old cards are converted automatically.
+     All of this is in Game tuning > Viewer cards.
+   - !card REPLIES IN CHAT AGAIN. Twitch was quietly refusing some replies; now replies never
+     repeat the exact same text, several !card requests become one message, and Diagnostics shows
+     any reply Twitch refused. Cooldowns (per person, on screen, chat replies) are in
+     Game tuning > Viewer cards.
+   - AUTOMOD / "too many times too quickly": chat blocks the SAME message sent twice quickly.
+     The games now accept small variations: L, l, left, L1, L!, !fire2, !turbo! all work, and the
+     shooter sees LOCKED IN as soon as their pick lands. You can turn AutoMod back on (level 1-2).
+   - SHOOTOUT RANDOM DRAW: everyone who types !join goes into a draw, two names spin on reels.
+     Last shootout's players sit out if others joined. (Game tuning > Penalty Shootout > Who plays.)
+   - QUEEN RAID: she breaks apart at 75% / 50% / 25% (plates and debris fly, smoke, cracks glow),
+     explodes in slow motion when beaten, and the raiders jump and fire flares. If time runs out,
+     her beam sweeps the map and the arena burns. Support now gives NAMED weapons on screen:
+     Pistol > SMG > Assault Rifle > Shotgun > Minigun > Grenade Launcher > RPG > Bazooka >
+     Railgun > Plasma Cannon, with a big "WEAPON UPGRADED" banner saying who sent it.
+   - CARD PER GAME: the card's look follows your stream category. FC = football card,
+     American Truck Simulator = US trucker's licence, Euro Truck Simulator 2 = Euro driving
+     licence, Arc Raiders = raider field tag. Same numbers. Force one on the Viewer cards page.
+   - CAMERA: every pop-up (cards, pack openings, tier-ups, streaks, toasts, leaderboards) keeps
+     clear of your camera; big moments slide sideways or shrink if needed. If cards show BEHIND
+     your camera, Diagnostics now says so and "Move the overlay to the top" fixes it in OBS.
+   - SAFER !link: the code works once for 10 minutes, and the viewer now confirms with the OTHER
+     account's name (!confirm NAME), so nobody can sneak onto a card. If someone else uses a code
+     first, its owner is warned and it's cancelled. !cancel stops a request. 3 wrong codes an hour max.
+     Viewer cards page: Account links shows every link, and you can turn on mod approval for links
+     between very different tiers.
+   - TANGIA + STREAMLABS: the app finds them in your OBS scene. Cards keep away from where they play
+     (pink boxes on Battles > Battle screen, drag to fit) and WAIT while one is playing, so nothing
+     covers anything. Sub / follow / bits / raid cards wait 6 seconds so the Streamlabs video plays
+     first. During battles Tangia and Streamlabs stay full size.
+     >> In OBS double-click Tangia and Streamlabs and tick "Control audio via OBS" (this is how the
+        app hears them play). Press Reconnect Twitch once on the Platforms page so it also sees
+        channel point redemptions.
+   - Discord images: 12 rule pictures in the "discord" folder, post them in order 01 to 12.
+
+EARLIER (v15)
+   - BOSS SPORTS NEWS IS NOW PART OF THIS APP. One window, one Browser Source.
+     Live scores ticker, goal alerts, squad stories and the 3D goal replay all run from here.
+     New sidebar section "Sports News": Live desk, Squad & stories, Leagues & alerts.
+     Switch the ticker on/off on the Live desk (it hides during battles unless you tick
+     "Keep the ticker on screen during battles").
+     >> Stop the old Python Boss Sports News app and DELETE its old Browser Source in OBS,
+        otherwise you'll get two tickers. Your normal overlay (localhost:3000/overlay) shows it now.
+     >> Optional OBS dock for the quick buttons: Docks > Custom Browser Docks,
+        URL http://localhost:3000/bsn/control
+     Chat: !lastgoal and !roundup.
+   - TRUCK RACE: every truck now has its own colours and a (made-up) haulage firm on the trailer.
+     New camera: looking down from above, slowly circling 360 degrees and following the leader.
+   - QUEEN RAID IN 3 PHASES:
+       Phase 1  she can throw up 1 or 2 shields that must be broken first.
+       Phase 2  ENRAGED: big attacks that hurt, and can knock raiders out of the raid.
+       Phase 3  TRUE FORM: she flies, and hits harder the weaker she gets.
+     The phases are a SECRET from viewers: the rules, the on-screen How to play and chat never
+     mention them, so the first time she shields up, rages or takes flight is a surprise.
+     EXTRA TIME: chat cheers with the word "time" = +30 seconds (Game tuning > Queen Raid > Time:
+     change the seconds, how many times, the cost, or allow a free !time per viewer).
+   - BATTLE SCREEN (Battles > Battle screen): when your Live scene moves into the corner,
+     the empty space now shows How to play + commands, the weekly battle leaderboard and
+     animated Twitch / Kick / YouTube links. Tick what you want, drag the boxes around,
+     resize them, pick the background, then "Preview on stream".
+   - ALERT CARDS NOW AVOID YOUR CAMERA. The app finds your webcam source in OBS (any source
+     with cam / webcam / facecam / Brio / Kiyo / C920 in its name) and puts cards in a corner
+     that's clear of it. Wrong one? Type the exact source name on the Battle screen page
+     (Advanced), or pick which corner your camera is in, or force a corner.
+
+EARLIER (v14)
+   - GIVEAWAYS ARE SWITCHED OFF for now (Settings > Features). No tickets, pot or giveaway
+     commands while off. Nothing is deleted, switching it on carries on where it left off.
+   - NEW SETTINGS PAGE: sidebar on the left, "Advanced" switch at the bottom shows every setting.
+     Hover any dotted-underlined word for an explanation.
+   - DIAGNOSTICS page (System > Diagnostics): health checks, recent errors, fix log, daily
+     viewer-data backups (data/backups, last 7 days), "Download a report". With "Fix problems
+     automatically" on it reconnects chat/OBS, resets a stuck battle, and puts your OBS scene back.
+   - QUEEN RAID WIN CHANCE is now by ACTIVE players (raiders actually typing), with two columns:
+     no support / with support. Default: 1 active player 0% without support, 50% with.
+   - TRUCK RACE: about 30 seconds longer, road no longer flickers, real landmarks for every city,
+     new "Truck routes" page (switch routes on/off, see how one is picked).
+   - SHOOTOUT: new crowd commands !flash (camera flashes) and !laser (laser pointers).
+
+BBR VIEWER CARDS - SETUP
+========================
+
+UPDATING FROM AN OLDER VERSION
+   From v36: the app updates itself (Setup › App & updates). Your settings and cards are in
+   %APPDATA%\BBR Viewer Cards and are kept. Going from v35 or older: install v36 and press
+   "Bring it all over" the first time (see WHAT'S NEW IN v36).
+
+1. INSTALL IT
+   Run BBR-Viewer-Cards-Setup-<version>.exe ("More info" > "Run anyway" the first time).
+   (Running it by hand instead: install Node.js 22+ from https://nodejs.org and use
+   "Start BBR Cards.bat".)
+
+2. START IT
+   It starts with Windows in the tray (the BBR icon by the clock). Click it for the dashboard.
+   The settings page is also at http://localhost:3000 in any browser.
+
+3. CONNECT YOUR PLATFORMS (one-time, each has step-by-step help on the page)
+   TWITCH   - create a free app on dev.twitch.tv, paste 2 codes, Connect.
+   KICK     - type your channel name and Save: chat, subs, gifted subs, Kicks,
+              hosts and follows are tracked straight away.
+              Then create a free app in Kick Settings > Developer and "Log in to Kick"
+              so the app can also reply in Kick chat and see when you're live.
+   YOUTUBE  - create a free Google Cloud project with the YouTube Data API,
+              paste 2 codes, Connect. Tracks chat, Super Chats, Super Stickers,
+              new members, milestones and gifted memberships while you're live.
+
+4. ADD THE OVERLAY TO OBS
+   Sources -> + -> Browser.  URL: http://localhost:3000/overlay
+   Width 1920, Height 1080. Tick "Control audio via OBS". Put it above your game.
+
+5. TEST
+   Use "Test events" (pick Twitch, Kick or YouTube) and "Test shootout" /
+   "Test truck race". Press "Clear test viewers" when done.
+
+EVERY STREAM
+   Nothing to start: it's already running in the tray (it starts with Windows).
+
+HOW EACH PLATFORM COUNTS
+   Bits (Twitch), Kicks (Kick) and Super Chats/Stickers (YouTube, $1 = 100) all
+   raise BIT. Subs, Kick subs and YouTube memberships all raise SUB.
+   Raids (Twitch) and hosts (Kick) raise RAI.
+   Watch time: Twitch shares who is in chat, so lurkers count. Kick and YouTube
+   don't share viewer lists, so watch time there comes from being active in chat.
+   Each platform account starts with its own card, but viewers can link them (below).
+
+LINKING ACCOUNTS (one card across Twitch, Kick and YouTube)
+   1. On one platform type:        !link          (the app replies with a code)
+   2. On the other platform type:  !link CODE
+   3. Back on the first one type:  !confirm
+   Their cards merge: all stats, subs, bits/Kicks/Super Chats and battle wins are
+   combined, and from then on activity on either platform builds the same card.
+   The !confirm step means nobody who sees the code in chat can steal a card.
+   You can also link cards yourself: tick them in "Viewer cards" on the settings
+   page and press "Link as one person". Click a card to unlink an account.
+
+TICKETS, PRIZE POT AND GIVEAWAYS
+   The rule: MONEY FILLS THE POT, IT NEVER BUYS TICKETS. That keeps your giveaways
+   out of UK lottery law and inside Twitch / YouTube contest rules.
+   - Tickets (on each viewer's card) come only from: watching (2 an hour, 3 on two
+     linked platforms at once, 4 on three), turning up to a stream (2, plus 1 more
+     from the 3rd stream in a row), follow anniversaries (5) and battles. Max 15 a day,
+     balance stops at 250, and a balance expires after 60 days without attending.
+   - Check-in is automatic: being seen in a stream (Twitch viewer list, or chatting on
+     Kick / YouTube) counts once per stream across all platforms.
+   - The pot: a share (default 20%) of every sub, gift, membership, bit, Kick and Super
+     Chat goes in, split across 5 tiers. Set what you actually receive per sub and per
+     100 bits on the settings page. "!pot" or a support event shows the pot meter.
+     A monthly prize limit (default 200) stops you overspending: sponsor prizes
+     don't count towards it.
+   - Tiers: Community Drop (up to 10, followers), Bronze (30), Silver (75), Gold (100),
+     Legend Jackpot (250). Higher tiers need a higher CARD tier, which takes weeks of
+     loyalty, not spending. Following on any linked platform is required for all.
+   - Running one: settings page > Giveaways > pick tier, prize and value > Open entries.
+     Viewers type !enter (1 free entry) or !enter 5 (extra entries paid with tickets).
+     Close entries > Draw winner. The winner has 10 minutes to type !claim, or press Draw
+     again for a redraw. "Test giveaway" shows the whole thing with fake viewers.
+   - Afterwards: the winner's tickets are spent, they get a WINNER ribbon and a 30-day
+     cooldown on that tier (7 days on all tiers). Everyone else gets half their tickets
+     back plus a Lucky Charm (+1 free entry next time in that tier, stacks to 3).
+     Nobody's card stats go down.
+   - Before your first giveaway, put a short rules page in your panels / description
+     (see the plan document): UK only, age, prize and value, how the winner is picked,
+     "not sponsored by Twitch / YouTube / Kick", and a privacy line.
+
+WEEKLY GIVEAWAY SCHEDULE (settings page > Giveaways > Weekly schedule)
+   One draw a week on your draw day (Thursday by default), building to The Big One:
+     1st Thursday of the month  Community Drop   (default prize up to 10)
+     2nd Thursday               Bronze Drop      (25)
+     3rd Thursday               Silver Drop      (50)
+     LAST Thursday              THE BIG ONE: Gold Drop (100)
+   A 5th Thursday, or a skipped date (24/25/31 Dec, 1 Jan by default), becomes a
+   DOUBLE TICKETS WEEK: no prize, everyone earns tickets twice as fast.
+   Tick "Weekly schedule on", set the prizes, Save. From then on the app opens each
+   week's draw at your first stream of the week, reminds chat every 30 minutes, and
+   shows "this week's draw / The Big One in X days" on stream. YOU press Draw winner
+   at the end of the draw-day stream. Scheduled draws are paid from your monthly
+   prize limit even if the pot is short. Chat can type !giveaway to see the plan.
+
+WATCHING ON SEVERAL PLATFORMS AT ONCE
+   Linked cards earn watch time once, then x1.25 when present on 2 platforms at the
+   same time and x1.5 on all 3 (tickets earn faster too). After 10 streams watched on
+   2+ platforms a viewer gets the MULTI-PLATFORM ribbon.
+
+CHAT COMMANDS (work on all three platforms)
+   !rules    quick explainer + link to your rules page (!rules card / battles /
+             tickets / giveaway). Also answers to !help and !commands.
+   !card     shows your card on stream and posts your stats in chat
+   !top      lists the top 5 cards
+   !join     enters a battle while it's open
+   !tickets  shows your tickets, today's earnings and your streak
+   !pot      shows the prize pot on stream
+   !enter    enters the open giveaway (!enter 5 = extra entries with tickets)
+   !claim    the drawn winner claims their prize
+   !giveaway what's running right now and this week's schedule
+   !link     links your accounts on different platforms (see above)
+   !rules    links your public rules page (settings page, Giveaways tab, "Rules page link")
+   !battle   (you and mods) starts a battle now. Add "shootout", "race" or "queen" to pick.
+             !battle pause / !battle resume / !battle delay 10 / !battle cancel
+   !lb       (you and mods) leaderboard on screen: !lb (battles this week), !lb month, !lb all,
+             !lb support, !lb support month, !lb support all
+
+BATTLES (every 30 minutes of live stream time, on any platform)
+   NEXT BATTLE TIMER: a small countdown at the top centre of the screen (turn it off in the
+   Battles tab). PAUSE: in the middle of a match? Press "Pause battles" (or !battle pause, or a
+   Stream Deck button). The countdown stops until you resume. "Delay 5/10/15 min" pushes it back.
+   COMMANDS ON SCREEN: every battle shows a "how to play" bar with exactly what to type.
+   LEADERBOARDS: Battles tab > "Leaderboards on screen", or !lb in chat. Battle board (wins, MVPs)
+   and Top supporters (subs, gifts, bits, Kicks, Super Chat across all 3 platforms) for this week,
+   this month or all time. Weekly/monthly support counts start from this version.
+   GAME INTO A CORNER (OBS): Battles tab > "Move my game into a corner". Turn on OBS's WebSocket
+   server (Tools > WebSocket Server Settings), paste the password, Save & connect, Try it.
+   During a battle everything in your current scene (game capture, camera...) shrinks into the
+   top-right corner and goes back exactly as it was afterwards. The BBR overlay stays full size.
+   STREAM DECK: the Battles tab lists links (pause, resume, delay, leaderboards, corner...) for a
+   Stream Deck "Website" action.
+   All three battles are full 3D scenes with cinematic cameras and sound.
+   PENALTY SHOOTOUT   - A full stadium: crowd that jumps when it's a goal, flares, banners,
+                        flags and floodlights. The AI keeper dives, catches or parries,
+                        gets back up and resets on the line before every kick.
+                        2 players take turns against the AI goalkeeper, best of 5, then
+                        sudden death. On your kick type L, C or R (left, centre, right).
+                        Twitch players can WHISPER it so nobody sees. NO PICK = A MISS.
+                        Starts by itself 3 seconds after the second player joins.
+                        CROWD: anyone not playing can shout once per kick:
+                        !boo !whistle !horn !drum = -1 composure, !flare !firework = -2,
+                        !chant = +1. Capped at -8 / +4 per kick so the crowd can't decide it.
+                        COMPOSURE: each player has a meter that starts from their card
+                        (OVR and LOY). It drops every kick, more after a miss, and takes a
+                        big hit when sudden death starts. A "must score" kick adds extra
+                        pressure. Low composure = more shots wide or over the bar, and the
+                        keeper starts reading the shot (heartbeat + red screen = nerves).
+                        Chat can help: each 100 bits / 100 Kicks / $1 Super Chat with the
+                        player's name = 1 ON TARGET shot (max 5, that kick can't go wide or
+                        over, but it's a safer shot so easier to save) and +3 composure
+                        (max +18 from chat). A sub or gift = +2 shots and +8 composure.
+                        Balance: equal cards 50/50; the most chat support can buy makes it
+                        about 67/33; a much better card still usually wins.
+   BBR HAULAGE CUP    - up to 8 drivers race LIVE to a fixed finish line on a real ATS/ETS route with random cargo and
+                        weather. Rain is the most common: trucks slide, throw up spray and
+                        crash more (jackknifes!). Deer, moose, cows, sheep, bears and boar
+                        run out, tyres blow, police pull drivers over, roadworks slow them.
+                        The leader has a gold P1 plate, a crown and a glow under the truck,
+                        and every lead change is called out. Drafting behind the leader
+                        keeps the pack close, so expect overtakes.
+                        DRIVERS: !turbo = speed burst (3 per race). !dodge when a hazard
+                        is flagged on your truck to avoid it.
+                        EVERYONE ELSE (one each per race): !rain !wind !lightning !traffic.
+                        Nobody picks the target: it hits the race LEADER 80% of the time,
+                        otherwise a random truck. Each truck can only be hit 3 times.
+                        Bits with a driver's name = fuel (100 = +1). Bits with "lightning",
+                        "crash", "rain" or "wind" trigger it instantly.
+   QUEEN RAID         - Set in your own Ashfall Frontier artwork (8 maps, the Veydr machines
+                        and the six crew are in public/art), and EVERYONE can play: all viewers who type
+                        !join drop in together. Clear the swarm of Veydr machines (Scrabbler,
+                        Clusterwisp, Lantern, Lookout, Boreback, Quarrymaw), then break the
+                        Veydr Queen's armour plates and destroy her core before the clock runs
+                        out. Each raider gets a crew role from their card (Kite recon, Bulwark
+                        heavy, Rivet tech, Merek medic, Cinder scavenger, Orchid analyst). Downed raiders get revived by
+                        teammates. Every raider has 100 health. Type !fire to keep shooting
+                        (counts once every 2 seconds, idle raiders barely hit), !grenade for big damage (25s cooldown),
+                        !heal to heal (medics heal the weakest teammate).
+                        Bits / Kicks / Super Chat with a raider's name = more
+                        firepower, full health and armour (100 = +1, max 10); without a name = a SUPPLY DROP that
+                        boosts the whole team (max +30%). Boosts work during the fight too
+                        and instantly pick a downed raider back up. Every raid rolls a
+                        Queen strength. WIN CHANCE: you set the team's chance of winning for
+                        each squad size in the Game tuning tab (default 40% solo up to 70% for
+                        21+ raiders). !fire activity and support move it a little.
+   GAME TUNING tab: every number in all three battles is editable there (health, damage,
+   cooldowns, spawn chances of each machine, the raid win % table, shootout goal %, turbo
+   strength, how often chaos hits the leader...). "Test the odds" runs a quick simulation.
+   "Reset" puts a game back to the defaults.
+   On "Auto" the app picks the battle from your stream category (FC = shootout,
+   ATS/ETS = race, ARC Raiders = Queen Raid). Otherwise it takes turns.
+   Timings: chat has 30 seconds to type !join, then 15 seconds to boost.
+   !battle shootout / !battle race / !battle queen  (you and mods) start one now.
+
+   CARD POINTS FROM BATTLES (each point = +1 to the card's lowest stat at the time)
+     Shootout:   winner 3, loser 1
+     Race:       1st 3, 2nd 2, 3rd 1, everyone else 1
+     Queen Raid: won  = top scorer 3, 2nd and 3rd 2, everyone else who scored 1
+                 lost = top scorer 1, everyone else 0
+     A viewer can earn at most 5 battle points per day, and battle bonuses on one stat
+     top out at +6, so battles help but real support and watch time still matter most.
+
+   NOTE: for whispered picks, click "Connect Twitch" once more after updating so the
+   app gets permission to read your whispers.
+
+ALERTS
+   Follows, subs, resubs, gifted subs, bits, Kicks, Super Chats, raids/hosts and
+   battle wins each have their own colour, icon and animation: the card flies in
+   and lands with a shockwave, the name and amount count in, and stat bars fill up.
+   A tier up (Bronze > Silver > Gold > Legend) takes over the whole screen.
+   Use "Test events" on the settings page to see each one.
+
+PROFILE PICTURES ON CARDS
+   Every card shows the viewer's Twitch profile picture once Twitch is connected
+   (linked cards use the Twitch picture first, then Kick, then YouTube). Pictures are
+   fetched in the background every 30 minutes and refreshed weekly, so changed
+   pictures update by themselves. "Update profile pictures" on the settings page
+   does it straight away. Viewers without a picture show their initials.
+
+STADIUM TEXTURES
+   The stadium paints its own high-resolution textures. For photo-real grass, crowd
+   or sky, put your own images in the "textures" folder (see the README there).
+
+THE OVERLAY UPDATES ITSELF
+   When you restart the app (for example after updating), the OBS overlay reloads
+   itself automatically. After installing THIS update, right-click the browser
+   source in OBS once and press "Refresh" so it picks up the auto-reload.
+
+SOUNDS
+   All sounds are generated by the app (modern, mixed with reverb and a limiter).
+   To use your own instead, drop files into the "sounds" folder (see the README there).
+
+HOW CARDS STAY FAIR
+   - Early points come quickly; 90+ takes months of real support.
+   - Each stat has a daily limit; big one-off spends are banked and added over
+     the following days.
+   - Gold needs 14 days in the community and 5 streams. Legend needs 60 days,
+     20 streams and 4 streams in the last month.
+   - After 7 days away, stats slowly fade. SUB fades once a sub lapses.
+
+IF KICK STOPS WORKING
+   Kick's chat feed isn't officially documented and Kick changed it in October 2026.
+   Anything the app doesn't recognise is written to data\kick-events.log. Send that
+   file over and it can be fixed quickly.
+
+WHERE THINGS ARE SAVED
+   In %APPDATA%\BBR Viewer Cards (Setup › App & updates › Open the folder):
+   data\viewers.json   everyone's card progress (backed up before every update)
+   config.json         your settings and logins. Never share this file.
+   app-backups\        the full backups (before updates, start of streams, by hand)
+   logs\app.log        what the app did (in "Save a report for Claude")
+
+CHANGING THE POINT RULES
+   Add a "rules" section to config.json, for example:
+     "rules": { "graceDays": 14, "dailyCap": { "BIT": 5000 } }
+   Restart the app afterwards. Full list of rules: lib\stats.js

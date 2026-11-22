@@ -1,0 +1,200 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; style-src 'self' 'unsafe-inline'; script-src 'self' 'unsafe-inline'; img-src 'self' data:">
+<title>BBR Viewer Cards · first run</title>
+<style>
+  :root { --bg:#0b0d10; --panel:#14181e; --line:#2b313b; --ink:#e9edf2; --mute:#a7b0ba; --acc:#3dff9a; --bad:#ff5a6a; --warn:#ffb020; }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; height: 100%; background: var(--bg); color: var(--ink); font: 15px/1.45 "Segoe UI", Inter, system-ui, sans-serif; }
+  main { max-width: 1080px; margin: 0 auto; padding: 34px 48px 40px; display: flex; flex-direction: column; gap: 20px; }
+  .kick { font-size: 14px; color: var(--acc); font-weight: 600; letter-spacing: 1px; }
+  h1 { margin: 4px 0 0; font: 800 46px/1 "Bahnschrift SemiBold Condensed", "Bahnschrift", "Barlow Condensed", "Arial Narrow", sans-serif; letter-spacing: 1px; }
+  .sub { margin: 8px 0 0; color: var(--mute); }
+  .grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px; }
+  .card { background: var(--panel); border: 1px solid var(--line); border-radius: 12px; padding: 18px; display: flex; flex-direction: column; gap: 10px; }
+  .card.on { border: 2px solid var(--acc); }
+  .card.wide { grid-column: 1 / -1; }
+  .head { display: flex; justify-content: space-between; align-items: center; gap: 12px; }
+  .head b { font-size: 18px; }
+  .tag { font-size: 13px; font-weight: 700; color: var(--mute); white-space: nowrap; }
+  .tag.ok { color: var(--acc); } .tag.bad { color: var(--bad); } .tag.warn { color: var(--warn); }
+  .mute { color: var(--mute); font-size: 14px; }
+  .row { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
+  button { font: 600 14px "Segoe UI", system-ui, sans-serif; border-radius: 8px; padding: 10px 16px; cursor: pointer; border: 1px solid var(--line); background: transparent; color: var(--ink); }
+  button.go { background: var(--acc); color: #04130b; border: 0; font-weight: 700; }
+  button:disabled { opacity: .45; cursor: default; }
+  button:focus-visible, input:focus-visible { outline: 3px solid #7ee8ff; outline-offset: 2px; }
+  .found { display: flex; flex-direction: column; gap: 8px; max-height: 230px; overflow: auto; }
+  .opt { display: flex; gap: 10px; align-items: flex-start; padding: 10px 12px; border: 1px solid var(--line); border-radius: 10px; cursor: pointer; }
+  .opt:has(input:checked) { border-color: var(--acc); background: #12241b; }
+  .opt input { margin-top: 4px; accent-color: var(--acc); }
+  .opt small { display: block; color: var(--mute); word-break: break-all; }
+  label.tick { display: flex; gap: 10px; align-items: center; cursor: pointer; }
+  label.tick input { width: 18px; height: 18px; accent-color: var(--acc); }
+  .big { font: 800 22px "Bahnschrift SemiBold Condensed", "Bahnschrift", "Arial Narrow", sans-serif; letter-spacing: 1px; padding: 16px 28px; }
+  .msg { min-height: 20px; font-size: 14px; }
+  .msg.bad { color: var(--bad); } .msg.ok { color: var(--acc); }
+  .bar { height: 6px; background: #222831; border-radius: 3px; overflow: hidden; } .bar i { display: block; height: 100%; width: 30%; background: var(--acc); animation: slide 1.1s linear infinite; }
+  @keyframes slide { from { transform: translateX(-100%); } to { transform: translateX(340%); } }
+  [hidden] { display: none !important; }
+  code { background: #1d232b; padding: 1px 6px; border-radius: 4px; }
+</style>
+</head>
+<body>
+<main>
+  <div>
+    <div class="kick">FIRST TIME ONLY</div>
+    <h1>LET'S CONNECT EVERYTHING</h1>
+    <p class="sub">Same connections as now. Nothing changes in OBS: your Browser Sources keep pointing at <code id="link">http://localhost:3000</code>.</p>
+  </div>
+
+  <div class="grid">
+    <section class="card on" id="cOld" aria-labelledby="hOld">
+      <div class="head"><b id="hOld">Your old data</b><span class="tag" id="oldTag">LOOKING…</span></div>
+      <div class="bar" id="oldBar"><i></i></div>
+      <span class="mute" id="oldText">Looking for your BBR Viewer Cards folder in Downloads, Desktop, Documents and OneDrive…</span>
+      <div class="found" id="oldList" role="radiogroup" aria-label="Folders found"></div>
+      <div class="row">
+        <button class="go" id="bring" disabled>Bring it all over</button>
+        <button id="choose">Choose a folder…</button>
+        <button id="fresh">Start fresh</button>
+      </div>
+      <span class="mute">A copy is made: your old folder isn't changed.</span>
+      <div class="msg" id="oldMsg" role="status" aria-live="polite"></div>
+    </section>
+
+    <section class="card" id="cStart" aria-labelledby="hStart">
+      <div class="head"><b id="hStart">Starting up</b><span class="tag" id="startTag">NEXT</span></div>
+      <label class="tick"><input type="checkbox" id="oAuto" checked> Start BBR Viewer Cards when Windows starts (in the tray)</label>
+      <label class="tick"><input type="checkbox" id="oOpen" checked> Open the dashboard when it starts</label>
+      <label class="tick"><input type="checkbox" id="oUpd" checked> Check for updates by itself (never installs while you're live)</label>
+      <span class="mute">Your settings, logins and cards live in <code id="home">%APPDATA%\BBR Viewer Cards</code>, so updates never touch them.</span>
+      <div class="row"><button class="go" id="startBtn" disabled>Start the app</button></div>
+      <div class="msg" id="startMsg" role="status" aria-live="polite"></div>
+    </section>
+
+    <section class="card" id="cObs" aria-labelledby="hObs">
+      <div class="head"><b id="hObs">OBS</b><span class="tag" id="obsTag">—</span></div>
+      <span class="mute" id="obsText">Checked once the app is running.</span>
+      <div class="row"><button id="obsFix" hidden>Open Setup › Platforms</button></div>
+    </section>
+
+    <section class="card" id="cTw" aria-labelledby="hTw">
+      <div class="head"><b id="hTw">Twitch</b><span class="tag" id="twTag">—</span></div>
+      <span class="mute">Chat, subs, bits, follows, clips and the viewer list.</span>
+      <div class="row"><button id="twFix" hidden>Connect Twitch</button></div>
+    </section>
+
+    <section class="card wide" id="cKy" aria-labelledby="hKy">
+      <div class="head"><b id="hKy">Kick &amp; YouTube</b><span class="tag" id="kyTag">—</span></div>
+      <span class="mute" id="kyText">Checked once the app is running.</span>
+      <div class="row"><button id="kyFix" hidden>Open Setup › Platforms</button></div>
+    </section>
+  </div>
+
+  <div class="row" style="justify-content:space-between">
+    <span class="mute">You can change all of this later in Setup.</span>
+    <button class="go big" id="done" disabled>OPEN THE DASHBOARD</button>
+  </div>
+</main>
+<script>
+const $ = (id) => document.getElementById(id);
+const call = (a, b) => window.bbr.call(a, b);
+let pick = null, moved = false, started = false, port = 3000;
+const fmtN = (n) => Number(n || 0).toLocaleString();
+function describe(f) {
+  const bits = [fmtN(f.cards) + ' cards'];
+  if (f.settings) bits.push('settings');
+  if (f.logins.length) bits.push(f.logins.join(' + ') + ' logins');
+  if (f.clips) bits.push(fmtN(f.clips) + ' clips');
+  if (f.media) bits.push(fmtN(f.media) + ' photos & songs');
+  if (f.sounds + f.textures) bits.push((f.sounds + f.textures) + ' of your own sounds / textures');
+  return bits.join(', ') + (f.version ? ' · version ' + f.version : '');
+}
+function showFound(list) {
+  const box = $('oldList'); box.innerHTML = '';
+  list.forEach((f, i) => {
+    const l = document.createElement('label'); l.className = 'opt';
+    const r = document.createElement('input'); r.type = 'radio'; r.name = 'old'; r.value = f.dir; r.checked = i === 0;
+    r.onchange = () => { pick = f.dir; };
+    const t = document.createElement('div');
+    t.innerHTML = '<b></b><small></small>'; t.querySelector('b').textContent = describe(f); t.querySelector('small').textContent = f.dir + (f.newest ? ' · last used ' + new Date(f.newest).toLocaleDateString() : '');
+    l.append(r, t); box.append(l);
+  });
+  pick = list[0] ? list[0].dir : null;
+  $('bring').disabled = !pick;
+}
+async function scan() {
+  const r = await call('scan');
+  $('oldBar').hidden = true;
+  if (r.error) { $('oldTag').textContent = 'NOT FOUND'; $('oldText').textContent = r.error; return; }
+  if (r.found.length) {
+    $('oldTag').textContent = '✓ FOUND'; $('oldTag').className = 'tag ok';
+    $('oldText').textContent = r.found.length === 1 ? 'Found your BBR Viewer Cards folder:' : 'Found ' + r.found.length + ' BBR Viewer Cards folders. The newest is picked:';
+    showFound(r.found);
+  } else {
+    $('oldTag').textContent = 'NOT FOUND'; $('oldTag').className = 'tag warn';
+    $('oldText').textContent = 'No old folder in Downloads, Desktop, Documents or OneDrive. Press "Choose a folder…" and pick the folder with server.js in it, or start fresh.';
+  }
+  if (r.oldRunning) { $('oldMsg').className = 'msg bad'; $('oldMsg').textContent = 'The old BBR Cards window is still running: close it (the black window) before bringing your data over.'; }
+}
+function oldDone(text) {
+  moved = true;
+  ['bring', 'choose', 'fresh'].forEach((id) => { $(id).disabled = true; });
+  $('oldTag').textContent = '✓ DONE'; $('oldTag').className = 'tag ok';
+  $('oldMsg').className = 'msg ok'; $('oldMsg').textContent = text;
+  $('cOld').classList.remove('on'); $('cStart').classList.add('on'); $('startBtn').disabled = false; $('startTag').textContent = 'READY'; $('startBtn').focus();
+}
+$('bring').onclick = async () => {
+  if (!pick) return;
+  $('bring').disabled = true; $('oldMsg').className = 'msg'; $('oldMsg').textContent = 'Copying…';
+  const r = await call('migrate', { dir: pick });
+  if (r.error) { $('bring').disabled = false; $('oldMsg').className = 'msg bad'; $('oldMsg').textContent = r.error; return; }
+  oldDone('Brought over ' + fmtN(r.cards) + ' cards and ' + fmtN(r.files) + ' files. Your old folder is untouched (keep it until you\'re happy, then you can delete it).');
+};
+$('choose').onclick = async () => {
+  const r = await call('choose');
+  if (r.canceled) return;
+  if (r.error) { $('oldMsg').className = 'msg bad'; $('oldMsg').textContent = r.error; return; }
+  $('oldTag').textContent = '✓ FOUND'; $('oldTag').className = 'tag ok'; $('oldText').textContent = 'This folder:'; $('oldMsg').textContent = '';
+  showFound([r.found]);
+};
+$('fresh').onclick = () => oldDone('Starting fresh: no old data brought over.');
+
+$('startBtn').onclick = async () => {
+  $('startBtn').disabled = true; $('startMsg').className = 'msg'; $('startMsg').textContent = 'Starting…';
+  const r = await call('start', { autostart: $('oAuto').checked, openOnStart: $('oOpen').checked, autoCheck: $('oUpd').checked });
+  if (!r.ready) { $('startBtn').disabled = false; $('startMsg').className = 'msg bad'; $('startMsg').textContent = r.status === 'port-busy' ? 'Port ' + r.port + ' is busy: close the old BBR Cards window, then press Start the app again.' : 'It didn\'t start yet (' + r.status + '). Press Start the app again.'; return; }
+  started = true; port = r.port;
+  $('startTag').textContent = '✓ RUNNING'; $('startTag').className = 'tag ok'; $('startMsg').className = 'msg ok'; $('startMsg').textContent = 'Running on http://localhost:' + port;
+  $('cStart').classList.remove('on'); $('done').disabled = false;
+  status(); setInterval(status, 4000);
+};
+function tag(id, ok, text, warn) { $(id).textContent = text; $(id).className = 'tag ' + (ok ? 'ok' : warn ? 'warn' : 'bad'); }
+async function status() {
+  const s = await call('status'); if (!s || !s.twitch) return;
+  const o = s.obs || {};
+  tag('obsTag', !!o.connected, o.connected ? '✓ CONNECTED' : 'NOT CONNECTED', !o.connected);
+  $('obsText').textContent = o.connected ? 'OBS found on this PC' + (o.version ? ' (OBS ' + o.version + ')' : '') + '.' : 'Open OBS (Tools › WebSocket Server Settings › Enable). The app connects by itself when OBS is open.';
+  $('obsFix').hidden = !!o.connected;
+  const tw = s.twitch;
+  tag('twTag', tw.loggedIn && tw.connected, tw.loggedIn ? (tw.connected ? '✓ ' + (tw.login || 'connected') : 'CONNECTING…') : 'NOT CONNECTED', tw.loggedIn);
+  $('twFix').hidden = !!(tw.loggedIn && tw.connected); $('twFix').textContent = tw.loggedIn ? 'Reconnect' : 'Connect Twitch';
+  const k = s.kick.connected || s.kick.loggedIn, y = s.youtube.loggedIn;
+  tag('kyTag', k && y, (k ? 1 : 0) + (y ? 1 : 0) + ' of 2', true);
+  $('kyText').textContent = 'Kick: ' + (k ? 'connected' : 'not yet') + '. YouTube: ' + (y ? 'connected' : 'not yet') + '.';
+  $('kyFix').hidden = !!(k && y);
+}
+const openSetup = () => call('open', { url: 'http://localhost:' + port + '/#platforms' });
+$('obsFix').onclick = openSetup; $('twFix').onclick = openSetup; $('kyFix').onclick = openSetup;
+$('done').onclick = () => call('done');
+call('info').then((i) => {
+  $('home').textContent = i.home; $('link').textContent = 'http://localhost:' + i.port; port = i.port;
+  $('oAuto').checked = i.settings.autostart !== false; $('oUpd').checked = i.settings.autoCheck !== false; $('oOpen').checked = i.settings.openOnStart !== false;
+});
+scan();
+</script>
+</body>
+</html>

@@ -1,0 +1,151 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+<title>BBR Analysis</title>
+<style>
+  :root{--bg:#0b0d10;--panel:#13161b;--line:#2b313b;--text:#eef1f4;--muted:#a7b0ba;--y:#f5c400;--r:#e3132c}
+  *{box-sizing:border-box}
+  html,body{margin:0;background:var(--bg);color:var(--text);font:14px/1.35 Inter,system-ui,sans-serif;touch-action:manipulation}
+  .w{padding:10px;display:flex;flex-direction:column;gap:8px;max-width:1500px;margin:0 auto}
+  h1{margin:0;font:800 22px 'Barlow Condensed',Inter,sans-serif;letter-spacing:2px}h1 b{color:var(--y)}
+  .top{display:flex;gap:8px;align-items:center;flex-wrap:wrap}.top .st{flex:1;color:var(--muted);font-size:13px;min-width:200px}
+  button{font:inherit;font-weight:700;color:var(--text);background:var(--panel);border:1px solid var(--line);border-radius:9px;min-height:42px;padding:0 12px;cursor:pointer}
+  button:disabled{opacity:.4;cursor:default}button.on{background:var(--y);border-color:var(--y);color:#061233}
+  .tools,.row{display:flex;gap:6px;flex-wrap:wrap;align-items:center}
+  .tools button{min-width:62px;min-height:52px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:1px;font-size:11.5px}
+  .tools button i{font-style:normal;font-size:18px;line-height:1}
+  .sw{width:34px;height:34px;min-height:34px;border-radius:50%;padding:0;border:3px solid var(--line)}.sw.on{border-color:#fff;outline:2px solid var(--y)}
+  .stage{position:relative;width:100%;aspect-ratio:16/9;background:#1b2a1f;border-radius:10px;overflow:hidden;user-select:none;touch-action:none}
+  .stage img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+  .stage .layer{position:absolute;inset:0}
+  .stage .hint{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);color:var(--muted);text-align:center;font-size:15px;pointer-events:none}
+  .stage .hdl{cursor:grab}
+  input[type=text]{font:inherit;color:var(--text);background:var(--panel);border:1px solid var(--line);border-radius:8px;min-height:38px;padding:0 10px;width:200px}
+  .red{border-color:#ff3b3b;color:#ff8080}.blue{border-color:#4dc3ff;color:#4dc3ff}
+  .msg{min-height:18px;font-size:12.5px;color:#7dffb8}
+</style>
+</head>
+<body>
+<div class="w">
+  <div class="top">
+    <h1>BBR <b>ANALYSIS</b></h1>
+    <span class="st" id="st">Loading…</span>
+    <button id="bFreeze" class="blue">Freeze</button><button id="bBack" aria-label="One frame back">◀ Frame</button><button id="bFwd" aria-label="One frame forward">Frame ▶</button><button id="bPic">Grab picture</button><button id="bLive" class="red">Back to live</button>
+  </div>
+  <div class="tools" id="tools"></div>
+  <div class="row">
+    <span style="color:var(--muted);font-size:12.5px">Colour</span><span class="row" id="cols"></span>
+    <span style="color:var(--muted);font-size:12.5px;margin-left:8px">Thickness</span><span class="row" id="thick"></span>
+    <label style="display:flex;gap:6px;align-items:center;margin-left:8px;font-size:12.5px;color:var(--muted)">Label <input type="text" id="label" list="names" placeholder="name or text"></label><datalist id="names"></datalist>
+  </div>
+  <div class="stage" id="stage"><img id="pic" alt="" hidden onerror="this.hidden=true"><div class="hint" id="hint">Play a replay, press <b>Freeze</b>, then draw here.<br>What you draw shows on stream straight away.</div><div class="layer" id="layer"></div></div>
+  <div class="row"><button id="bUndo">Undo</button><button id="bClear">Clear all</button><button id="bHide">Hide drawings</button><span class="msg" id="msg" role="status"></span></div>
+</div>
+<script src="draw.js"></script>
+<script>
+(function () {
+  const $ = (id) => document.getElementById(id);
+  const key = new URLSearchParams(location.search).get('key');
+  const U = (u) => u + (key ? (u.includes('?') ? '&' : '?') + 'key=' + encodeURIComponent(key) : '');
+  const api = (b) => fetch(U('/api/analysis'), b ? { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(b) } : { cache: 'no-store' }).then((r) => r.json());
+  const TOOLS = [['move', '✥', 'Move'], ['ring', '◯', 'Spotlight'], ['arrow', '→', 'Arrow'], ['run', '⤳', 'Run'], ['pass', '⇢', 'Pass'], ['line', '│', 'Line'], ['zone', '▱', 'Zone'], ['pen', '✎', 'Pen'], ['tag', '▭', 'Name'], ['text', 'Aa', 'Text'], ['del', '✕', 'Delete']];
+  const COLS = ['red', 'yellow', 'white', 'blue', 'green', 'navy'];
+  let tool = 'ring', color = 'red', w = 2, shapes = [], hist = [], sel = null, hidden = false, playing = null, drag = null, sendT = null, lastSent = 0;
+  $('tools').innerHTML = TOOLS.map(([k, i, n]) => '<button data-t="' + k + '" aria-label="' + n + '"><i>' + i + '</i>' + n + '</button>').join('');
+  $('cols').innerHTML = COLS.map((c) => '<button class="sw" data-c="' + c + '" aria-label="' + c + '" style="background:' + BBRDRAW.COLORS[c] + '"></button>').join('');
+  $('thick').innerHTML = [[1, 'Thin'], [2, 'Medium'], [3, 'Thick']].map(([v, n]) => '<button data-w="' + v + '">' + n + '</button>').join('');
+  const paintBars = () => {
+    document.querySelectorAll('[data-t]').forEach((b) => b.classList.toggle('on', b.dataset.t === tool));
+    document.querySelectorAll('[data-c]').forEach((b) => b.classList.toggle('on', b.dataset.c === color));
+    document.querySelectorAll('[data-w]').forEach((b) => b.classList.toggle('on', +b.dataset.w === w));
+  };
+  document.querySelectorAll('[data-t]').forEach((b) => { b.onclick = () => { tool = b.dataset.t; if (tool !== 'move') sel = null; paintBars(); render(); }; });
+  document.querySelectorAll('[data-c]').forEach((b) => { b.onclick = () => { color = b.dataset.c; const s = tool === 'move' && shapes.find((x) => x.id === sel); if (s) { snap(); s.color = color; send(true); } paintBars(); render(); }; });
+  document.querySelectorAll('[data-w]').forEach((b) => { b.onclick = () => { w = +b.dataset.w; const s = tool === 'move' && shapes.find((x) => x.id === sel); if (s) { snap(); s.w = w; send(true); } paintBars(); render(); }; });
+  paintBars();
+  const say = (t) => { $('msg').textContent = t || ''; };
+  function size() { const r = $('stage').getBoundingClientRect(); return { W: r.width, H: r.height, r }; }
+  function render() { const { W, H } = size(); $('layer').innerHTML = BBRDRAW.svg(shapes, W, H, { selected: tool === 'move' ? sel : null }); $('hint').hidden = !!(shapes.length || !$('pic').hidden); }
+  function snap() { hist.push(JSON.stringify(shapes)); if (hist.length > 60) hist.shift(); }
+  function send(now) {
+    clearTimeout(sendT);
+    const go = () => { lastSent = Date.now(); api({ shapes, hidden }).then((r) => { if (r.error) say(r.error); }).catch(() => say('App not reachable')); };
+    if (now || Date.now() - lastSent > 90) go(); else sendT = setTimeout(go, 90);
+  }
+  const id = () => Date.now().toString(36) + Math.random().toString(36).slice(2, 5);
+  function pt(e) { const { r } = size(); return [Math.max(0, Math.min(1, (e.clientX - r.left) / r.width)), Math.max(0, Math.min(1, (e.clientY - r.top) / r.height))]; }
+  $('stage').addEventListener('pointerdown', (e) => {
+    if (!playing) { say('Start a replay first (dock, Stream Deck or the Replay page).'); return; }
+    const p = pt(e), { W, H } = size(); $('stage').setPointerCapture(e.pointerId);
+    if (tool === 'move') {
+      const h = e.target.closest && e.target.closest('.hdl');
+      const s = shapes.find((x) => x.id === sel);
+      if (h && s) { snap(); drag = { kind: 'handle', s, i: +h.dataset.h }; return; }
+      const hit = BBRDRAW.hit(shapes, p[0], p[1], W, H);
+      if (hit) { sel = hit.id; snap(); drag = { kind: 'move', s: hit, from: p, orig: JSON.parse(JSON.stringify(hit.p)) }; render(); return; }
+      sel = null; render(); return;
+    }
+    if (tool === 'del') { const hit = BBRDRAW.hit(shapes, p[0], p[1], W, H); if (hit) { snap(); shapes = shapes.filter((x) => x !== hit); render(); send(true); } return; }
+    snap();
+    const s = { id: id(), type: tool, color, w, p: [p.slice(), p.slice()] };
+    if (tool === 'ring') { s.p = [p]; s.r = 0.035; }
+    if (tool === 'run') s.p = [p.slice(), p.slice(), p.slice()];
+    if (tool === 'zone') s.p = [p.slice(), p.slice(), p.slice(), p.slice()];
+    if (tool === 'pen') s.p = [p.slice()];
+    if (tool === 'tag' || tool === 'text') { s.p = [p]; s.text = ($('label').value || (tool === 'tag' ? 'PLAYER' : 'LOOK')).toUpperCase().slice(0, 24); shapes.push(s); sel = s.id; render(); send(true); return; }
+    shapes.push(s); drag = { kind: 'new', s, from: p }; render();
+  });
+  $('stage').addEventListener('pointermove', (e) => {
+    if (!drag) return; const p = pt(e), s = drag.s;
+    if (drag.kind === 'new') {
+      if (s.type === 'ring') s.r = Math.max(0.012, Math.hypot(p[0] - drag.from[0], (p[1] - drag.from[1]) * 9 / 16));
+      else if (s.type === 'run') { const a = drag.from, mx = (a[0] + p[0]) / 2, my = (a[1] + p[1]) / 2, dx = p[0] - a[0], dy = p[1] - a[1]; s.p = [a, [mx - dy * 0.3, my + dx * 0.3], p]; }
+      else if (s.type === 'zone') { const a = drag.from; s.p = [[a[0], a[1]], [p[0], a[1]], [p[0], p[1]], [a[0], p[1]]]; }
+      else if (s.type === 'pen') { const l = s.p[s.p.length - 1]; if (Math.hypot(p[0] - l[0], p[1] - l[1]) > 0.004) s.p.push(p); }
+      else s.p[1] = p;
+    } else if (drag.kind === 'handle') {
+      if (s.type === 'ring' && drag.i === 1) s.r = Math.max(0.012, Math.abs(p[0] - s.p[0][0]));
+      else if (s.type === 'pen' || (s.type === 'ring' && drag.i === 0)) { const dx = p[0] - s.p[0][0], dy = p[1] - s.p[0][1]; s.p = s.p.map((q) => [q[0] + dx, q[1] + dy]); }
+      else s.p[drag.i] = p;
+    } else if (drag.kind === 'move') {
+      const dx = p[0] - drag.from[0], dy = p[1] - drag.from[1]; s.p = drag.orig.map((q) => [q[0] + dx, q[1] + dy]);
+    }
+    render(); send(false);
+  });
+  const up = () => {
+    if (!drag) return; const s = drag.s;
+    if (drag.kind === 'new' && s.type !== 'ring' && s.type !== 'pen' && s.p.length >= 2 && Math.hypot(s.p[s.p.length - 1][0] - s.p[0][0], s.p[s.p.length - 1][1] - s.p[0][1]) < 0.01) { shapes = shapes.filter((x) => x !== s); hist.pop(); }
+    else if (drag.kind === 'new') sel = s.id;
+    drag = null; render(); send(true);
+  };
+  $('stage').addEventListener('pointerup', up); $('stage').addEventListener('pointercancel', up);
+  window.addEventListener('resize', render);
+  $('bUndo').onclick = () => { if (!hist.length) return; shapes = JSON.parse(hist.pop()); sel = null; render(); send(true); };
+  $('bClear').onclick = () => { if (!shapes.length) return; snap(); shapes = []; sel = null; render(); send(true); };
+  $('bHide').onclick = () => { hidden = !hidden; $('bHide').textContent = hidden ? 'Show drawings' : 'Hide drawings'; send(true); };
+  async function grab() { const r = await api({ frame: true }); if (r.image) { $('pic').src = r.image; $('pic').hidden = false; render(); } else if (r.error) say(r.error); }
+  $('bPic').onclick = grab;
+  $('bFreeze').onclick = async () => { if (!playing) return say('No replay playing'); const r = await api({ freeze: !playing.frozen }); if (r.error) return say(r.error); if (r.frozen) { setTimeout(grab, 250); say('Frozen. Draw away.'); } else say('Playing'); load(); };
+  const step = async (ms) => { const r = await api({ step: ms }); if (r.error) return say(r.error); setTimeout(grab, 200); load(); };
+  $('bBack').onclick = () => step(-120); $('bFwd').onclick = () => step(120);
+  $('bLive').onclick = async () => { await api({ live: true }); shapes = []; hist = []; sel = null; $('pic').hidden = true; render(); load(); };
+  async function load() {
+    try {
+      const d = await api();
+      const was = playing; playing = d.playing;
+      if (!was && playing) { shapes = (d.analysis && d.analysis.shapes) || []; hist = []; $('pic').hidden = true; }
+      if (was && !playing) { shapes = []; hist = []; $('pic').hidden = true; }
+      $('st').innerHTML = !playing ? 'No replay playing. Start one, then come back here.' : playing.frozen ? '<b style="color:#f5c400">FROZEN</b> · replay #' + playing.n + (playing.label ? ' · ' + playing.label : '') : '<b style="color:#4dc3ff">PLAYING</b> replay #' + playing.n + (playing.label ? ' · ' + playing.label : '') + ' · press Freeze to draw';
+      $('bFreeze').textContent = playing && playing.frozen ? 'Play' : 'Freeze';
+      ['bFreeze', 'bBack', 'bFwd', 'bPic', 'bLive'].forEach((x) => { $(x).disabled = !playing; });
+      if (d.names) $('names').innerHTML = d.names.map((n) => '<option value="' + String(n).replace(/"/g, '') + '">').join('');
+      render();
+    } catch (e) { $('st').textContent = 'App not reachable'; }
+  }
+  load(); setInterval(() => { if (!drag) load(); }, 1500);
+})();
+</script>
+</body>
+</html>

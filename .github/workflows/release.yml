@@ -1,0 +1,50 @@
+# Builds the Windows installer and puts it on the release page, every time a version tag is pushed
+# (e.g. v36.0.0). The installed app checks this release page for updates.
+# Test versions: tag e.g. v36.1.0-beta.1 (package.json "version": "36.1.0-beta.1"): it's marked as a
+# pre-release, so only apps with "Test versions too" ticked get it.
+name: Build the Windows installer
+on:
+  push:
+    tags: ['v*']
+  workflow_dispatch:
+    inputs:
+      publish:
+        description: 'Put it on the release page (the installed apps update to it)'
+        type: boolean
+        default: true
+      test_version:
+        description: 'Test version (only apps with "Test versions too" get it)'
+        type: boolean
+        default: false
+permissions:
+  contents: write
+jobs:
+  windows:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - run: npm install --no-audit --no-fund
+      - run: node desktop/check-version.js
+      - name: Test the app's own parts (no Electron window needed)
+        run: node desktop/test/unit.js
+      - name: Build and publish
+        shell: bash
+        run: |
+          TYPE=release
+          if [[ "$GITHUB_REF_NAME" == *-* || "${{ inputs.test_version }}" == "true" ]]; then TYPE=prerelease; fi
+          if [[ "$GITHUB_REF_TYPE" == "tag" || "${{ inputs.publish }}" == "true" ]]; then
+            npx electron-builder --win --x64 --publish always -c.publish.releaseType=$TYPE
+          else
+            npx electron-builder --win --x64 --publish never
+          fi
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - uses: actions/upload-artifact@v4
+        with:
+          name: installer
+          path: |
+            dist/*.exe
+            dist/latest.yml

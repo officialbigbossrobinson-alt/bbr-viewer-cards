@@ -1,0 +1,651 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Boss Sports News Ticker</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:ital,wght@0,500;0,600;0,700;0,800;1,800&family=Barlow:wght@500;700&display=swap" rel="stylesheet">
+
+  <style>
+    :root {
+      --ink: #061233;      /* deepest navy: clock, score boxes */
+      --navy: #0d2459;     /* league tags */
+      --red: #d10a22;      /* brand block, story labels, live markers */
+      --gold: #f5c400;     /* signature rule along the bottom */
+      --paper: #f6f7fa;    /* ticker strip */
+      --muted: #5b6888;    /* kick-off times, FT/HT */
+      --bar: 56px;         /* strip height */
+      --slant: 14px;       /* angle on the brand and clock panels */
+    }
+
+    /* Transparent page so only the bar shows in OBS */
+    html, body {
+      margin: 0;
+      background: transparent;
+    }
+
+    body {
+      font-family: 'Barlow Condensed', 'Arial Narrow', Arial, sans-serif;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    .ticker-container {
+      display: flex;
+      width: 100%;
+      height: var(--bar);
+      border-bottom: 3px solid var(--gold);
+      box-shadow: 0 6px 18px rgba(0, 0, 0, 0.45);
+      overflow: hidden;
+    }
+
+    /* ---- Brand block and clock ---- */
+    .brand {
+      display: flex;
+      flex-shrink: 0;
+      position: relative;
+      z-index: 3;
+    }
+
+    .brand-mark {
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      background: linear-gradient(180deg, #e3132c 0%, var(--red) 55%, #b00019 100%);
+      color: #ffffff;
+      padding: 0 calc(var(--slant) + 18px) 0 18px;
+      clip-path: polygon(0 0, 100% 0, calc(100% - var(--slant)) 100%, 0 100%);
+    }
+
+    .brand-mark .wordmark {
+      font-weight: 800;
+      font-size: 28px;
+      line-height: 0.85;
+      letter-spacing: 0.5px;
+    }
+
+    .brand-mark .strapline {
+      font-family: 'Barlow', Arial, sans-serif;
+      font-weight: 700;
+      font-size: 10px;
+      letter-spacing: 2.6px;
+      margin-top: 3px;
+    }
+
+    .clock {
+      display: flex;
+      align-items: center;
+      margin-left: calc(var(--slant) * -1);
+      padding: 0 calc(var(--slant) + 16px) 0 calc(var(--slant) + 14px);
+      background: var(--ink);
+      color: #ffffff;
+      font-weight: 700;
+      font-size: 26px;
+      font-variant-numeric: tabular-nums;
+      letter-spacing: 0.5px;
+      clip-path: polygon(var(--slant) 0, 100% 0, calc(100% - var(--slant)) 100%, 0 100%);
+    }
+
+    /* ---- Scrolling strip ---- */
+    .ticker-wrapper {
+      flex: 1;
+      display: flex;
+      align-items: center;
+      position: relative;
+      overflow: hidden;
+      margin-left: calc(var(--slant) * -1);
+      background: linear-gradient(180deg, #ffffff 0%, var(--paper) 60%, #e8ebf2 100%);
+    }
+
+    /* Soft fade where text enters and leaves */
+    .ticker-wrapper::before,
+    .ticker-wrapper::after {
+      content: '';
+      position: absolute;
+      top: 0;
+      bottom: 0;
+      width: 56px;
+      z-index: 2;
+      pointer-events: none;
+    }
+    .ticker-wrapper::before { left: 0; background: linear-gradient(90deg, var(--paper) 30%, rgba(246, 247, 250, 0)); }
+    .ticker-wrapper::after { right: 0; background: linear-gradient(270deg, var(--paper) 10%, rgba(246, 247, 250, 0)); }
+
+    .ticker-track {
+      display: flex;
+      width: max-content;
+      white-space: nowrap;
+      will-change: transform;
+    }
+
+    .ticker-item {
+      flex-shrink: 0;
+      display: inline-flex;
+      align-items: center;
+      padding-left: 30px;
+      color: var(--ink);
+      font-weight: 600;
+      font-size: 26px;
+      text-transform: uppercase;
+      letter-spacing: 0.3px;
+    }
+
+    /* Story label, e.g. RUMOUR MILL: */
+    .highlight {
+      color: var(--red);
+      font-weight: 800;
+      margin-right: 10px;
+    }
+
+    /* Separator between stories: small navy diamond */
+    .divider {
+      display: inline-block;
+      font-size: 0;
+      margin-left: 30px;
+    }
+    .divider::before {
+      content: '';
+      display: block;
+      width: 7px;
+      height: 7px;
+      background: var(--navy);
+      transform: rotate(45deg);
+    }
+
+    /* ---- Real scores ---- */
+    .score-item .comp-tag {
+      display: inline-block;
+      margin-right: 18px;
+      padding: 4px 11px 3px 9px;
+      background: var(--navy);
+      border-left: 4px solid var(--gold);
+      color: #ffffff;
+      font-weight: 700;
+      font-size: 15px;
+      letter-spacing: 1.6px;
+    }
+
+    .match {
+      display: inline-flex;
+      align-items: center;
+      margin-right: 26px;
+    }
+    .match:last-of-type { margin-right: 0; }
+
+    .match .score {
+      min-width: 46px;
+      margin: 0 10px;
+      padding: 1px 9px;
+      background: var(--ink);
+      color: #ffffff;
+      font-weight: 700;
+      text-align: center;
+      font-variant-numeric: tabular-nums;
+      box-shadow: inset 0 -2px 0 rgba(255, 255, 255, 0.08);
+    }
+
+    .match .score.upcoming {
+      background: transparent;
+      color: var(--muted);
+      box-shadow: inset 0 0 0 1.5px #c3cbdc;
+    }
+
+    .match .state {
+      margin-left: 9px;
+      color: var(--muted);
+      font-weight: 700;
+      font-size: 16px;
+      letter-spacing: 1px;
+    }
+
+    .match .state.live { color: var(--red); }
+    .match .state.live::before {
+      content: '';
+      display: inline-block;
+      width: 7px;
+      height: 7px;
+      margin-right: 5px;
+      border-radius: 50%;
+      background: var(--red);
+      vertical-align: 2px;
+      animation: livePulse 1.4s ease-in-out infinite;
+    }
+
+    @keyframes livePulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.25; }
+    }
+
+    /* Full-screen overlay: the ticker sits along the bottom.
+       Change --ticker-offset to lift it up from the bottom edge. */
+    html, body { height: 100%; overflow: hidden; }
+    .ticker-container {
+      position: fixed; left: 0; right: 0; bottom: var(--ticker-offset, 0px); z-index: 10;
+      transition: transform .6s cubic-bezier(.3,.7,.3,1);
+    }
+    /* the BBR overlay slides the ticker away during battles (setting on the Live desk) */
+    body.bsn-hide-ticker .ticker-container { transform: translateY(115%); }
+  </style>
+  <link rel="stylesheet" href="goalflash.css">
+</head>
+<body>
+
+  <!-- Goal alerts, full-screen 3D reconstruction, VAR and round-up (goalflash.js) -->
+  <div class="gf-layer">
+    <div class="stage" id="stage">
+      <canvas id="pitch3d" width="1280" height="720"></canvas>
+      <div class="gbox" id="gbox"></div>
+      <div class="gbox-tag" id="gboxTag"><b>LIVE</b><span>BIGBOSSROBINSON · FC 27</span></div>
+
+      <div class="bug" id="bug">
+        <div class="chan">BSN</div>
+        <div class="state" id="bugState"><i></i><span id="bugText">LIVE</span></div>
+        <div class="sc"><span id="bugHome"></span><em id="bugScore"></em><span id="bugAway"></span><small id="bugMin"></small></div>
+      </div>
+      <div class="recon" id="recon">BSN reconstruction · recreated from the match report</div>
+
+      <div class="stats" id="stats">
+        <h3>THE GOAL</h3>
+        <div><span>Scorer</span><b id="stScorer">–</b></div>
+        <div><span>Finish</span><b id="stFinish">–</b></div>
+        <div><span>Distance</span><b id="stDist">–</b></div>
+        <div><span>Build-up</span><b id="stBuild">–</b></div>
+        <div><span>Placement</span><b id="stPlace">–</b></div>
+      </div>
+
+      <div class="roundup" id="roundup">
+        <div class="ru-head"><b>FULL TIME</b><span>RESULTS<small id="ruPage"></small></span></div>
+        <div class="ru-rows" id="ruRows"></div>
+      </div>
+
+      <div class="band" id="band">
+        <div class="word" id="bandWord">GOAL</div>
+        <div class="txt"><b id="bandMain"></b><span id="bandSub"></span></div>
+        <div class="yours">FORZA MILAN</div>
+      </div>
+
+      <div class="lt" id="lt">
+        <img class="ph" id="photo" alt="BigBossRobinson" src="images/boss-grin.jpg">
+        <div class="col">
+          <div class="lab" id="ltLab"></div>
+          <div class="head" id="ltHead"></div>
+          <div class="quote"><b>BIGBOSSROBINSON:</b><span id="ltQuote"></span><span class="caret"></span></div>
+        </div>
+      </div>
+
+      <div class="wipe" id="wipe"></div>
+    </div>
+  </div>
+
+  <div class="ticker-container">
+    <!-- Brand block and clock -->
+    <div class="brand">
+      <div class="brand-mark">
+        <span class="wordmark">BOSS</span>
+        <span class="strapline">SPORTS NEWS</span>
+      </div>
+      <div class="clock" id="clock">00:00</div>
+    </div>
+
+    <!-- Stories and scores are added here automatically -->
+    <div class="ticker-wrapper">
+      <div class="ticker-track"></div>
+      <div class="goalflash" id="goalflash">
+        <div class="stamp"><i></i><span id="stampText">GOAL</span></div>
+        <div class="detail" id="flashText">PREMIER LEAGUE · ARSENAL <em>2–1</em> CHELSEA · SAKA 67’</div>
+        <div class="more" id="moreChip"></div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    /* =====================================================================
+       YOUR SQUAD — edit these names and the ticker writes the stories.
+       ===================================================================== */
+    let SQUAD = {
+      captain: 'BigBossRobinson',
+      manager: 'BigBossRobinson',
+      owner: 'ELDI EL MUHAMMED',
+      rivalManager: 'CREAMYGLAZE',
+      clubs: ['BOSSHAUSENS', 'DIAMOND DOGS', 'PASSTHEBALL UTD'],
+      players: [
+        'WillRKO1094', 'Crambeu', 'godfarther2007', 'riley5121', 'Kuroo6833', 'G2_masonL2',
+        'L0veS05a', 'Raging_Ginge98', 'BigBossRobinson', 'LeeJ2509', 'YNWA GINGE', 'El Kremit',
+        'JordoPP', 'BOOF__X', 'Lk Syncs', 'pogsone', 'natsbyrne98', 'ak47_bigsm0kes', 'Daithi_420',
+        'Angeldimaria91', 'Blake_Mozzy6', 'Snipepro6001', 'CxPabz', 'CoolKid9912',
+        'EthanHunt7gamer', 'AdamLallana__', 'LBad-S', 'kenan_zuid', 'Saxczy7858', 'Orichieva',
+        'read25736884', 'HyVeSniper11', 'StainCare', 'DXTomi', 'RyannnUTB', 'Lingling6534',
+        'T3mpss', 'Luca-bazuka2014', 'diegoias03', 'ShatteredVain', 'Kara za 7081',
+        'CerealCircle528', 'Sycuya', 'Sneakyman420834', 'tigerthetheo', 'Eclipxed', 'BDB_221',
+        'rrman7', 'DaAmazingTiDus', 'DkDaVillain_7', 'AbdelWeshh', 'BIH-Begic', 'OatieBoy',
+        'XLVII-XXIV', 'Gartenboy', 'Torben_758'
+      ],
+    };
+
+    // Clubs that get "linked" with your players.
+    let SUITORS = ['A MYSTERY SAUDI PRO LEAGUE CLUB', 'AN UNNAMED SERIE A SIDE', 'A CASH-RICH MLS FRANCHISE',
+                     '{rival}’S SIDE', 'A BUNDESLIGA GIANT', 'A NEWLY PROMOTED CHAMPIONSHIP CLUB',
+                     'AN AMBITIOUS LIGUE 1 OUTFIT'];
+    let FEES = ['£12.50', '£40 AND A MEAL DEAL', '£3 MILLION', '£150 MILLION', 'TWO PACKETS OF CRISPS'];
+
+    // Headlines that always appear once per cycle (leave empty for fully random).
+    let PINNED = [
+      // ['BREAKING', 'BIGBOSSROBINSON RECONSIDERING A RETURN TO MANAGEMENT'],
+    ];
+
+    /* Story templates. {p} and {q} are two different random players.
+       Also available: {captain} {manager} {owner} {rival} {club} {suitor} {fee} {n} */
+    let TEMPLATES = [
+      ['BREAKING', '{p} SPOTTED LEAVING THE TRAINING GROUND IN A HURRY — {club} REFUSE TO COMMENT'],
+      ['BREAKING', '{club} CONFIRM {p} WILL TAKE PENALTIES THIS WEEKEND — FANS ALREADY BRACING'],
+      ['BREAKING', '{owner} SPOTTED IN THE DIRECTORS’ BOX TAKING NOTES DURING {p}’S WARM-UP'],
+      ['TRANSFER WHISPERS', '{suitor} WEIGHING UP A SHOCK BID FOR {p}'],
+      ['TRANSFER WHISPERS', '{p}’S AGENT SEEN AT THE AIRPORT — FANS FEAR THE WORST'],
+      ['TRANSFER WHISPERS', '{p} SAID TO BE “FLATTERED” BY INTEREST FROM {suitor}'],
+      ['TRANSFER WHISPERS', '{club} PREPARED TO LISTEN TO OFFERS FOR {p} IN THE REGION OF {fee}'],
+      ['RUMOUR MILL', '{p} AND {q} NO LONGER SHARING A LIFT TO TRAINING, SOURCES CLAIM'],
+      ['RUMOUR MILL', '{p} SEEN HAVING DINNER WITH {rival} — {club} FANS DEMAND ANSWERS'],
+      ['RUMOUR MILL', '{p} AND {q} NOW COMMUNICATING EXCLUSIVELY THROUGH {manager}'],
+      ['DRESSING ROOM', '{p} PUT IN CHARGE OF THE MATCHDAY PLAYLIST — MORALE SAID TO BE AT AN ALL-TIME LOW'],
+      ['DRESSING ROOM', '{p} CALLED IN BY {manager} OVER EXCESSIVE USE OF THE SKILL MOVE BUTTON'],
+      ['DRESSING ROOM', 'SPECULATION GROWS THAT {p} COULD BE IN LINE FOR A BIGGER LEADERSHIP ROLE'],
+      ['TRAINING GROUND', '{p} NUTMEGS {q} THREE TIMES IN ONE SESSION — {q} REPORTEDLY DEMANDING A REMATCH'],
+      ['TRAINING GROUND', '{q} LEFT FURIOUS AFTER {p} SCORES A CHEEKY PANENKA PAST HIM IN SHOOTING PRACTICE'],
+      ['TRAINING GROUND', 'UNCONFIRMED TALK OF A RIFT BETWEEN {p} AND {q} AFTER A FIERY FIVE-A-SIDE'],
+      ['FITNESS UPDATE', '{p} A DOUBT FOR THE WEEKEND AFTER PULLING A HAMSTRING CELEBRATING A TRAINING GOAL'],
+      ['FITNESS UPDATE', '{p} INSISTS HE IS “FEELING SHARP” DESPITE MISSING EVERY SHOT IN FINISHING DRILLS'],
+      ['FITNESS UPDATE', '{p} PASSES MEDICAL AT THE SECOND ATTEMPT AFTER STOPPING AT LEVEL {n} ON THE BLEEP TEST'],
+      ['OWNER WATCH', '{owner} SAID TO BE DRAWING UP A SHORTLIST OF NEW MANAGERS — JUST IN CASE'],
+      ['OWNER WATCH', '{owner} PROMISES A “SIGNIFICANT” TRANSFER BUDGET, BELIEVED TO BE AROUND {fee}'],
+      ['OWNER WATCH', '{owner} REPORTEDLY KEEPING A CLOSE EYE ON {club} PERFORMANCES'],
+      ['CONTRACT CHAT', '{p} REJECTS NEW DEAL AFTER A DISPUTE OVER SHIRT NUMBERS'],
+      ['CONTRACT CHAT', '{p} CLOSE TO AN EXTENSION AFTER {club} AGREE TO UNLIMITED POST-MATCH PIZZA'],
+      ['CONTRACT CHAT', '{p} WANTS A RELEASE CLAUSE IN CASE {suitor} COMES CALLING'],
+      ['TACTICAL TALK', '{manager} TRIALLING A BOLD 2-3-5 — {p} UNSURE WHERE HE IS MEANT TO STAND'],
+      ['TACTICAL TALK', '{manager} UNDER PRESSURE TO START {p} AFTER A RUN OF ASSURED DISPLAYS'],
+      ['TACTICAL TALK', '{manager} FACING BIG DECISIONS AS {club} CHASE PROMOTION'],
+      ['SELECTION TALK', '{p} TIPPED TO START AHEAD OF {q} IN A SHOCK SELECTION CALL'],
+      ['SELECTION TALK', '{p} DETERMINED TO LET HIS FOOTBALL DO THE TALKING AMID RUMOURS OF A DROP'],
+      ['CAPTAINCY', '{captain} REFUSES TO HAND OVER THE ARMBAND, CITING “VIBES”'],
+      ['CAPTAINCY', '{captain} CLAIMS {club} ARE “THE BEST TEAM IN THE DIVISION IF YOU IGNORE THE RESULTS”'],
+      ['RIVAL WATCH', '{rival} TAKES A SWIPE AT {club}, CALLING THEIR DEFENDING “OPTIONAL”'],
+      ['RIVAL WATCH', '{rival} REPORTEDLY TRIED TO TAP UP {p} WITH A PARTY CHAT INVITE'],
+      ['SCOUTING WATCH', 'SCOUTS FROM {suitor} IN ATTENDANCE TO WATCH {p} THIS WEEKEND'],
+      ['INTERNATIONAL WATCH', '{p} HOPEFUL OF A SHOCK CALL-UP AFTER POSTING A HIGHLIGHTS REEL'],
+      ['STAT ATTACK', '{p} HAS NOW GONE {n} MATCHES WITHOUT PASSING TO {q}'],
+      ['STAT ATTACK', '{p} LEADS THE SQUAD IN SPRINTS — MOSTLY BACK TOWARDS HIS OWN GOAL'],
+      ['PRESS CONFERENCE', '{manager}: “{p} KNOWS EXACTLY WHAT HE DID”'],
+      ['PRESS CONFERENCE', '{manager} REFUSES TO RULE OUT A RETURN FOR {p} AT LEFT BACK'],
+      ['FASHION DESK', '{p} ARRIVES AT THE STADIUM IN SLIDERS AND A FULL TRACKSUIT — PUNDITS DIVIDED'],
+      ['MEDICAL ROOM', '{p} TREATED FOR CRAMP AFTER A {n}-HOUR GAMING SESSION'],
+      ['SQUAD NEWS', '{p} RETURNS TO FULL TRAINING AND IMMEDIATELY CLAIMS THE BEST SEAT ON THE BUS'],
+      ['ACADEMY', '{club} YOUNGSTERS SAID TO BE STUDYING {p}’S TACKLING — AS A WARNING'],
+    ];
+
+    /* =====================================================================
+       Ticker settings
+       ===================================================================== */
+    let CHECK_EVERY_SECONDS = 60;     // how often to refresh the real scores
+    let RUMOURS_BETWEEN_SCORES = 3;   // stories between each league's scores
+    let SHOW_UPCOMING = true;         // kick-off times for games not started
+    let PIXELS_PER_SECOND = 125;      // scroll speed
+
+    /* Real scores come from ESPN's public scoreboard: live, free, no key.
+       The Boss Sports News server window must be open for them to appear. Each competition only appears when it has games today
+       (or yesterday's results, before today's games kick off).
+       Delete a line to hide that competition; order here = order on the ticker. */
+    let LEAGUES = [
+      ['eng.1',            'PREMIER LEAGUE'],
+      ['uefa.champions',   'CHAMPIONS LEAGUE'],
+      ['uefa.europa',      'EUROPA LEAGUE'],
+      ['esp.1',            'LA LIGA'],
+      ['ita.1',            'SERIE A'],
+      ['ger.1',            'BUNDESLIGA'],
+      ['fra.1',            'LIGUE 1'],
+      ['fifa.world',       'WORLD CUP'],
+      ['uefa.euro',        'EURO'],
+      ['uefa.nations',     'NATIONS LEAGUE'],
+      ['fifa.worldq.uefa', 'WORLD CUP QUALIFIERS'],
+      ['uefa.euroq',       'EURO QUALIFIERS'],
+      ['fifa.friendly',    'INTERNATIONAL FRIENDLY'],
+    ];
+    // Scores come through the Boss Sports News server (ESPN blocks direct requests from OBS).
+    const SCORES_BASE = '/bsn/espn/';   // through the BBR app (ESPN blocks direct requests from OBS)
+
+    /* ===================================================================== */
+    const track = document.querySelector('.ticker-track');
+    const wrapper = document.querySelector('.ticker-wrapper');
+
+    function esc(text) {
+      const d = document.createElement('div');
+      d.textContent = text == null ? '' : String(text);
+      return d.innerHTML;
+    }
+    const pick = list => list[Math.floor(Math.random() * list.length)];
+    const randInt = (a, b) => a + Math.floor(Math.random() * (b - a + 1));
+
+    // ---------- Rumour generator ----------
+    const recentTemplates = [];
+    const recentPlayers = [];
+    let pinnedIndex = 0;
+
+    // placeholders written any way ([p], {P}, (club), [player] ...) still work
+    const TOKEN_ALIAS = { p: 'p', player: 'p', player1: 'p', name: 'p', q: 'q', player2: 'q', other: 'q', club: 'club', team: 'club', owner: 'owner', chairman: 'owner', rival: 'rival', manager: 'manager', boss: 'manager', captain: 'captain', skipper: 'captain', suitor: 'suitor', fee: 'fee', n: 'n', number: 'n' };
+    const TOKEN_RE = /[\[{(<]\s*(player1|player2|player|name|other|p|q|club|team|owner|chairman|rival|manager|boss|captain|skipper|suitor|fee|number|n)\s*[\]})>]/gi;
+    const norm = t => String(t == null ? '' : t).replace(TOKEN_RE, (m, k) => '{' + TOKEN_ALIAS[k.toLowerCase()] + '}');
+    function filler(p, q) {
+      return str => norm(str)
+        .replaceAll('{suitor}', norm(pick(SUITORS) || 'A MYSTERY CLUB'))
+        .replaceAll('{p}', p).replaceAll('{q}', q)
+        .replaceAll('{captain}', SQUAD.captain || 'THE CAPTAIN').replaceAll('{manager}', SQUAD.manager || 'THE MANAGER')
+        .replaceAll('{owner}', SQUAD.owner || 'THE OWNER').replaceAll('{rival}', SQUAD.rivalManager || 'A RIVAL MANAGER')
+        .replaceAll('{club}', pick(SQUAD.clubs || []) || 'THE CLUB').replaceAll('{fee}', pick(FEES) || '£5')
+        .replaceAll('{n}', randInt(3, 14))
+        .replace(/[\[{<][a-z0-9 _]{1,14}[\]}>]/gi, '');   // anything still in brackets is dropped, never shown
+    }
+    function twoPlayers(exclude) {
+      const pool = (SQUAD.players || []).filter(n => !(exclude || []).includes(n));
+      const fresh = pool.filter(n => !recentPlayers.includes(n));
+      const p = pick(fresh.length ? fresh : pool) || 'THE NEW SIGNING';
+      const q = pick(pool.filter(n => n !== p)) || 'THE KIT MAN';
+      recentPlayers.push(p);
+      if (recentPlayers.length > Math.min(4, Math.max(1, (SQUAD.players || []).length - 1))) recentPlayers.shift();
+      return [p, q];
+    }
+
+    function makeRumour() {
+      // the app's own headlines (pinned, GODFATHER, red cards...) never take more than 1 in 4 stories, and no repeats in a row
+      const pins = Array.from(new Map(PINNED.map(x => [x[0] + '|' + x[1], x])).values());
+      if (pins.length && Math.random() < Math.min(0.25, 1 / (TEMPLATES.length / pins.length + 1))) {
+        const [label, text] = pins[pinnedIndex++ % pins.length];
+        const [p, q] = twoPlayers();
+        const f = filler(p, q);
+        return itemHTML(f(label), f(text));
+      }
+      let tIndex;
+      do { tIndex = Math.floor(Math.random() * TEMPLATES.length); }
+      while (recentTemplates.includes(tIndex) && TEMPLATES.length > 12);
+      recentTemplates.push(tIndex);
+      if (recentTemplates.length > 12) recentTemplates.shift();
+
+      // Keep the manager (and captain) out of {p}/{q} when the story already names them.
+      const [rawLabel, rawText0] = TEMPLATES[tIndex];
+      const rawText = norm(rawText0);
+      const named = [];
+      if (rawText.includes('{manager}')) named.push(SQUAD.manager);
+      if (rawText.includes('{captain}')) named.push(SQUAD.captain);
+      const [p, q] = twoPlayers(named);
+      const fill = filler(p, q);
+      return itemHTML(fill(rawLabel), fill(rawText));
+    }
+
+    function itemHTML(label, text) {
+      return `<span class="ticker-item"><span class="highlight">${esc(label)}:</span>${esc(text)}<span class="divider">❚</span></span>`;
+    }
+
+    // ---------- Real scores (ESPN) ----------
+    let scoreGroups = [];
+
+    function ymd(d) {
+      return `${d.getFullYear()}${String(d.getMonth() + 1).padStart(2, '0')}${String(d.getDate()).padStart(2, '0')}`;
+    }
+
+    // Turn one ESPN event into { home, away, score, state, stateClass, started, kickoff }.
+    function readEvent(ev) {
+      const comp = (ev.competitions || [])[0] || {};
+      const teams = comp.competitors || [];
+      const home = teams.find(t => t.homeAway === 'home') || teams[0] || {};
+      const away = teams.find(t => t.homeAway === 'away') || teams[1] || {};
+      const name = t => (t.team && (t.team.shortDisplayName || t.team.displayName || t.team.name)) || 'TBC';
+      const status = comp.status || ev.status || {};
+      const type = status.type || {};
+      const code = type.name || '';
+
+      const m = { home: name(home), away: name(away), kickoff: ev.date, started: false, state: '', stateClass: '' };
+
+      if (/POSTPONED|CANCEL|ABANDON|SUSPEND|DELAY/.test(code)) {
+        m.score = 'v';
+        m.state = /POSTPONED/.test(code) ? 'P-P' : 'OFF';
+      } else if (type.state === 'in') {
+        m.started = true;
+        m.score = `${home.score ?? 0}-${away.score ?? 0}`;
+        m.state = /HALFTIME|HALF_TIME/.test(code) ? 'HT' : (status.displayClock || type.shortDetail || 'LIVE');
+        m.stateClass = 'live';
+      } else if (type.state === 'post') {
+        m.started = true;
+        m.score = `${home.score ?? 0}-${away.score ?? 0}`;
+        m.state = /PEN/.test(code) ? 'PENS' : /AET|EXTRA/.test(code) ? 'AET' : 'FT';
+      } else {
+        m.score = new Date(ev.date).toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' });
+      }
+      return m;
+    }
+
+    function matchHTML(m) {
+      if (!m.started && m.score !== 'v' && !SHOW_UPCOMING) return '';
+      return `<span class="match">${esc(m.home)}` +
+        `<span class="score${m.started ? '' : ' upcoming'}">${esc(m.score)}</span>${esc(m.away)}` +
+        (m.state ? `<span class="state ${m.stateClass}">${esc(m.state)}</span>` : '') + `</span>`;
+    }
+
+    function groupHTML(title, events) {
+      const todayKey = new Date().toDateString();
+      const isToday = ev => new Date(ev.date).toDateString() === todayKey;
+      const matches = events.map(ev => ({ ev, m: readEvent(ev) }));
+
+      let pool = matches.filter(x => isToday(x.ev));
+      // Nothing kicked off yet today? Lead with yesterday's results.
+      if (!pool.some(x => x.m.started)) {
+        pool = matches.filter(x => !isToday(x.ev) && x.m.started).concat(pool);
+      }
+      pool.sort((a, b) => new Date(a.ev.date) - new Date(b.ev.date));
+
+      const list = pool.map(x => matchHTML(x.m)).filter(Boolean);
+      if (!list.length) return null;
+      return `<span class="ticker-item score-item"><span class="comp-tag">${esc(title)}</span>${list.join('')}<span class="divider">❚</span></span>`;
+    }
+
+    async function checkScores() {
+      const now = new Date();
+      const yesterday = new Date(now.getTime() - 86400000);
+      const dates = `${ymd(yesterday)}-${ymd(now)}`;
+
+      const results = await Promise.allSettled(LEAGUES.map(async ([slug, title]) => {
+        const res = await fetch(`${SCORES_BASE}${slug}/scoreboard?dates=${dates}`, { cache: 'no-store' });
+        if (!res.ok) throw new Error(`${slug}: ${res.status}`);
+        const data = await res.json();
+        return groupHTML(title, data.events || []);
+      }));
+
+      const fresh = results.filter(r => r.status === 'fulfilled' && r.value).map(r => r.value);
+      const failed = results.filter(r => r.status === 'rejected');
+      if (failed.length === LEAGUES.length) console.warn('No scores: is the Boss Sports News server window open?');
+      else if (failed.length) console.warn('Some leagues failed:', failed.map(f => String(f.reason)).join(', '));
+      // Keep the last good scores if every request failed (e.g. a network blip).
+      if (fresh.length || failed.length < LEAGUES.length) scoreGroups = fresh;
+    }
+
+    // ---------- Endless feed ----------
+    let rumoursSinceScores = 0;
+    let leagueIndex = 0;
+
+    function nextItem() {
+      if (rumoursSinceScores >= RUMOURS_BETWEEN_SCORES && scoreGroups.length) {
+        rumoursSinceScores = 0;
+        return scoreGroups[leagueIndex++ % scoreGroups.length];
+      }
+      rumoursSinceScores++;
+      return makeRumour();
+    }
+
+    let x = 0;
+    let last = null;
+    function frame(now) {
+      const dt = last === null ? 0 : Math.min((now - last) / 1000, 0.1);
+      last = now;
+      x -= PIXELS_PER_SECOND * dt;
+
+      // Drop stories that have scrolled off the left edge.
+      let first = track.firstElementChild;
+      while (first && x + first.offsetWidth < 0) {
+        x += first.offsetWidth;
+        first.remove();
+        first = track.firstElementChild;
+      }
+      // Queue new stories (and the latest scores) off the right edge.
+      // (capped: if the ticker is hidden it has no width, and an uncapped loop would freeze the overlay)
+      for (let n = 0; n < 40 && x + track.offsetWidth < wrapper.clientWidth + 400; n++) {
+        track.insertAdjacentHTML('beforeend', nextItem());
+      }
+      if (!wrapper.clientWidth) { while (track.children.length > 60) track.firstElementChild.remove(); }
+
+      track.style.transform = `translateX(${x}px)`;
+      requestAnimationFrame(frame);
+    }
+
+    // ---------- Clock ----------
+    const clockEl = document.getElementById('clock');
+    function tickClock() {
+      clockEl.textContent = new Date().toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' });
+    }
+
+    // Settings come from the BBR control centre (Sports News pages). The values above are only a fallback.
+    async function loadConfig() {
+      try {
+        const c = await (await fetch('/bsn/config', { cache: 'no-store' })).json();
+        if (c.squad && c.squad.players && c.squad.players.length) SQUAD = c.squad;
+        if (Array.isArray(c.suitors) && c.suitors.length) SUITORS = c.suitors;
+        if (Array.isArray(c.fees) && c.fees.length) FEES = c.fees;
+        if (Array.isArray(c.pinned)) PINNED = c.pinned;
+        if (Array.isArray(c.templates) && c.templates.length) TEMPLATES = c.templates;
+        if (Array.isArray(c.leagues)) LEAGUES = c.leagues;
+        if (c.ticker) {
+          PIXELS_PER_SECOND = +c.ticker.speed || PIXELS_PER_SECOND;
+          RUMOURS_BETWEEN_SCORES = c.ticker.between != null ? +c.ticker.between : RUMOURS_BETWEEN_SCORES;
+          SHOW_UPCOMING = c.ticker.upcoming !== false;
+          CHECK_EVERY_SECONDS = Math.max(20, +c.ticker.refresh || CHECK_EVERY_SECONDS);
+        }
+      } catch (e) { /* keep the built-in settings */ }
+    }
+    let scoreTimer = null;
+    (async () => {
+      await loadConfig();
+      tickClock();
+      setInterval(tickClock, 1000);
+      checkScores();
+      scoreTimer = setInterval(checkScores, CHECK_EVERY_SECONDS * 1000);
+      requestAnimationFrame(frame);
+      setInterval(loadConfig, 60000);
+    })();
+  </script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+  <script src="goalflash.js"></script>
+<script>
+  // standalone OBS source (the ticker in front of / behind the camera): follow the app's show / hide
+  if (/standalone=1/.test(location.search)) {
+    try { const es = new EventSource('/events'); es.onmessage = (m) => { try { const a = JSON.parse(m.data); if (a.type === 'bsnTicker') { document.body.classList.toggle('bsn-hide-ticker', !!a.hide || !a.on || !a.separate); } } catch (e) { /* ignore */ } }; } catch (e) { /* ignore */ }
+  }
+</script>
+</body>
+</html>

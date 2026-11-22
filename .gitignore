@@ -1,0 +1,6 @@
+# logins and data never go on GitHub
+config.json
+data/
+node_modules/
+dist/
+*.log

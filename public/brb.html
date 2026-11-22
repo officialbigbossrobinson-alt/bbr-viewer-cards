@@ -1,0 +1,184 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>BBR Be Right Back</title>
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700;800&family=Inter:wght@400;600;700&family=VT323&display=swap" rel="stylesheet">
+<style>
+  /* v30: Be Right Back screen. Its own OBS Browser Source (1920 x 1080) in your BRB scene. The look follows the game. */
+  html,body{margin:0;width:1920px;height:1080px;overflow:hidden;background:#061233;color:#fff;font-family:'Barlow Condensed','Arial Narrow',sans-serif}
+  #bg,#deco{position:absolute;inset:0;overflow:hidden}
+  .hide{display:none!important}
+  /* ---- shared pieces ---- */
+  .bug{position:absolute;left:80px;top:56px;display:flex;height:46px;box-shadow:0 10px 30px rgba(0,0,0,.4);z-index:3}
+  .bug b{display:flex;align-items:center;padding:0 16px;font-size:26px;letter-spacing:3px;background:var(--a);color:var(--at)}
+  .bug span{display:flex;align-items:center;padding:0 16px;font-size:18px;font-weight:700;letter-spacing:3px;background:var(--b);color:var(--bt)}
+  .main{position:absolute;left:80px;top:150px;width:1000px;z-index:3}
+  .kick{font-size:28px;letter-spacing:8px;font-weight:700;color:var(--hl)}
+  .title{font-size:170px;font-weight:800;line-height:.86;margin-top:8px;letter-spacing:2px;text-shadow:0 10px 40px rgba(0,0,0,.45);white-space:nowrap}
+  .msg{font-family:Inter,sans-serif;font-size:26px;font-weight:600;color:#e8edf3;margin-top:18px;max-width:950px;line-height:1.35}
+  .clock{margin-top:34px;display:inline-flex;flex-direction:column;filter:drop-shadow(0 18px 40px rgba(0,0,0,.45))}
+  .clock .lb{align-self:flex-start;font-size:26px;font-weight:800;letter-spacing:5px;padding:4px 16px;background:var(--a);color:var(--at)}
+  .clock .dg{font-size:170px;font-weight:800;line-height:.92;padding:6px 34px 0;background:var(--clk);color:var(--clkt);font-variant-numeric:tabular-nums;min-width:440px;text-align:center}
+  .frame{position:absolute;right:90px;top:140px;width:720px;height:480px;z-index:2}
+  .frame .ph{position:absolute;inset:0;background-size:cover;background-position:center;opacity:0;transition:opacity 1.4s ease}
+  .frame .ph.on{opacity:1}
+  .chat{position:absolute;right:90px;top:660px;width:720px;height:300px;display:flex;flex-direction:column;justify-content:flex-end;gap:8px;overflow:hidden;z-index:3;-webkit-mask-image:linear-gradient(180deg,transparent,#000 22%)}
+  .cm{font-family:Inter,sans-serif;font-size:21px;background:rgba(0,0,0,.6);border-left:5px solid var(--hl);padding:8px 12px;animation:cmIn .4s ease-out both;flex:none}
+  .cm b{color:var(--hl);margin-right:8px}
+  @keyframes cmIn{from{transform:translateX(40px);opacity:0}to{transform:none;opacity:1}}
+  .np{position:absolute;left:80px;bottom:110px;display:flex;align-items:center;gap:10px;font-family:Inter,sans-serif;font-size:19px;font-weight:600;background:rgba(0,0,0,.55);padding:8px 14px;border-radius:8px;z-index:3}
+  .np i{display:flex;gap:3px;align-items:flex-end;height:18px}.np i s{width:4px;background:var(--hl);animation:eq 0.9s ease-in-out infinite;text-decoration:none}
+  .np i s:nth-child(2){animation-delay:.2s}.np i s:nth-child(3){animation-delay:.4s}
+  @keyframes eq{0%,100%{height:4px}50%{height:18px}}
+  .tick{position:absolute;left:0;right:0;bottom:0;height:62px;display:flex;align-items:center;overflow:hidden;z-index:4;background:var(--tk);color:var(--tkt)}
+  .tick b{height:100%;display:flex;align-items:center;padding:0 24px;font-size:28px;letter-spacing:2px;background:var(--a);color:var(--at);flex:none;position:relative;z-index:1}
+  .tick .run{white-space:nowrap;font-size:30px;font-weight:800;padding-left:40px;animation:run 45s linear infinite}
+  @keyframes run{from{transform:translateX(0)}to{transform:translateX(-50%)}}
+  /* ---- looks ---- */
+  body.football{--a:#e3132c;--at:#fff;--b:#0d2459;--bt:#fff;--hl:#f5c400;--clk:#f6f7fa;--clkt:#061233;--tk:#fff;--tkt:#061233}
+  body.football #bg{background:radial-gradient(ellipse at 30% 20%,#16337a,#0d2459 45%,#061233)}
+  body.football .frame{border:8px solid #fff;box-shadow:0 20px 60px rgba(0,0,0,.5)}
+  body.ets{--a:#ffd400;--at:#111;--b:#0b4fa8;--bt:#fff;--hl:#ffd400;--clk:#ffd400;--clkt:#111;--tk:#ffd400;--tkt:#111}
+  body.ets #bg{background:linear-gradient(180deg,#13284d 0%,#2b4f7e 45%,#d9874a 76%,#f0b066 84%)}
+  body.ets .main{background:#0b4fa8;border:6px solid #fff;border-radius:18px;padding:28px 40px 34px;box-sizing:border-box;width:1040px;box-shadow:0 18px 40px rgba(0,0,0,.35)}
+  body.ets .clock .dg{border:8px solid #111;border-top:0}
+  body.ets .frame,body.ats .frame{width:620px;height:420px;right:70px;top:170px;transform:rotate(2.5deg);border:18px solid #f4f1e8;border-bottom-width:70px;box-shadow:0 20px 50px rgba(0,0,0,.45)}
+  body.ats{--a:#0c6b35;--at:#fff;--b:#1d3f8f;--bt:#fff;--hl:#ffcc33;--clk:#0c6b35;--clkt:#fff;--tk:#b3121b;--tkt:#fff}
+  body.ats #bg{background:linear-gradient(180deg,#0f1530 0%,#3a2a5a 40%,#c4553a 72%,#e8a352 82%)}
+  body.ats .main{background:#0c6b35;border:6px solid #fff;border-radius:18px;padding:28px 40px 34px;box-sizing:border-box;width:1040px;box-shadow:0 18px 40px rgba(0,0,0,.35)}
+  body.ats .clock .dg{border:6px solid #fff}
+  body.arc{--a:#f2c200;--at:#111;--b:#1a1a1a;--bt:#f2c200;--hl:#f2c200;--clk:#141414;--clkt:#f2c200;--tk:#141414;--tkt:#f2c200}
+  body.arc #bg{background:radial-gradient(ellipse at 70% 30%,#3a2a20,#16110e 60%,#0a0807)}
+  body.arc .frame{border:4px solid #f2c200;box-shadow:0 0 0 10px #141414,0 0 40px rgba(242,194,0,.35)}
+  body.arc .frame::after{content:'';position:absolute;inset:0;background:repeating-linear-gradient(0deg,rgba(0,0,0,.18) 0 2px,transparent 2px 5px)}
+  body.mgs{--a:#3dff7a;--at:#03140a;--b:#06140c;--bt:#3dff7a;--hl:#3dff7a;--clk:#03140a;--clkt:#3dff7a;--tk:#03140a;--tkt:#3dff7a}
+  body.mgs #bg{background:radial-gradient(ellipse at 50% 40%,#0d2a18,#03100a 70%)}
+  body.mgs .title,body.mgs .clock .dg{font-family:VT323,monospace;font-weight:400}
+  body.mgs .frame{border:4px solid #3dff7a;filter:sepia(1) hue-rotate(70deg) saturate(2.4) brightness(.9);box-shadow:0 0 40px rgba(61,255,122,.4)}
+  body.mgs .clock .dg{border:3px solid #3dff7a}
+  body.neon{--a:#c58bff;--at:#12061f;--b:#12061f;--bt:#22d3ee;--hl:#22d3ee;--clk:transparent;--clkt:#fff;--tk:#12061f;--tkt:#c58bff}
+  body.neon #bg{background:radial-gradient(ellipse at 30% 30%,#2a0d4a,#12061f 60%,#07030d)}
+  body.neon .title{color:#fff;text-shadow:0 0 18px #c58bff,0 0 50px #c58bff}
+  body.neon .clock .dg{border:4px solid #22d3ee;box-shadow:0 0 30px #22d3ee,inset 0 0 20px #22d3ee;text-shadow:0 0 16px #22d3ee}
+  body.neon .frame{border:4px solid #c58bff;box-shadow:0 0 40px #c58bff}
+  body.heist{--a:#ff3d8b;--at:#fff;--b:#12061f;--bt:#2ef2ff;--hl:#2ef2ff;--clk:#12061f;--clkt:#ffe48a;--tk:#12061f;--tkt:#ffe48a}
+  body.heist #bg{background:linear-gradient(180deg,#1d0b3a 0%,#5b1a6e 28%,#c2306f 50%,#ff6a5a 64%,#ffb35c 72%,#2a0f3d 72.2%,#120624 100%)}
+  body.heist .title{font-style:italic;font-weight:900;color:#ffe48a;text-shadow:6px 6px 0 #c2306f,12px 12px 0 #12061f}
+  body.heist .kick{color:#2ef2ff;text-shadow:0 0 14px rgba(46,242,255,.7)}
+  body.heist .clock .lb{transform:skewX(-8deg)}
+  body.heist .clock .dg{font-style:italic;border:4px solid #ff3d8b;box-shadow:8px 8px 0 #2ef2ff;text-shadow:4px 4px 0 #c2306f}
+  body.heist .frame{width:600px;height:420px;right:110px;top:170px;transform:rotate(-3deg);border:14px solid #fff;border-bottom-width:60px;box-shadow:12px 12px 0 #12061f}
+  body.heist .frame::before{content:'';position:absolute;left:50%;top:-34px;width:160px;height:40px;margin-left:-80px;background:rgba(255,228,138,.8);transform:rotate(4deg);z-index:2}
+  body.heist .cm{background:rgba(18,6,31,.85);border-left:0;border-radius:16px 16px 16px 4px}
+  .hsun{position:absolute;left:1180px;top:420px;width:380px;height:380px;border-radius:50%;background:linear-gradient(#ffe68a,#ff8a5b 70%,#ff4f7b);-webkit-mask:linear-gradient(#000 52%,transparent 52% 57%,#000 57% 65%,transparent 65% 70%,#000 70% 78%,transparent 78% 84%,#000 84%);mask:linear-gradient(#000 52%,transparent 52% 57%,#000 57% 65%,transparent 65% 70%,#000 70% 78%,transparent 78% 84%,#000 84%);opacity:.75}
+  .hcity{position:absolute;left:0;right:0;top:640px;height:140px;background:#140726;clip-path:polygon(0 100%,0 60%,5% 60%,5% 30%,9% 30%,9% 55%,14% 55%,14% 15%,17% 15%,17% 0,19% 0,19% 15%,22% 15%,22% 50%,30% 50%,30% 35%,36% 35%,36% 65%,58% 65%,58% 40%,63% 40%,63% 10%,66% 10%,66% 45%,72% 45%,72% 25%,78% 25%,78% 55%,86% 55%,86% 35%,92% 35%,92% 60%,100% 60%,100% 100%)}
+  .hpalm{position:absolute;bottom:62px;width:16px;background:#0b0316;border-radius:8px;transform-origin:bottom;animation:hsway 6s ease-in-out infinite}
+  .hpalm::before{content:'';position:absolute;left:-110px;top:-60px;width:236px;height:120px;background:radial-gradient(70px 16px at 30% 60%,#0b0316 96%,transparent),radial-gradient(70px 16px at 70% 60%,#0b0316 96%,transparent),radial-gradient(60px 14px at 18% 82%,#0b0316 96%,transparent),radial-gradient(60px 14px at 82% 82%,#0b0316 96%,transparent),radial-gradient(50px 12px at 50% 40%,#0b0316 96%,transparent)}
+  @keyframes hsway{50%{transform:rotate(2.5deg)}}
+  .heli{position:absolute;top:120px;left:-200px;width:16px;height:16px;border-radius:50%;background:#ff3d3d;box-shadow:0 0 18px #ff3d3d,40px 0 0 -4px #fff;animation:heli 22s linear infinite}
+  .heli::after{content:'';position:absolute;left:-200px;top:8px;width:220px;height:900px;background:linear-gradient(180deg,rgba(255,255,255,.18),transparent);clip-path:polygon(45% 0,55% 0,100% 100%,0 100%);transform-origin:top;animation:helib 4s ease-in-out infinite}
+  @keyframes heli{to{transform:translateX(2300px)}}
+  @keyframes helib{50%{transform:rotate(14deg)}}
+  /* ---- decorations ---- */
+  .road{position:absolute;left:0;right:0;top:820px;bottom:0;background:#1f2226}
+  .road::before{content:'';position:absolute;left:0;width:200%;top:80px;height:12px;background:repeating-linear-gradient(90deg,#f4f4f4 0 120px,transparent 120px 220px);animation:drive 1.8s linear infinite}
+  @keyframes drive{to{transform:translateX(-220px)}}
+  .sun{position:absolute;left:1180px;top:520px;width:300px;height:300px;border-radius:50%;background:radial-gradient(circle,#ffd27a,#f08a3a 60%,transparent 70%);opacity:.8}
+  .mesa{position:absolute;left:900px;top:600px;width:1100px;height:230px;background:#2a1830;clip-path:polygon(0 100%,5% 40%,22% 40%,26% 10%,40% 10%,44% 45%,70% 45%,74% 20%,88% 20%,92% 60%,100% 100%)}
+  .pitch{position:absolute;left:-10%;top:66%;width:130%;height:300px;background:#e3132c;opacity:.8;transform:skewY(-8deg)}
+  .pitch2{position:absolute;left:-10%;top:73%;width:130%;height:44px;background:#f5c400;transform:skewY(-8deg)}
+  .wm{position:absolute;right:-60px;top:-140px;font-size:820px;font-weight:800;color:rgba(255,255,255,.045);line-height:1}
+  .haz{position:absolute;left:0;right:0;height:40px;background:repeating-linear-gradient(45deg,#f2c200 0 40px,#141414 40px 80px)}
+  .beam{position:absolute;left:50%;top:-200px;width:600px;height:1400px;margin-left:-300px;background:linear-gradient(90deg,transparent,rgba(229,59,44,.18),transparent);animation:sweep 4s ease-in-out infinite alternate;transform-origin:50% 0}
+  @keyframes sweep{from{transform:rotate(-35deg)}to{transform:rotate(35deg)}}
+  .radar{position:absolute;right:220px;top:600px;width:380px;height:380px;border-radius:50%;border:2px solid rgba(61,255,122,.5);background:repeating-radial-gradient(circle,transparent 0 46px,rgba(61,255,122,.25) 46px 48px)}
+  .radar::after{content:'';position:absolute;inset:0;border-radius:50%;background:conic-gradient(rgba(61,255,122,.5),transparent 60deg);animation:spin 3s linear infinite}
+  @keyframes spin{to{transform:rotate(360deg)}}
+  .scan{position:absolute;inset:0;background:repeating-linear-gradient(0deg,rgba(0,0,0,.25) 0 2px,transparent 2px 4px);pointer-events:none}
+  .grid{position:absolute;left:-50%;right:-50%;bottom:-200px;height:600px;background-image:linear-gradient(#c58bff55 2px,transparent 2px),linear-gradient(90deg,#c58bff55 2px,transparent 2px);background-size:80px 80px;transform:perspective(500px) rotateX(60deg);animation:gridmove 2s linear infinite}
+  @keyframes gridmove{to{background-position:0 80px}}
+</style>
+</head>
+<body class="football">
+<div id="bg"></div>
+<div id="deco"></div>
+<div class="bug"><b id="bugA">BBR</b><span id="bugB">BOSS SPORTS NEWS</span></div>
+<div class="main">
+  <div class="kick" id="kick">BIGBOSSROBINSON</div>
+  <div class="title" id="title">BE RIGHT BACK</div>
+  <div class="msg" id="msg"></div>
+  <div class="clock" id="clock"><span class="lb" id="clkL">BACK IN</span><span class="dg" id="dg">5:00</span></div>
+</div>
+<div class="frame" id="frame"></div>
+<div class="chat" id="chat"></div>
+<div class="np hide" id="np"><i><s></s><s></s><s></s></i><span id="npT"></span></div>
+<div class="tick" id="tick"><b id="tickL">WHILE YOU WAIT</b><div class="run" id="run"></div></div>
+<script src="/sfx.js"></script>
+<script src="/music.js"></script>
+<script src="/stinger.js"></script>
+<script>
+(function () {
+  const $ = (id) => document.getElementById(id);
+  const esc = (s) => String(s == null ? '' : s).replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+  // the words and the decorations for each game
+  const LOOK = {
+    football: { bugA: 'BBR', bugB: 'BOSS SPORTS NEWS · HALF-TIME', kick: 'BIGBOSSROBINSON · HALF-TIME', title: 'HALF-TIME', msg: 'Back after the break. Grab a drink, the second half starts soon.', clk: 'SECOND HALF IN', tick: 'HALF-TIME', deco: '<div class="pitch"></div><div class="pitch2"></div><div class="wm">BSN</div>' },
+    ets: { bugA: 'BBR', bugB: 'BBR HAULAGE · SERVICES', kick: 'BBR HAULAGE · DRIVER\'S BREAK', title: 'DRIVER ON A BREAK', msg: 'Rest stop at the services. Back on the road in a bit.', clk: 'BACK ON THE ROAD IN', tick: 'TRAFFIC NEWS', deco: '<div class="road"></div>' },
+    ats: { bugA: 'BBR', bugB: 'BBR FREIGHT LINES · REST AREA', kick: 'NEXT RIGHT · REST AREA', title: 'REST AREA', msg: 'Coffee at the truck stop. Back on the interstate soon.', clk: 'BACK ON THE ROAD IN', tick: 'CB RADIO', deco: '<div class="sun"></div><div class="mesa"></div><div class="road"></div>' },
+    arc: { bugA: 'RAIDER', bugB: 'TOPSIDE · STANDBY', kick: 'BIGBOSSROBINSON · STANDING BY', title: 'BACK SOON, RAIDER', msg: 'Restocking in the bunker. Stay out of sight.', clk: 'DEPLOYING IN', tick: 'RAIDER COMMS', deco: '<div class="beam"></div><div class="haz" style="top:0"></div><div class="haz" style="bottom:62px"></div>' },
+    mgs: { bugA: '!', bugB: 'CODEC · 140.85', kick: 'SNAKE? SNAAAKE!', title: 'INTERMISSION', msg: 'Stay on this frequency. Mission resumes shortly.', clk: 'MISSION RESUMES IN', tick: 'CODEC', deco: '<div class="radar"></div><div class="scan"></div>' },
+    heist: { bugA: 'BBR', bugB: 'SUNSET COAST · SAFEHOUSE', kick: 'BIGBOSSROBINSON · LAYING LOW', title: 'LAYING LOW', msg: 'Heat\'s too high. Hiding out at the safehouse, back before the cops clock off.', clk: 'BACK ON THE STREETS IN', tick: 'COAST NEWS 24', deco: '<div class="hsun"></div><div class="hcity"></div><div class="heli"></div><div class="hpalm" style="left:60px;height:460px"></div><div class="hpalm" style="left:180px;height:380px;animation-delay:-2s"></div><div class="hpalm" style="left:1840px;height:520px;animation-delay:-4s"></div>' },
+    neon: { bugA: 'BBR', bugB: 'BIGBOSSROBINSON', kick: 'BIGBOSSROBINSON', title: 'BE RIGHT BACK', msg: 'Don\'t go anywhere.', clk: 'BACK IN', tick: 'WHILE YOU WAIT', deco: '<div class="grid"></div>' },
+  };
+  let st = null, skew = 0, look = '', picKey = '', picT = null, picI = 0;
+  const fmt = (ms) => { const s = Math.max(0, Math.ceil(ms / 1000)); return Math.floor(s / 60) + ':' + String(s % 60).padStart(2, '0'); };
+  function left() { return !st ? 0 : st.running && st.endsAt ? Math.max(0, st.endsAt - (Date.now() + skew)) : st.left; }
+  function clock() { if (!st) return; const l = left(); $('dg').textContent = l <= 0 && st.running ? 'ANY SEC' : fmt(l); $('dg').style.fontSize = l <= 0 && st.running ? '120px' : ''; }
+  setInterval(clock, 250);
+  function photos(list, secs) {
+    const key = JSON.stringify([list, secs]); if (key === picKey) return; picKey = key;
+    clearInterval(picT); $('frame').innerHTML = ''; $('frame').classList.toggle('hide', !list.length);
+    const els = list.map((u) => { const d = document.createElement('div'); d.className = 'ph'; d.style.backgroundImage = 'url("' + u + '")'; $('frame').appendChild(d); return d; });
+    if (!els.length) return; picI = 0; els[0].classList.add('on');
+    if (els.length > 1) picT = setInterval(() => { els[picI].classList.remove('on'); picI = (picI + 1) % els.length; els[picI].classList.add('on'); }, secs * 1000);
+  }
+  function fit() { const t = $('title'); let fs = 170; t.style.fontSize = fs + 'px'; const W = /ets|ats/.test(look) ? 950 : 1000; while (t.scrollWidth > W && fs > 70) { fs -= 4; t.style.fontSize = fs + 'px'; } }
+  function apply(a) {
+    st = a; skew = (a.now || Date.now()) - Date.now();
+    const L = LOOK[a.look] || LOOK.neon;
+    if (a.look !== look) { look = a.look; document.body.className = look; $('deco').innerHTML = L.deco; }
+    $('bugA').textContent = L.bugA; $('bugB').textContent = L.bugB; $('kick').textContent = L.kick; $('clkL').textContent = L.clk; $('tickL').textContent = L.tick;
+    $('title').textContent = a.S.title || L.title; fit(); if (document.fonts && document.fonts.ready) document.fonts.ready.then(fit);
+    $('msg').textContent = a.S.message || L.msg;
+    $('clock').classList.toggle('hide', !a.S.timer);
+    photos(a.S.photos || [], a.S.photoSecs || 10);
+    $('chat').classList.toggle('hide', !a.S.chat); $('tick').classList.toggle('hide', !a.S.ticker);
+    const so = a.socials || {}, T = ['TYPE !CARD TO SEE YOUR CARD', 'SAY HI: YOUR CARD KEEPS EARNING WHILE YOU WAIT'];
+    if (so.twitch) T.push('TWITCH.TV/' + String(so.twitch).toUpperCase()); if (so.kick) T.push('KICK.COM/' + String(so.kick).toUpperCase()); if (so.youtube) T.push('YOUTUBE.COM/' + String(so.youtube).toUpperCase());
+    const s = T.join('  ·  ') + '  ·  '; if ($('run').dataset.s !== s) { $('run').dataset.s = s; $('run').textContent = s + s; }
+    MUSIC.set(a.on ? (a.music || {}) : { on: false });
+    clock();
+  }
+  MUSIC.onTrack((t) => { $('npT').textContent = t.name; $('np').classList.remove('hide'); });
+  function chat(a) {
+    const d = document.createElement('div'); d.className = 'cm'; d.innerHTML = '<b>' + esc(a.display) + (a.ovr ? ' ' + a.ovr : '') + '</b>' + esc(a.text);
+    $('chat').appendChild(d); while ($('chat').children.length > 7) $('chat').removeChild($('chat').firstChild);
+  }
+  function load() { fetch('/api/brb').then((r) => r.json()).then((d) => apply(d.state)).catch(() => setTimeout(load, 3000)); }
+  load();
+  try {
+    const es = new EventSource('/events');
+    es.onmessage = (m) => {
+      let a; try { a = JSON.parse(m.data); } catch (e) { return; }
+      if (a.type === 'brb' && a.action === 'end') { MUSIC.set({ on: false }); return; }
+      if (a.type === 'brb') return apply(a);
+      if (a.type === 'music') return MUSIC.event(a);
+      if (a.type === 'schat' && st && st.S.chat) return chat(a);
+      if (a.type === 'stinger') return STINGER.play(a, { sound: false });
+    };
+  } catch (e) { /* no live updates */ }
+})();
+</script>
+</body>
+</html>

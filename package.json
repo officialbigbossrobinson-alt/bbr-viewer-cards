@@ -1,0 +1,85 @@
+{
+  "name": "bbr-viewer-cards",
+  "productName": "BBR Viewer Cards",
+  "version": "36.0.0",
+  "description": "Viewer cards, battles, giveaways and overlays for bigbossrobinson's streams (Twitch, Kick, YouTube).",
+  "main": "desktop/main.js",
+  "author": "bigbossrobinson",
+  "license": "UNLICENSED",
+  "private": true,
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/officialbigbossrobinson-alt/bbr-viewer-cards.git"
+  },
+  "scripts": {
+    "start": "electron .",
+    "server": "node server.js",
+    "check": "node desktop/check-version.js",
+    "dist": "node desktop/check-version.js && electron-builder --win --x64 --publish never",
+    "release": "node desktop/check-version.js && electron-builder --win --x64 --publish always"
+  },
+  "dependencies": {
+    "electron-updater": "^6.3.9"
+  },
+  "devDependencies": {
+    "electron": "^39.0.0",
+    "electron-builder": "^26.0.12"
+  },
+  "build": {
+    "appId": "com.bigbossrobinson.bbrviewercards",
+    "productName": "BBR Viewer Cards",
+    "copyright": "bigbossrobinson",
+    "asar": false,
+    "directories": {
+      "output": "dist",
+      "buildResources": "build"
+    },
+    "files": [
+      "server.js",
+      "lib/**",
+      "public/**",
+      "sounds/**",
+      "textures/**",
+      "tools/**",
+      "desktop/**",
+      "package.json",
+      "!**/config.json",
+      "!data/**",
+      "!**/*.log",
+      "!desktop/test/**"
+    ],
+    "win": {
+      "target": [
+        {
+          "target": "nsis",
+          "arch": [
+            "x64"
+          ]
+        }
+      ],
+      "icon": "build/icon.ico",
+      "artifactName": "BBR-Viewer-Cards-Setup-${version}.${ext}"
+    },
+    "nsis": {
+      "oneClick": false,
+      "perMachine": false,
+      "allowToChangeInstallationDirectory": true,
+      "createDesktopShortcut": true,
+      "createStartMenuShortcut": true,
+      "shortcutName": "BBR Viewer Cards",
+      "runAfterFinish": true,
+      "deleteAppDataOnUninstall": false,
+      "installerIcon": "build/icon.ico",
+      "uninstallerIcon": "build/icon.ico"
+    },
+    "publish": {
+      "provider": "github",
+      "owner": "officialbigbossrobinson-alt",
+      "repo": "bbr-viewer-cards",
+      "releaseType": "release"
+    },
+    "releaseInfo": {
+      "releaseNotesFile": "build/release-notes.md"
+    }
+  }
+}

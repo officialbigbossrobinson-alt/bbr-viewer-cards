@@ -1,0 +1,68 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>BBR Teeth Tracker</title>
+<style>
+  html,body{margin:0;background:#0b0d10;color:#eef1f4;font:14px Inter,system-ui,sans-serif}
+  .w{padding:12px;display:flex;flex-direction:column;gap:8px;max-width:420px}
+  h1{margin:0;font-size:16px;letter-spacing:2px}
+  .st{font-size:13px;color:#a7b0ba}.ok{color:#3dff9a}.bad{color:#ff6b7d}
+  .pv{position:relative;width:100%;background:#000;border-radius:8px;overflow:hidden}
+  .pv img{display:block;width:100%}
+  .pv i{position:absolute;border:2px solid #3dff9a;border-radius:50%;box-sizing:border-box}
+</style>
+</head>
+<body>
+<div class="w">
+  <h1>BBR TEETH TRACKER</h1>
+  <div class="st" id="st">Loading the face finder…</div>
+  <div class="pv"><img id="im" alt="Camera picture with the mouth marked"><i id="box" hidden></i><svg viewBox="0 0 100 100" preserveAspectRatio="none" style="position:absolute;inset:0;width:100%;height:100%" aria-hidden="true"><polygon id="lip" points="" fill="rgba(255,90,160,.25)" stroke="#ff5aa0" stroke-width=".3"/></svg></div>
+  <div class="st">Keep this open while you stream: as an OBS Browser Source (put it off the edge of the canvas, untick "Shutdown source when not visible") or in a browser tab. It finds your mouth in the camera a few times a second so the whitening follows you.</div>
+</div>
+<script type="module">
+const $ = (id) => document.getElementById(id);
+const say = (t, c) => { $('st').innerHTML = '<span class="' + (c || '') + '">' + t + '</span>'; };
+const V = '0.10.14';
+let lm = null;
+try {
+  const vision = await import('https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@' + V + '/vision_bundle.mjs');
+  const files = await vision.FilesetResolver.forVisionTasks('https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@' + V + '/wasm');
+  lm = await vision.FaceLandmarker.createFromOptions(files, {
+    baseOptions: { modelAssetPath: 'https://storage.googleapis.com/mediapipe-models/face_landmarker/face_landmarker/float16/1/face_landmarker.task', delegate: 'CPU' },
+    runningMode: 'VIDEO', numFaces: 1, minFacePresenceConfidence: 0.4, minTrackingConfidence: 0.4
+  });
+} catch (e) { say('Could not load the face finder (needs the internet once): ' + e.message, 'bad'); }
+let fps = 0, n = 0, t0 = performance.now(), miss = 0;
+async function loop() {
+  try {
+    const d = await fetch('/api/teeth/frame?w=480', { cache: 'no-store' }).then((r) => r.json());
+    if (d.error) { say(d.error, 'bad'); return setTimeout(loop, 3000); }
+    if (!d.on || !d.follow) { say('Waiting: switch on Teeth whitening and "Follow my mouth" in Camera studio.'); return setTimeout(loop, 3000); }
+    const img = $('im'); img.src = 'data:image/jpeg;base64,' + String(d.image).replace(/^data:image\/\w+;base64,/, '');
+    await img.decode();
+    if (lm) {
+      const r = lm.detectForVideo(img, performance.now()), f = r.faceLandmarks && r.faceLandmarks[0];
+      if (f) {
+        // 61 / 291 = mouth corners, 0 = top of the upper lip, 17 = bottom of the lower lip, 13 / 14 = inner lips
+        const L = f[61], Rr = f[291], T = f[0], B = f[17], i1 = f[13], i2 = f[14];
+        // 10 points around the INSIDE of the lips (where teeth show), clockwise from the left corner
+        const poly = [78, 80, 82, 13, 312, 310, 308, 318, 14, 88].map((i) => [f[i].x, f[i].y]);
+        const width = Math.hypot(Rr.x - L.x, Rr.y - L.y), gap = Math.hypot(i2.x - i1.x, i2.y - i1.y);
+        const m = { x: (L.x + Rr.x) / 2, y: (i1.y + i2.y) / 2, w: Math.abs(Rr.x - L.x) / 2 * 1.05, h: Math.max(0.012, Math.abs(B.y - T.y) / 2 * 0.9), poly, closed: gap / Math.max(width, 0.001) < 0.035 };
+        fetch('/api/teeth/track', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(m) }).catch(() => {});
+        const bx = $('box'); bx.hidden = false;
+        Object.assign(bx.style, { left: (m.x - m.w) * 100 + '%', top: (m.y - m.h) * 100 + '%', width: m.w * 200 + '%', height: m.h * 200 + '%', borderColor: m.closed ? '#ffb020' : '#3dff9a' });
+        $('lip').setAttribute('points', poly.map((q) => (q[0] * 100).toFixed(2) + ',' + (q[1] * 100).toFixed(2)).join(' '));
+        miss = 0; n++;
+      } else { miss++; $('box').hidden = true; }
+      const now = performance.now(); if (now - t0 > 2000) { fps = n / ((now - t0) / 1000); n = 0; t0 = now; }
+      say(miss > 3 ? 'Can\'t see a face right now (it keeps the last spot)' : 'Following your lips · ' + fps.toFixed(1) + ' times a second', miss > 3 ? 'bad' : 'ok');
+    }
+  } catch (e) { say('App not reachable: ' + e.message, 'bad'); return setTimeout(loop, 3000); }
+  setTimeout(loop, 15);
+}
+loop();
+</script>
+</body>
+</html>

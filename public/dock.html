@@ -1,0 +1,402 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>BBR Dock</title>
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  /* v29: the simple dock. Four tabs, big buttons. Everything else lives in the dashboard. */
+  :root{--bg:#101317;--panel:#181c22;--line:#2b313b;--text:#eef1f4;--muted:#a7b0ba;--blue:#4dc3ff;--yel:#f5c400;--grn:#3dff9a;--red:#ff6b7d;--org:#ffb020}
+  *{box-sizing:border-box}
+  html,body{margin:0;background:var(--bg);color:var(--text);font:13px/1.35 Inter,system-ui,sans-serif}
+  .w{padding:10px;display:flex;flex-direction:column;gap:10px;min-height:100vh}
+  .top{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+  .live{padding:3px 9px;border-radius:999px;background:#3a404a;color:#fff;font-weight:700;font-size:12px}.live.on{background:#ff3b3b}
+  .muted{color:var(--muted)}
+  .hp{margin-left:auto;display:flex;align-items:center;gap:6px;padding:3px 10px;border-radius:999px;font-weight:700;font-size:12px;border:1px solid var(--grn);color:var(--grn);background:rgba(61,255,154,.1);cursor:pointer;font-family:inherit}
+  .hp.bad{border-color:var(--org);color:var(--org);background:rgba(255,176,32,.12)}
+  .hp i{width:8px;height:8px;border-radius:50%;background:currentColor}
+  h3{margin:2px 0 0;font:700 15px 'Barlow Condensed',sans-serif;letter-spacing:1px;color:var(--muted)}
+  button{font:inherit;color:var(--text);cursor:pointer;border-radius:10px;border:1px solid var(--line);background:var(--panel);min-height:44px;font-weight:700}
+  button:active{transform:scale(.97)}
+  button:disabled{opacity:.4;cursor:default}
+  .g2,.g3,.g4{display:grid;gap:8px}.g2{grid-template-columns:repeat(2,minmax(0,1fr))}.g3{grid-template-columns:repeat(3,minmax(0,1fr))}.g4{grid-template-columns:repeat(4,minmax(0,1fr))}
+  .big{min-height:80px;border-width:2px;display:flex;flex-direction:column;align-items:flex-start;justify-content:space-between;padding:10px 12px;text-align:left}
+  .big b{font:800 22px 'Barlow Condensed',sans-serif;letter-spacing:.5px}
+  .big small{font-weight:500;font-size:11.5px;color:#c8cdd4}
+  .bc{font:800 18px 'Barlow Condensed',sans-serif;letter-spacing:.3px;line-height:1.1}
+  .card{border-radius:12px;padding:10px 12px;display:flex;flex-direction:column;gap:8px;border:2px solid var(--line);background:var(--panel)}
+  .card .hd{display:flex;justify-content:space-between;align-items:baseline;gap:8px}
+  .card .t{font:800 19px 'Barlow Condensed',sans-serif;letter-spacing:.5px}
+  .card.y{border-color:var(--yel);background:rgba(245,196,0,.08)}.card.y .t{color:var(--yel)}
+  .card.b{border-color:var(--blue);background:rgba(77,195,255,.08)}.card.b .t{color:var(--blue)}
+  .card.o{border-color:var(--org);background:rgba(255,176,32,.1)}.card.o .t{color:#ffc861}
+  .card.r{border-color:var(--red);background:rgba(255,107,125,.1)}.card.r .t{color:#ffb3bc}
+  .card.g{border-color:var(--grn);background:rgba(61,255,154,.07)}.card.g .t{color:var(--grn)}
+  .pri{background:var(--yel);border-color:var(--yel);color:#13110a;font:800 20px 'Barlow Condensed',sans-serif}
+  .wdl button{min-height:60px;font:800 26px 'Barlow Condensed',sans-serif;border-width:2px}
+  .names{color:#d9dde2;font-size:12.5px;word-break:break-word}
+  .teams{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:6px}
+  .teams div{border:1px solid var(--c);border-radius:9px;padding:6px 8px;font-size:12px}
+  .teams b{display:block;font:700 14px 'Barlow Condensed',sans-serif;color:var(--c)}
+  .clip{display:flex;align-items:center;gap:10px;border:1px solid var(--line);border-radius:10px;padding:6px;background:var(--panel)}
+  .clip img,.clip .th{width:72px;height:42px;border-radius:6px;object-fit:cover;background:#22303d;flex:none;display:flex;align-items:center;justify-content:center;color:var(--blue);font-size:11px;font-weight:700}
+  .clip .x{flex:1;min-width:0}.clip .x b{display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .clip button{min-width:64px;border-color:var(--blue);color:var(--blue);background:transparent}
+  .job{display:flex;gap:8px;align-items:center;border:1px solid var(--line);border-radius:10px;padding:8px 10px;background:var(--panel);font-size:12.5px}
+  .job i{width:10px;height:10px;border-radius:50%;background:var(--org);flex:none}.job.ok i{background:var(--grn)}.job.bad i{background:#ff5a6a}
+  .tog{display:flex;align-items:center;gap:10px;border:1px solid var(--line);border-radius:10px;padding:8px 10px;background:var(--panel);min-height:44px;cursor:pointer}
+  .tog input{width:20px;height:20px;accent-color:var(--yel);flex:none}
+  .health{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:6px;font-size:12px}
+  .health span{border:1px solid var(--line);border-radius:8px;padding:6px 8px;background:var(--panel);display:flex;align-items:center;gap:6px}
+  .health i{width:8px;height:8px;border-radius:50%;background:var(--grn)}.health .no i{background:#ff5a6a}.health .no{border-color:#ff5a6a}.health .off{opacity:.45}.health .off i{background:#6b737d}
+  .fix{min-height:58px;border-width:2px;display:flex;flex-direction:column;align-items:flex-start;justify-content:center;padding:6px 12px;text-align:left}
+  .fix b{font:800 18px 'Barlow Condensed',sans-serif;letter-spacing:.3px}.fix small{font-weight:500;font-size:12px;color:#c8cdd4}
+  .lcr3 button{min-height:46px;font:800 18px 'Barlow Condensed',sans-serif}
+  .msg{min-height:16px;font-size:12px;color:#7dffb8}
+  .tabs{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:6px;margin-top:auto;position:sticky;bottom:0;background:var(--bg);padding-top:6px}
+  .tabs button{min-height:50px;font-weight:600;font-size:12px;padding:4px 1px;overflow:hidden;line-height:1.15;hyphens:manual}
+  #body select{background:#0b0d10;color:#fff;border:1px solid #3a414c;border-radius:8px;padding:8px;font-size:14px}
+  .gw-list{display:flex;flex-direction:column;gap:4px;max-height:52vh;overflow:auto;border:1px solid #2b313b;border-radius:10px;padding:6px}
+  .gw-row{display:flex;align-items:center;gap:8px;padding:5px 8px;border-radius:8px;background:#14181e}
+  .gw-row b{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.gw-row .x{min-height:30px;padding:2px 10px;border-color:#ff6b7d;color:#ffb3bc}
+  .gw-row em{font-style:normal;font-size:11px;padding:1px 6px;border-radius:6px;background:#2b313b;color:#a7b0ba}
+  .inrow{display:flex;gap:6px}.inrow input,.inrow select{flex:1;min-width:0;background:#0b0d10;color:#fff;border:1px solid #3a414c;border-radius:8px;padding:10px;font-size:15px}
+  .sr{display:flex;align-items:center;gap:8px;padding:8px;border-radius:8px;background:#14181e;margin-bottom:4px}.sr span{flex:1;min-width:0}.sr small{display:block;color:#8f98a3;font-size:11px}
+  .sr button{min-height:34px;padding:4px 10px}
+  details.gwm summary{cursor:pointer;color:#a7b0ba;padding:6px 0}details.gwm textarea{width:100%;box-sizing:border-box;background:#0b0d10;color:#fff;border:1px solid #3a414c;border-radius:8px;padding:8px;font:14px Inter,sans-serif;min-height:54px}
+  .tabs button.on{background:#c58bff;border-color:#c58bff;color:#0b0d10;font-weight:800}
+  .tabs button.fx{border-color:var(--red);color:#ffb3bc;background:#2a1012}.tabs button.fx.on{background:var(--red);color:#1a0508}
+  .tabs button .dot{display:inline-block;width:8px;height:8px;border-radius:50%;background:var(--org);margin-left:4px;vertical-align:middle}
+  .hide{display:none!important}
+  a{color:var(--blue)}
+</style>
+</head>
+<body>
+<div class="w">
+  <div class="top" id="top"></div>
+  <div id="body"></div>
+  <div class="msg" id="msg" role="status"></div>
+  <div class="tabs" id="tabs">
+    <button data-t="live">Live</button><button data-t="replay">Replay</button><button data-t="games">Games</button><button data-t="give">Give&shy;away</button><button data-t="search">Search</button><button data-t="fix" class="fx">Fix it</button>
+  </div>
+</div>
+<script>
+(function () {
+  const $ = (id) => document.getElementById(id);
+  const esc = (s) => String(s == null ? '' : s).replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+  let tab = 'live', D = null, shown = '';
+  try { tab = localStorage.getItem('bbr-dock29') || 'live'; } catch (e) { /* ignore */ }
+  if (!/^(live|replay|games|give|search|fix)$/.test(tab)) tab = 'live';
+  const say = (t) => { $('msg').textContent = t; };
+  const go = async (u, ask) => { if (ask && !confirm(ask)) return; const t = await fetch(u).then((r) => r.text()).catch(() => 'Could not reach the app'); say(t); setTimeout(load, 300); if (/clip-(get|pull)/.test(u) && typeof TW !== 'undefined' && TW.open) setTimeout(twLoad, 1500); };
+  const post = (u, b) => fetch(u, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(b || {}) }).then((r) => r.json());
+  const mmss = (ms) => { const s = Math.max(0, Math.ceil(ms / 1000)); return Math.floor(s / 60) + ':' + String(s % 60).padStart(2, '0'); };
+  const B = (u, label, cls, extra) => '<button data-u="' + esc(u) + '"' + (cls ? ' class="' + cls + '"' : '') + (extra || '') + '>' + label + '</button>';
+  const healthBad = (h) => Object.entries(h || {}).filter(([, v]) => v === false).map(([k]) => k);
+  const NAMES = { twitch: 'Twitch', kick: 'Kick', youtube: 'YouTube', obs: 'OBS', overlay: 'Overlay', cards: 'Cards' };
+
+  // ---------- things that need you right now (shown on Live, and on the matching tab) ----------
+  function lobbyCard(d) {
+    const L = d.lobby; if (!L) return '';
+    const left = L.endsAt ? mmss(L.endsAt - Date.now()) : '';
+    return '<div class="card y"><div class="hd"><span class="t">' + esc(L.label || 'GAME') + '</span><b>' + (L.starting ? 'STARTING' : left) + '</b></div>' +
+      (L.teams ? '<div class="teams">' + L.teams.map((s) => '<div style="--c:' + esc(s.color || '#c9ced6') + '"><b>' + esc(s.name) + ' · ' + s.players.length + '/' + s.size + '</b>' + (s.players.map(esc).join('<br>') || '<span class="muted">nobody yet</span>') + '</div>').join('') + '</div>'
+        : '<div class="names">' + L.count + ' joined' + (L.names.length ? ': <b>' + L.names.map(esc).join('</b>, <b>') + '</b>' : '') + '</div>') +
+      '<div class="muted" style="font-size:12px">Starts by itself when it\'s full' + (d.gamesOpts && d.gamesOpts.idle ? ' or when nobody new joins for ' + d.gamesOpts.idle + ' s' : '') + '.</div>' +
+      '<div class="g3">' + B('/control/start-now', 'START NOW', 'pri', ' style="grid-column:span 2;min-height:50px"' + (L.count < L.min || L.starting ? ' disabled' : '')) + B('/control/cancel', 'Cancel') + '</div></div>';
+  }
+  function bossKick(d) {
+    if (!(d.boss && d.boss.boss && d.boss.bossRole)) return '';
+    const Z = [['lt', 'TOP L'], ['ct', 'TOP'], ['rt', 'TOP R'], ['l', 'LEFT'], ['c', 'CENTRE'], ['r', 'RIGHT'], ['lb', 'LOW L'], ['cb', 'LOW'], ['rb', 'LOW R']];
+    return '<div class="card r"><div class="hd"><span class="t">BEAT THE BOSS · YOUR KICK</span></div><div class="g3 lcr3">' + Z.map(([k, n]) => B('/control/boss-' + k, n)).join('') + '</div></div>';
+  }
+  function gameCard(d) {
+    if (!d.game) return '';
+    const T = d.boss && d.boss.teams;
+    let h = '<div class="card g"><div class="hd"><span class="t">' + (T ? 'TEAM SHOOTOUT · ' + T.size + ' v ' + T.size : d.game.boss ? 'BEAT THE BOSS' : String(d.game.mode || 'GAME').replace('arc', 'QUEEN RAID').replace('race', 'TRUCK RACE').replace('shootout', 'PENALTY SHOOTOUT').toUpperCase()) + '</span><span class="muted">' + esc(T && T.score || '') + '</span></div>';
+    if (T) h += '<div class="g3">' + B('/control/teampens-skip', 'Skip AFK') + B('/control/teampens-pause', T.paused ? 'Carry on' : 'Pause') + B('/control/cancel', 'End it') + '</div>';
+    else h += '<div class="g2">' + B('/control/cancel', 'Stop this game') + '</div>';
+    return h + '</div>';
+  }
+  function guardCard(d) {
+    const S = d.safety; if (!S || !S.frozen) return '';
+    const g = S.frozen.by === 'guard';
+    return '<div class="card o"><span class="t">' + (g ? 'CARD GUARD STEPPED IN' : 'CARDS ARE FROZEN') + '</span><span>' + (g ? esc(S.frozen.who) + ' went up ' + S.frozen.rise + ' OVR in ' + S.frozen.mins + ' minutes, so card changes are paused. ' : 'Card changes are held. ') + (S.pending ? S.pending + ' card' + (S.pending === 1 ? ' has' : 's have') + ' changes waiting.' : 'Nothing waiting yet.') + '</span>' +
+      '<div class="g2">' + B('/control/cards-apply', g ? 'Looks fine, apply' : 'Unfreeze + apply') + B('/control/cards-discard', 'Throw them away', '', '') + '</div></div>';
+  }
+  function startingCard(d) {
+    const S0 = d.starting; if (!S0) return '';
+    const sl = S0.ended ? 'LIVE' : mmss(S0.left);
+    return '<div class="card b"><div class="hd"><span class="t">STARTING SOON</span><b style="font:800 26px \'Barlow Condensed\',sans-serif">' + sl + '</b></div><span class="muted">' + (S0.running ? 'running' : 'stopped') + ' · ' + S0.here + ' here' + (S0.held ? ' · ' + S0.held + ' alerts waiting' : '') + '</span>' +
+      '<div class="g2">' + B('/control/starting-start', 'START', '', ' style="background:#3dff9a;border-color:#3dff9a;color:#04130b;min-height:50px;font-size:16px"') + B('/control/starting-stop', 'STOP', '', ' style="background:#ff6b7d;border-color:#ff6b7d;color:#1a0508;min-height:50px;font-size:16px"') + '</div>' +
+      '<div class="g4">' + B('/control/starting-minus1', '−1 min') + B('/control/starting-plus1', '+1 min') + B('/control/starting-set?secs=300', '5:00') + B('/control/starting-live', 'GO LIVE') + '</div></div>';
+  }
+  function brbCard(d) {
+    const R = d.brb; if (!R || !R.on) return '';
+    return '<div class="card" style="border-color:#c58bff;background:rgba(197,139,255,.1)"><div class="hd"><span class="t" style="color:#c58bff">BE RIGHT BACK IS ON</span><b style="font:800 26px \'Barlow Condensed\',sans-serif">' + (R.left != null ? mmss(R.left) : '') + '</b></div>' +
+      '<div class="g4">' + B('/control/brb-timer-start', 'START') + B('/control/brb-timer-stop', 'STOP') + B('/control/brb-minus1', '−1 min') + B('/control/brb-plus1', '+1 min') + '</div>' + B('/control/brb-end', 'I\'M BACK', 'pri', ' style="min-height:52px;background:#c58bff;border-color:#c58bff"') + '</div>';
+  }
+  function smallBars(d) {
+    let a = '';
+    if (d.botMuted) a += '<div class="card r"><span class="t">CHAT BOT MUTED</span><span>The app is not posting in chat.</span>' + B('/control/bot-mute', 'Unmute') + '</div>';
+    else if (d.botFlood) a += '<div class="card r"><span class="t">CHAT BOT HELD BACK</span><span>It was posting too much.</span>' + B('/control/bot-mute', 'Mute it') + '</div>';
+    const R = d.replay;
+    if (R && R.wanted) a += '<div class="card b"><span class="t">CHAT WANTS A REPLAY (' + R.wanted + ')</span>' + B('/control/replay', 'CLIP + PLAY IT', 'pri', ' style="background:#4dc3ff;border-color:#4dc3ff;color:#04121c"') + '</div>';
+    if (d.red) a += '<div class="card r"><span class="t">' + (d.red.kind === 'yellow2' ? 'TWO YELLOWS' : 'RED CARD') + (d.red.player ? ': ' + esc(d.red.player) : '') + '</span>' + (!d.red.player && (d.red.players || []).length ? '<select id="rcWho" aria-label="Who got the card" style="min-height:40px;background:#0b0d10;color:#eef1f4;border:1px solid #2b313b;border-radius:8px">' + d.red.players.map((n) => '<option>' + esc(n) + '</option>').join('') + '</select><button id="rcGive">Give it</button>' : '') + B('/control/redcard-clear', 'Clear') + '</div>';
+    const q = d.queen || {};
+    if (q.on && q.stage === 'ready') a += '<div class="card o"><span class="t">QUEEN AWAKE</span><div class="g3">' + B('/control/queen-now', 'Now') + B('/control/queen-aftergame', 'After game') + B('/control/queen-later', 'Later') + '</div></div>';
+    if (d.challenge) { const c = d.challenge; a += '<div class="card o"><span class="t">' + esc(String(c.name).toUpperCase()) + ' · ' + (c.unit === 'minutes' ? c.left + ' min left' : 'game ' + (c.total - c.left + 1) + ' of ' + c.total) + '</span><div class="g3">' + B('/control/challenge-done', 'Done −1') + B('/control/challenge-undo', '+1') + B('/control/challenge-pause', c.paused ? 'Go' : 'Pause') + '</div></div>'; }
+    if (d.squad && d.squad.waiting) a += '<div class="card y"><span class="t">SQUAD: ' + d.squad.waiting + ' WAITING</span><span class="muted">next: ' + esc((d.squad.next || []).join(', ')) + '</span>' + B('/control/squad-next', 'Next team sheet') + '</div>';
+    if (d.bp && d.bp.on) a += '<div class="card" style="border-color:' + esc(d.bp.color) + '"><div class="hd"><span class="t" style="color:' + esc(d.bp.color) + '">BP ' + d.bp.sys + '/' + d.bp.dia + ' · ' + esc(d.bp.level) + '</span></div><div class="g3">' + B('/control/bp-up', '+5') + B('/control/bp-up15', '+15') + B('/control/bp-down', 'Calm') + '</div></div>';
+    return a;
+  }
+
+  // ---------- tabs ----------
+  const QUICK_SKIP = /^(result-|start$|replay$|clip$|cards-|starting-)/;
+  function live(d) {
+    let h = guardCard(d) + brbCard(d) + lobbyCard(d) + bossKick(d) + gameCard(d) + startingCard(d) + smallBars(d);
+    h += giveCard(d);
+    // v33: giveaway meter
+    const G = d.gmeter;
+    if (G && G.on) {
+      const hms = (ms) => { const x = Math.max(0, Math.ceil(ms / 1000)), hh = Math.floor(x / 3600); return hh ? hh + ':' + String(Math.floor((x % 3600) / 60)).padStart(2, '0') + ':' + String(x % 60).padStart(2, '0') : mmss(ms); };
+      const gl = G.hasTimer ? (G.ended ? 'time up' : hms(G.running && G.endsAt ? G.endsAt - Date.now() : G.left) + (G.paused ? ' paused' : '')) : 'no clock';
+      if (G.mode === 'timer') {
+        // countdown only (no target)
+        h += '<div class="card y"><div class="hd"><span class="t">' + esc(G.title) + (G.prize ? ' · ' + esc(G.prize) : '') + '</span><span class="muted">' + gl + (G.entries ? ' · ' + G.entries + ' in' : '') + '</span></div>' + (G.winner ? '<span>Winner: <b>' + esc(G.winner.name) + '</b></span>' : '') +
+          '<div class="g3">' + B('/control/gmeter-pause', G.paused ? '▶ RESUME' : '❚❚ PAUSE', '', ' style="border-color:#f5c400;color:#f6d77a"') + B('/control/gmeter-restart', 'RESTART') + B('/control/gmeter-stop', 'STOP', '', ' style="border-color:#ff8080;color:#ff8080"') + '</div>' +
+          '<div class="g3">' + B('/control/gmeter-addtime?mins=-10', '−10 min') + B('/control/gmeter-addtime?mins=10', '+10 min') + B('/control/gmeter-addtime?hours=1', '+1 hour') + '</div></div>';
+      } else
+      h += '<div class="card ' + (G.hit ? 'g' : 'y') + '"><div class="hd"><span class="t">' + esc(G.title) + ' · ' + G.value + ' / ' + G.goal + ' ' + esc(G.unit || '') + '</span><span class="muted">' + gl + (G.entries ? ' · ' + G.entries + ' in' : '') + '</span></div>' +
+        (G.winner ? '<span>Winner: <b>' + esc(G.winner.name) + '</b></span>' : '') +
+        '<div class="g3">' + B('/control/gmeter-minus', '−1') + B('/control/gmeter-add', '+1', '', ' style="border-color:#3dff9a;color:#3dff9a"') + B('/control/gmeter-add?n=5', '+5') + '</div>' +
+        '<div class="g3">' + B('/control/gmeter-pause', G.paused ? '▶ RESUME' : '❚❚ PAUSE', '', ' style="border-color:#f5c400;color:#f6d77a"') + B('/control/gmeter-restart', 'RESTART', '', '', ) + B('/control/gmeter-stop', 'STOP', '', ' style="border-color:#ff8080;color:#ff8080"') + '</div>' +
+        '<div class="g3">' + B('/control/gmeter-minus1', '−1 min') + B('/control/gmeter-plus1', '+1 min') + B('/control/gmeter-pick', 'Pick winner', '', ' data-ask="Pick a random winner from everyone who entered?"') + '</div></div>';
+    }
+    h += '<h3>SCREENS</h3><div class="g3">' + B('/control/brb', d.brb && d.brb.on ? 'I\'M BACK' : 'BE RIGHT BACK', 'bc', ' style="min-height:56px;border-color:#c58bff' + (d.brb && d.brb.on ? ';background:#c58bff;color:#12061f' : '') + '"') + B('/control/bigcam-go', 'BIG CAM', 'bc', ' style="min-height:56px;border-color:#4dc3ff"') + B('/control/links-now', 'LINKS', 'bc', ' style="min-height:56px;border-color:#9146ff"') + '</div>' +
+      '<div class="g3">' + B('/control/bigcam-next', 'Next Big Cam set') + B('/control/stinger', 'Stinger') + B('/control/music-mute', d.musicMuted ? 'Music: off' : 'Music: on') + '</div>' + (d.gmeter && !d.gmeter.on && d.gmeter.enabled !== false ? '<div class="g2">' + B('/control/gmeter-start', d.gmeter && d.gmeter.mode === 'timer' ? 'GIVEAWAY TIMER' : 'GIVEAWAY METER', '', ' style="border-color:#ffd23f;color:#ffd23f;min-height:52px"') + B('/control/gmeter-restart', 'New giveaway (from 0)', '', ' style="min-height:52px"') + '</div>' : '') + (d.bigcam ? '<p class="muted" style="margin:0;font-size:12px">Big Cam: ' + esc(d.bigcam) + (d.linksNext != null ? ' · links again in ' + Math.round(d.linksNext / 60000) + ' min' : '') + '</p>' : '');
+    h += '<h3>QUICK BUTTONS</h3><div class="g2">' +
+      '<button class="big" data-u="/control/replay" style="border-color:#4dc3ff;background:#0f2230"><b style="color:#4dc3ff">CLIP IT</b><small>last ' + ((d.replay && d.replay.secs) || 30) + ' s · plays when ready</small></button>' +
+      (d.battlesOff ? '<button class="big" data-u="/control/battles-on" style="border-color:#5a6270;background:#16191e"><b style="color:#a7b0ba">BATTLES ARE OFF</b><small>tap to turn them on</small></button></div>' :
+      '<button class="big" data-u="/control/start" style="border-color:#f5c400;background:#241f08"' + (d.lobby || d.game ? ' disabled' : '') + '><b style="color:#f5c400">START A GAME</b><small>' + (d.nextBattleMs != null ? 'next auto game in ' + Math.round(d.nextBattleMs / 60000) + ' min' : 'auto games paused') + '</small></button></div>') +
+      '<div class="g3 wdl">' + B('/control/result-win', 'WIN', '', ' style="border-color:#3dff9a;color:#3dff9a;background:#0d2219"') + B('/control/result-draw', 'DRAW', '', ' style="border-color:#c9ced6"') + B('/control/result-loss', 'LOSS', '', ' style="border-color:#ff8a8a;color:#ff9d9d;background:#2a1012"') + '</div>';
+    const mine = (d.buttons || []).filter((b) => !QUICK_SKIP.test(b.action || '')).slice(0, 8);
+    if (mine.length) h += '<div class="g2">' + mine.map((b) => '<button data-u="' + esc(b.u) + '" style="border-color:' + esc(b.color) + '">' + esc(b.label) + '</button>').join('') + '</div>';
+    if (!d.starting && !d.live) h += '<div class="g2">' + B('/control/starting-start', 'Starting Soon: START') + B('/control/starting-set?secs=300', 'Set it to 5:00') + '</div>';
+    h += '<p class="muted" style="margin:0;font-size:12px">Change the quick buttons in the dashboard (Live › Buttons &amp; Stream Deck).</p>';
+    return h;
+  }
+  const TW = { open: false, list: null, err: null, check: null, at: 0 };
+  const ago = (t) => { if (!t) return ''; const m = Math.round((Date.now() - t) / 60000); return m < 1 ? 'just now' : m < 60 ? m + ' min ago' : m < 1440 ? Math.round(m / 60) + ' h ago' : Math.round(m / 1440) + ' d ago'; };
+  async function twLoad() { TW.open = true; TW.at = Date.now(); try { const r = await fetch('/api/replay/twitch?days=7', { cache: 'no-store' }).then((x) => x.json()); TW.err = r.error || null; TW.list = r.list || []; } catch (e) { TW.err = 'App not running?'; } shown = ''; if (D) draw(); }
+  setInterval(() => { if (TW.open && tab === 'replay' && Date.now() - TW.at > 20000) twLoad(); }, 5000);
+  let scrubbing = false;
+  function replayTab(d) {
+    const R = d.replay || {};
+    let h = '';
+    if (!R.on) return '<div class="card r"><span class="t">REPLAYS ARE OFF</span><span>Turn them on in the dashboard (Live › Replay).</span></div>';
+    if (R.clipsReady) h += '<div class="card o"><span class="t">CLIPS NOT READY</span><span>' + esc(R.clipsReady) + '</span></div>';
+    if (R.err) h += '<div class="card r"><span class="t">LAST CLIP FAILED</span><span>' + esc(R.err) + '</span></div>';
+    // v32: pause, jump and scrub while it plays
+    if (R.playing) h += '<div class="card b"><div class="hd"><span class="t">PLAYING #' + R.playing.n + (R.playing.label ? ' · ' + esc(R.playing.label) : '') + '</span><span class="muted" id="rpPosT"></span></div>' +
+      '<input type="range" id="rpScrub" min="0" max="1000" value="0" aria-label="Scrub the replay" style="width:100%;accent-color:#4dc3ff;height:30px">' +
+      '<div class="g3">' + B('/control/replay-back', '« 2 s', '', ' style="min-height:52px"') + B('/control/replay-pause', R.playing.frozen ? '▶ PLAY' : '❚❚ PAUSE', '', ' style="min-height:52px;border-color:#f5c400;color:#f6d77a;font-weight:800"') + B('/control/replay-fwd', '2 s »', '', ' style="min-height:52px"') + '</div>' +
+      '<div class="g3">' + B('/control/replay-frame-back', '‹ frame') + '<button id="rpDesk">Draw</button>' + B('/control/replay-frame-fwd', 'frame ›') + '</div>' +
+      '<div class="g2">' + B('/control/replay-again', 'From the start') + B('/control/replay-stop', 'STOP · BACK TO LIVE', '', ' style="border-color:#ff8080;color:#ff8080"') + '</div></div>';
+    h += '<button class="big" data-u="/control/replay" style="min-height:104px;background:#4dc3ff;border-color:#4dc3ff;color:#04121c;align-items:center;justify-content:center"' + (R.clipsReady ? ' disabled' : '') + '><b style="font-size:38px;line-height:1">CLIP</b><small style="color:#04121c">last ' + (R.secs || 30) + ' seconds · plays when Twitch has it</small></button>';
+    h += '<div class="g3">' + B('/control/replay-again', 'VIEW LAST', 'bc', ' style="min-height:62px;border:2px solid #4dc3ff"') + B('/control/replay-last-slow', 'SLOW-MO', 'bc', ' style="min-height:62px;border:2px solid #f6d77a;color:#f6d77a"') + B('/control/replay-stop', 'STOP', 'bc', ' style="min-height:62px;border:2px solid #ff8a8a;color:#ffb3bc"') + '</div>';
+    h += '<div class="g2">' + B('/control/clip', 'Clip only (play later)') + B('/control/replay?look=studio', 'Studio replay') + '</div>';
+    const st = { clipping: 'Clipping…', processing: 'Twitch is making it…', downloading: 'Downloading…', waiting: 'Waiting for Twitch', saved: 'Downloaded', ready: 'Ready', failed: 'Failed' };
+    (R.jobs || []).forEach((j) => { h += '<div class="job' + (j.status === 'ready' ? ' ok' : j.status === 'failed' ? ' bad' : '') + '"><i></i><span style="flex:1">' + esc(j.label || (j.imported ? 'Twitch clip' : 'Clip')) + ' · ' + (st[j.status] || j.status) + (j.error ? ': ' + esc(j.error) : '') + '</span>' + (j.canRetry ? B('/control/clip-retry?key=' + encodeURIComponent(j.key), 'Try again', '', ' style="min-height:36px;padding:4px 10px"') : '') + (j.status === 'ready' && j.clipId ? B('/control/replay-play?id=' + encodeURIComponent(j.clipId), 'Play', '', ' style="min-height:36px;padding:4px 10px"') : '') + '<span class="muted">' + Math.round((Date.now() - j.at) / 1000) + 's</span></div>'; });
+    if ((R.recent || []).length) h += '<h3>YOUR CLIPS (TAP TO PLAY)</h3>' + R.recent.map((c) => '<div class="clip">' + (c.thumb ? '<img src="' + esc(c.thumb) + '" alt="" onerror="this.style.visibility=\'hidden\'">' : '<span class="th">' + (c.secs || '') + 's</span>') + '<span class="x"><b>#' + c.n + ' ' + esc(c.label || 'CLIP') + '</b><span class="muted">' + (c.secs || '') + 's' + (c.tonight ? '' : ' · earlier') + (c.auto && c.by ? ' · by ' + esc(c.by) : '') + (c.ok === false ? ' · file missing' : '') + '</span></span>' + B('/control/replay-play?id=' + encodeURIComponent(c.id), 'Play') + '</div>').join('');
+    else h += '<p class="muted" style="margin:0">No clips in the list yet. Tap CLIP while you\'re live, or get the ones already on your Twitch below.</p>';
+    // v32: every clip on your Twitch channel (yours, the app's and chat's): get it into the list and play it
+    h += '<h3>ON YOUR TWITCH</h3><div class="g3">' + '<button id="twShow">' + (TW.open ? 'Refresh list' : 'Show my Twitch clips') + '</button>' + B('/control/clip-pull', 'Get tonight\'s') + '<button id="twCheck">Check clips</button></div>';
+    if (TW.check) h += '<div class="card ' + (TW.check.ok ? 'g' : 'r') + '"><span class="t">CLIP CHECK</span>' + (TW.check.steps || []).map((x) => '<span>' + (x.ok ? '✓ ' : '✗ ') + esc(x.what) + '</span>').join('') + '</div>';
+    if (TW.open) {
+      if (TW.err) h += '<div class="card r"><span>' + esc(TW.err) + '</span></div>';
+      else if (!TW.list) h += '<p class="muted" style="margin:0">Asking Twitch…</p>';
+      else if (!TW.list.length) h += '<p class="muted" style="margin:0">No clips on your channel in the last 7 days.</p>';
+      else h += TW.list.slice(0, 20).map((c) => '<div class="clip">' + (c.thumb ? '<img src="' + esc(c.thumb) + '" alt="" onerror="this.style.visibility=\'hidden\'">' : '<span class="th">' + c.secs + 's</span>') + '<span class="x"><b>' + esc(c.title || 'Clip') + '</b><span class="muted">' + c.secs + 's · ' + esc(c.by || '') + ' · ' + ago(c.at) + (c.job ? ' · ' + esc(st[c.job] || c.job) : '') + '</span></span>' +
+        (c.have ? B('/control/replay-play?id=' + encodeURIComponent(c.have), 'Play') : B('/control/clip-get?id=' + encodeURIComponent(c.id) + '&play=1', 'Get + play') + B('/control/clip-get?id=' + encodeURIComponent(c.id) + '&play=0', 'Get')) + '</div>').join('');
+    }
+    h += '<p class="muted" style="margin:0;font-size:12px">Replays are Twitch clips: nothing records in OBS. Clip length, labels and the look are in the dashboard (Live › Replay).</p>';
+    return h;
+  }
+  // ================= v35: simple giveaway (!giveaway list) =================
+  const GW = { add: '', filter: '', sep: 'line' };
+  let pendingDraw = false;
+  document.addEventListener('focusout', () => { setTimeout(() => { if (pendingDraw && !($('body').contains(document.activeElement) && /^(INPUT|TEXTAREA|SELECT)$/.test(document.activeElement.tagName))) { pendingDraw = false; shown = ''; if (D) draw(); } }, 150); });
+  async function copyText(t) {
+    try { await navigator.clipboard.writeText(t); return true; } catch (e) {
+      const ta = document.createElement('textarea'); ta.value = t; ta.style.position = 'fixed'; ta.style.opacity = '0'; document.body.appendChild(ta); ta.select();
+      let ok = false; try { ok = document.execCommand('copy'); } catch (x) { /* no */ } ta.remove(); return ok;
+    }
+  }
+  function giveCard(d) {
+    const G = d.sgw; if (!G || G.on === false || (!G.open && !G.count)) return '';
+    return '<div class="card ' + (G.open ? 'g' : 'b') + '"><div class="hd"><span class="t">GIVEAWAY ' + (G.open ? 'OPEN' : 'CLOSED') + ' · ' + G.count + ' entered</span><span class="muted">' + esc(G.cmd) + (G.needMins ? ' · ' + G.needMins + ' min' : '') + '</span></div>' +
+      (G.winners && G.winners[0] ? '<span>Winner: <b>' + esc(G.winners[0].display) + '</b></span>' : '') +
+      '<div class="g3">' + B('/control/sgw-toggle', G.open ? 'CLOSE' : 'OPEN', '', ' style="border-color:' + (G.open ? '#ff8080;color:#ff8080' : '#3dff9a;color:#3dff9a') + '"') + B('/control/sgw-pick', 'Pick winner', '', ' style="border-color:#ffd23f;color:#ffd23f"' + (G.count ? '' : ' disabled')) + '<button data-t="give">See the list</button></div></div>';
+  }
+  function giveTab(d) {
+    const G = d.sgw || { entries: [], count: 0 };
+    if (G.on === false) return '<div class="card o"><span class="t">!GIVEAWAY IS SWITCHED OFF</span><span>Turn it on in the dashboard: Live › Giveaway list.</span></div>';
+    const f = GW.filter.toLowerCase(), L = (G.entries || []).filter((e) => !f || e.d.toLowerCase().includes(f));
+    let h = '<div class="card ' + (G.open ? 'g' : 'b') + '"><div class="hd"><span class="t">GIVEAWAY ' + (G.open ? 'OPEN' : 'CLOSED') + '</span><b>' + G.count + ' entered</b></div>' +
+      '<span class="muted">Chat types <b>' + esc(G.cmd) + '</b>' + (G.needMins ? ' · needs <b>' + G.needMins + ' min</b> of watch time this stream (counted every 5 min)' : ' · no watch time needed') + ' · <b>!watchtime</b> tells them theirs</span>' +
+      '<div class="g2">' + B('/control/sgw-' + (G.open ? 'close' : 'open'), G.open ? 'CLOSE ENTRIES' : 'OPEN ENTRIES', '', ' style="min-height:54px;font-weight:800;border-color:' + (G.open ? '#ff8080;color:#ff8080' : '#3dff9a;color:#3dff9a') + '"') +
+      B('/control/sgw-pick', 'PICK A WINNER', '', ' style="min-height:54px;font-weight:800;border-color:#ffd23f;color:#ffd23f"' + (G.count ? '' : ' disabled')) + '</div></div>';
+    if (G.winners && G.winners.length) h += '<div class="card y"><div class="hd"><span class="t">WINNER: ' + esc(G.winners[0].display) + '</span><span class="muted">' + (G.winners[0].mins || 0) + ' min watched</span></div>' +
+      '<div class="g2"><button id="gwCopyWin" data-name="' + esc(G.winners[0].display) + '">Copy winner\'s name</button>' + B('/control/sgw-pick', 'Pick again (re-roll)') + '</div>' + (G.winners.length > 1 ? '<span class="muted">Before: ' + G.winners.slice(1).map((w) => esc(w.display)).join(', ') + '</span>' : '') + '</div>';
+    h += '<div class="g3"><button id="gwCopy">Copy names</button><select id="gwSep" aria-label="How to copy"><option value="line"' + (GW.sep === 'line' ? ' selected' : '') + '>one per line</option><option value="comma"' + (GW.sep === 'comma' ? ' selected' : '') + '>a, b, c</option><option value="space"' + (GW.sep === 'space' ? ' selected' : '') + '>a b c</option></select>' + B('/control/sgw-clear', 'Clear list', '', ' data-ask="Clear all ' + G.count + ' names from the giveaway list?" style="border-color:#ff6b7d;color:#ffb3bc"') + '</div>';
+    h += '<div class="inrow"><input id="gwAdd" placeholder="Add a Twitch name" value="' + esc(GW.add) + '" autocomplete="off"><button id="gwAddB" style="flex:none">Add</button></div>';
+    if (G.count > 6) h += '<div class="inrow"><input id="gwFind" placeholder="Find a name in the list" value="' + esc(GW.filter) + '" autocomplete="off"></div>';
+    h += '<div class="gw-list" aria-label="Giveaway entries">' + (L.length ? L.map((e) => '<div class="gw-row"><b>' + esc(e.d) + '</b>' + (e.p !== 'twitch' ? '<em>' + esc(e.p) + '</em>' : '') + (e.h ? '<em>added by you</em>' : '<em>' + (e.m || 0) + ' min</em>') + '<button class="x" data-gwx="' + esc(e.key) + '" aria-label="Remove ' + esc(e.d) + '">✕</button></div>').join('') : '<span class="muted" style="padding:8px">' + (f ? 'No name matches.' : 'Nobody yet. Open entries and chat types ' + esc(G.cmd) + '.') + '</span>') + '</div>';
+    h += '<details class="gwm"><summary>Messages &amp; watch time</summary><label class="muted">Watch time needed this stream (minutes, 0 = none)</label><div class="inrow"><input id="gwNeed" type="number" min="0" max="1440" value="' + (G.needMins || 0) + '"></div>' +
+      '<label class="muted">Message when someone enters ({user}, {count})</label><textarea id="gwMsgIn"></textarea><label class="muted">Message when they need more watch time ({user}, {have}, {need}, {left})</label><textarea id="gwMsgNeed"></textarea>' +
+      '<div class="g2"><button id="gwMsgSave" class="pri">Save</button><button id="gwMsgDef">Back to the defaults</button></div><span class="muted">All the other messages are in the dashboard: Live › Giveaway list.</span></details>';
+    return h;
+  }
+  let gwMsgs = null;
+  function giveWire() {
+    const cp = $('gwCopy'); if (cp) cp.onclick = async () => { const t = await fetch('/api/sgw/text?sep=' + GW.sep).then((r) => r.text()); say((await copyText(t)) ? 'Copied ' + (t ? t.split(GW.sep === 'line' ? '\n' : GW.sep === 'comma' ? ', ' : ' ').length : 0) + ' names' : 'Could not copy: select them in the dashboard instead'); };
+    const sp = $('gwSep'); if (sp) sp.onchange = () => { GW.sep = sp.value; };
+    const cw = $('gwCopyWin'); if (cw) cw.onclick = async () => say((await copyText(cw.dataset.name)) ? 'Copied ' + cw.dataset.name : 'Could not copy');
+    const ad = $('gwAdd'), addIt = async () => { const n = ad.value.trim(); if (!n) return; const r = await post('/api/sgw', { add: { name: n } }); say(r.error || r.msg); if (!r.error) { GW.add = ''; ad.value = ''; } load(); };
+    if (ad) { ad.oninput = () => { GW.add = ad.value; }; ad.onkeydown = (e) => { if (e.key === 'Enter') addIt(); }; $('gwAddB').onclick = addIt; }
+    const fd = $('gwFind'); if (fd) { fd.oninput = () => { GW.filter = fd.value; const f = GW.filter.toLowerCase(); document.querySelectorAll('.gw-row').forEach((r) => { r.style.display = !f || r.querySelector('b').textContent.toLowerCase().includes(f) ? '' : 'none'; }); }; }
+    document.querySelectorAll('[data-gwx]').forEach((b) => { b.onclick = async () => { const r = await post('/api/sgw', { remove: b.dataset.gwx }); say(r.error || 'Removed'); load(); }; });
+    const mi = $('gwMsgIn');
+    if (mi) {
+      const fill = (r) => { gwMsgs = r; mi.value = r.settings.msg.in; $('gwMsgNeed').value = r.settings.msg.need; };
+      if (gwMsgs) fill(gwMsgs); else fetch('/api/sgw').then((r) => r.json()).then(fill).catch(() => {});
+      $('gwMsgSave').onclick = async () => { const r = await post('/api/sgw', { settings: { needMins: +$('gwNeed').value || 0, msg: { in: mi.value, need: $('gwMsgNeed').value } } }); fill(r); say('Saved: needs ' + r.settings.needMins + ' min'); shown = ''; load(); };
+      $('gwMsgDef').onclick = async () => { const r = await post('/api/sgw', { settings: { msg: { in: '', need: '' } } }); fill(r); say('Back to the default messages'); };
+    }
+  }
+  // ================= v35: search everything =================
+  const SR = { q: '', idx: null, viewers: [], vq: '' };
+  function searchTab() {
+    return '<div class="inrow"><input id="srQ" type="search" placeholder="Search buttons, pages, settings, viewers…" autocomplete="off" aria-label="Search"></div><div id="srOut"><p class="muted">Type a word: e.g. replay, camera, giveaway, theme, music, a viewer\'s name.</p></div>';
+  }
+  async function buildIndex() {
+    const out = [];
+    try { const a = await fetch('/api/actions').then((r) => r.json()); for (const x of a.list || []) out.push({ k: 'button', t: x.label, g: x.group, u: x.u, c: x.color }); } catch (e) { /* ignore */ }
+    try {
+      const html = await fetch('/').then((r) => r.text()), doc = new DOMParser().parseFromString(html, 'text/html');
+      const page = {}; doc.querySelectorAll('[data-go]').forEach((b) => { page[b.dataset.go] = b.textContent.trim(); out.push({ k: 'page', t: b.textContent.trim(), g: 'Dashboard page', p: b.dataset.go }); });
+      doc.querySelectorAll('section[data-tab]').forEach((sec) => {
+        const pg = sec.dataset.tab, h = (sec.querySelector('h2') || {}).textContent || '';
+        if (h) out.push({ k: 'section', t: h.trim(), g: (page[pg] || pg), p: pg, f: h.trim() });
+        sec.querySelectorAll('label, h3, button').forEach((x) => { const t = x.textContent.replace(/\s+/g, ' ').trim(); if (t.length > 2 && t.length < 90) out.push({ k: 'setting', t, g: (page[pg] || pg) + (h ? ' › ' + h.trim() : ''), p: pg, f: t }); });
+      });
+    } catch (e) { /* ignore */ }
+    SR.idx = out;
+  }
+  function score(item, words) { const t = (item.t + ' ' + item.g).toLowerCase(); let s = 0; for (const w of words) { const i = t.indexOf(w); if (i < 0) return 0; s += i === 0 ? 3 : 1; } return s + (item.k === 'button' ? 2 : item.k === 'page' ? 3 : item.k === 'section' ? 1 : 0); }
+  async function searchRun() {
+    const q = SR.q.trim().toLowerCase(), out = $('srOut'); if (!out) return;
+    if (!q) { out.innerHTML = '<p class="muted">Type a word: e.g. replay, camera, giveaway, theme, music, a viewer\'s name.</p>'; return; }
+    if (!SR.idx) { out.innerHTML = '<p class="muted">Getting everything ready…</p>'; await buildIndex(); }
+    const words = q.split(/\s+/).filter(Boolean), seen = new Set();
+    const hits = SR.idx.map((x) => [score(x, words), x]).filter((x) => x[0] > 0).sort((a, b) => b[0] - a[0]).map((x) => x[1]).filter((x) => { const k = x.k + '|' + x.t + '|' + (x.p || x.u); if (seen.has(k)) return false; seen.add(k); return true; });
+    const btn = hits.filter((x) => x.k === 'button').slice(0, 12), pages = hits.filter((x) => x.k !== 'button').slice(0, 12);
+    let h = '';
+    if (btn.length) h += '<h3>BUTTONS (TAP TO DO IT)</h3>' + btn.map((x) => '<div class="sr"><span>' + esc(x.t) + '<small>' + esc(x.g) + '</small></span><button data-u="' + esc(x.u) + '" style="border-color:' + esc(x.c || '#4dc3ff') + '">Do it</button></div>').join('');
+    if (pages.length) h += '<h3>IN THE DASHBOARD</h3>' + pages.map((x) => '<div class="sr"><span>' + esc(x.t) + '<small>' + esc(x.g) + '</small></span><a href="/#' + esc(x.p) + (x.f ? '?find=' + encodeURIComponent(x.f) : '') + '" target="bbrdash" rel="noopener"><button>Open</button></a></div>').join('');
+    if (q.length >= 2) {
+      try { if (SR.vq !== q) { SR.vq = q; SR.viewers = (await fetch('/api/viewers?q=' + encodeURIComponent(q)).then((r) => r.json())).slice(0, 8); } } catch (e) { SR.viewers = []; }
+      if (SR.viewers.length) h += '<h3>VIEWERS</h3>' + SR.viewers.map((c) => '<div class="sr"><span><b>' + esc(c.display) + '</b> ' + c.ovr + '<small>' + esc(String(c.tier || '').toUpperCase()) + ' · ' + esc((c.platforms || []).join(', ')) + '</small></span><button data-u="/control/showcard?key=' + encodeURIComponent(c.key) + '">Show card</button><button data-u="/control/sgw-add?name=' + encodeURIComponent(c.display) + '">+ Giveaway</button></div>').join('');
+    }
+    out.innerHTML = h || '<p class="muted">Nothing found for "' + esc(SR.q) + '".</p>';
+    out.querySelectorAll('[data-u]').forEach((b) => { b.onclick = () => go(b.dataset.u); });
+  }
+  let srT = null;
+  function searchWire() {
+    const i = $('srQ'); if (!i) return;
+    i.value = SR.q; i.oninput = () => { SR.q = i.value; clearTimeout(srT); srT = setTimeout(searchRun, 180); };
+    if (SR.q) searchRun();
+    if (!SR.focused) { SR.focused = true; setTimeout(() => i.focus(), 50); }
+  }
+  function gamesTab(d) {
+    // v35: battles switched off completely
+    if (d.battlesOff) return '<div class="card r"><span class="t">BATTLES ARE OFF</span><span>Nothing can start, !join and the game commands are ignored, and nothing battle-related shows on stream.</span></div>' +
+      B('/control/battles-on', '<b style="font-size:24px">TURN BATTLES ON</b>', 'big', ' style="min-height:90px;border-color:#3dff9a;color:#3dff9a;background:#0d2219"');
+    let h = guardCard(d) + lobbyCard(d) + bossKick(d) + gameCard(d);
+    const busy = !!(d.lobby || d.game);
+    h += '<h3>START A GAME</h3><div class="g2">' +
+      B('/control/start?mode=shootout', 'PENALTIES 1 v 1', 'bc', ' style="min-height:60px"' + (busy ? ' disabled' : '')) + B('/control/teampens-open', 'TEAM SHOOTOUT', 'bc', ' style="min-height:60px"' + (busy ? ' disabled' : '')) +
+      B('/control/boss-start', 'BEAT THE BOSS', 'bc', ' style="min-height:60px;border-color:#ff6b7d;color:#ffb3bc;background:#2a1012"' + (busy ? ' disabled' : '')) + B('/control/start?mode=race', 'TRUCK RACE', 'bc', ' style="min-height:60px"' + (busy ? ' disabled' : '')) +
+      B('/control/start?mode=arc', 'QUEEN RAID', 'bc', ' style="min-height:60px"' + (busy ? ' disabled' : '')) + B('/control/toggle', d.gamesOpts && d.gamesOpts.battlesPaused ? 'AUTO GAMES: OFF' : 'AUTO GAMES: ON', 'bc', ' style="min-height:60px"') + B('/control/battles-off', 'BATTLES OFF COMPLETELY', 'bc', ' style="min-height:60px;border-color:#ff6b7d;color:#ffb3bc" data-ask="Switch battles off completely? Nothing can start and !join is ignored until you turn them back on."') + '</div>';
+    const o = d.gamesOpts || {};
+    h += '<label class="tog"><input type="checkbox" id="goMe"' + (o.letMePlay ? ' checked' : '') + '><span><b>Let me play.</b> When you type !join you\'re always in (and first in the draw).</span></label>' +
+      '<label class="tog"><input type="checkbox" id="goRep"' + (o.joinReplies ? ' checked' : '') + '><span>Reply in chat when people join ("@KTB you\'re in! 6 joined"), grouped so it never spams.</span></label>' +
+      '<p class="muted" style="margin:0;font-size:12px">Shooters type L / C / R, add T or B for top / bottom: LT, RB, T, B (or 1-9 like a number pad).</p>';
+    return h;
+  }
+  function fixTab(d) {
+    let h = guardCard(d);
+    const H = d.health || {};
+    h += '<div class="health">' + Object.keys(NAMES).map((k) => '<span class="' + (H[k] === false ? 'no' : H[k] == null ? 'off' : '') + '"><i></i>' + NAMES[k] + '</span>').join('') + '</div>';
+    const S = d.safety || {};
+    h += '<h3>IF SOMETHING GOES WRONG</h3>' +
+      '<button class="fix" data-u="/control/cards-freeze" style="border-color:#ffb020;background:#1d1810"><b style="color:#ffc861">' + (S.frozen ? 'UNFREEZE CARDS' : 'FREEZE ALL CARDS') + '</b><small>' + (S.frozen ? 'Adds the held changes back' : 'Cards stop changing. Chat, games and alerts carry on.') + '</small></button>' +
+      '<button class="fix" data-u="/control/cards-undo10" data-ask="Take back the card points from the last 10 minutes? (Subs, gifts and bits stay. A backup is saved first.)"><b>UNDO THE LAST 10 MINUTES</b><small>Card points only' + (S.undo10 ? ' · ' + S.undo10 + ' card' + (S.undo10 === 1 ? '' : 's') + ' changed' : '') + '. Subs, gifts and bits stay.</small></button>' +
+      '<button class="fix" id="resetBtn"><b>CARDS BACK TO START OF STREAM</b><small>Uses the start-of-stream backup. Shows you first.</small></button>' +
+      '<div class="g2">' + B('/control/bot-mute', d.botMuted ? 'Unmute chat bot' : 'Mute chat bot', '', ' style="border-color:#ff6b7d;color:#ffb3bc;background:#2a1012;min-height:52px"') + B('/control/panic', d.panic ? 'Show overlays again' : 'Hide all overlays', '', ' style="border-color:#ff3b3b;background:#3a0b0e;min-height:52px"') +
+      B('/control/reconnect', 'Reconnect everything', '', ' style="min-height:52px"') + B('/control/stop-games', 'Stop all games', '', ' style="min-height:52px"') + '</div>' +
+      '<div class="g2">' + B('/control/cam-reset', 'RESET CAMERA', '', ' style="border-color:#ff5aa0;color:#ff9cc6;min-height:52px"') + B('/control/cam-savespot', 'Save camera spot', '', ' style="border-color:#ff5aa0;min-height:52px"') + '</div>' +
+      '<p class="muted" style="margin:0;font-size:12px">Card guard: if a card jumps ' + ((S.guard && S.guard.guardOvr) || 5) + '+ OVR in ' + ((S.guard && S.guard.guardMins) || 10) + ' minutes (not from someone paying), card changes pause by themselves and ask you here. Full card editor + card check: dashboard › Viewers › Edit a card.</p>';
+    return h;
+  }
+
+  function draw() {
+    const d = D, mins = d.liveSince && d.live ? Math.floor((Date.now() - d.liveSince) / 60000) : 0, bad = healthBad(d.health);
+    $('top').innerHTML = '<span class="live' + (d.live ? ' on' : '') + '">' + (d.live ? 'LIVE ' + Math.floor(mins / 60) + ':' + String(mins % 60).padStart(2, '0') : 'OFFLINE') + '</span>' +
+      (d.viewers != null ? '<span class="muted">' + d.viewers + ' viewers</span>' : '') + (d.theme === 'ets' ? '<span class="muted">ETS theme</span>' : d.theme === 'heist' ? '<span class="muted" style="color:#ff3d8b">Heist theme</span>' : '') + (d.panic ? '<span style="color:#ff6b7d;font-weight:700">HIDDEN</span>' : '') +
+      '<button class="hp' + (bad.length ? ' bad' : '') + '" data-tab="fix"><i></i>' + (bad.length ? bad.map((k) => NAMES[k]).join(', ') + (bad.length === 1 && bad[0] === 'cards' ? ' frozen' : ' down') : 'All good') + '</button>';
+    const fx = document.querySelector('.tabs .fx'); fx.innerHTML = 'Fix it' + (bad.length ? '<span class="dot"></span>' : '');
+    document.querySelectorAll('.tabs [data-t]').forEach((b) => b.classList.toggle('on', b.dataset.t === tab));
+    const html = tab === 'replay' ? replayTab(d) : tab === 'games' ? gamesTab(d) : tab === 'fix' ? fixTab(d) : tab === 'give' ? giveTab(d) : tab === 'search' ? searchTab(d) : live(d);
+    // don't redraw under your fingers while you type in a box (it catches up when you leave it)
+    const fe = document.activeElement; if (fe && $('body').contains(fe) && /^(INPUT|TEXTAREA|SELECT)$/.test(fe.tagName) && html !== shown) { pendingDraw = true; return; }
+    if (scrubbing && $('rpScrub')) return;   // don't redraw under your finger while you scrub
+    if (html === shown) { posUpdate(d); return; } shown = html;
+    $('body').style.display = 'flex'; $('body').style.flexDirection = 'column'; $('body').style.gap = '10px';
+    $('body').innerHTML = html;
+    $('body').querySelectorAll('[data-u]').forEach((b) => { b.onclick = () => go(b.dataset.u, b.dataset.ask); });
+    const dk = $('rpDesk'); if (dk) dk.onclick = () => window.open('/analysis', 'bbranalysis', 'width=1280,height=860');
+    const tws = $('twShow'); if (tws) tws.onclick = () => { TW.list = TW.list || null; twLoad(); };
+    const twc = $('twCheck'); if (twc) twc.onclick = async () => { TW.check = { ok: true, steps: [{ ok: true, what: 'Checking with Twitch…' }] }; shown = ''; draw(); try { TW.check = await post('/api/replay/twitch', { check: true }); } catch (e) { TW.check = { ok: false, steps: [{ ok: false, what: 'App not running?' }] }; } shown = ''; draw(); };
+    const sc = $('rpScrub'); if (sc) { sc.oninput = () => { scrubbing = true; }; sc.onchange = async () => { const P = D.replay && D.replay.pos; if (P && P.duration) await post('/api/replay/pos', { to: Math.round(P.duration * sc.value / 1000) }); scrubbing = false; load(); }; }
+    const g = $('rcGive'); if (g) g.onclick = () => go('/control/redcard-assign?player=' + encodeURIComponent($('rcWho').value));
+    const me = $('goMe'); if (me) me.onchange = async () => { await post('/api/gamesopts', { letMePlay: me.checked }); say(me.checked ? 'You\'re always in when you !join' : 'You go in the draw like everyone else'); load(); };
+    const rp = $('goRep'); if (rp) rp.onchange = async () => { await post('/api/gamesopts', { joinReplies: rp.checked }); say(rp.checked ? 'Join replies on' : 'Join replies off'); load(); };
+    const rs = $('resetBtn'); if (rs) rs.onclick = resetFlow;
+    giveWire(); searchWire();
+    posUpdate(d);
+  }
+  function posUpdate(d) {
+    const P = d.replay && d.replay.pos, sc = $('rpScrub'), t = $('rpPosT'); if (!P || !sc) return;
+    if (!scrubbing && P.duration) sc.value = Math.round(1000 * Math.min(1, P.cursor / P.duration));
+    if (t) t.textContent = (P.cursor / 1000).toFixed(1) + ' / ' + (P.duration / 1000).toFixed(1) + ' s' + (P.frozen ? ' · paused' : '');
+  }
+  async function resetFlow() {
+    const g = await fetch('/api/cardreset').then((r) => r.json()).catch(() => null);
+    if (!g || !g.best) { say('No backup from before this stream'); return; }
+    const p = await post('/api/cardreset', { file: g.best, apply: false });
+    if (p.error) { say(p.error); return; }
+    if (!confirm('Put every card back to how it was before this stream (' + new Date(p.backupAt).toLocaleString() + ')?\n\n' + p.viewers + ' cards change. Tonight\'s subs, gifts and bits are kept, and everyone who chatted tonight gets one normal check-in.\n\nA backup of right now is saved first.')) return;
+    const r = await post('/api/cardreset', { file: g.best, apply: true });
+    say(r.error || 'Done: ' + r.viewers + ' cards put back to before this stream'); load();
+  }
+  document.addEventListener('click', (e) => { const t = e.target.closest('[data-t],[data-tab]'); if (!t) return; tab = t.dataset.t || t.dataset.tab; try { localStorage.setItem('bbr-dock29', tab); } catch (err) { /* ignore */ } shown = ''; if (D) draw(); });
+  async function load() { try { D = await fetch('/api/dock', { cache: 'no-store' }).then((r) => r.json()); draw(); } catch (e) { say('App not running?'); } }
+  load(); setInterval(load, 1500);
+})();
+</script>
+</body>
+</html>

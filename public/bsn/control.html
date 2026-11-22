@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Boss Sports News · Control</title>
+<style>
+  :root {
+    --bg: #1b1d27; --card: #252836; --text: #eceef5; --muted: #9aa1b8; --line: #343849;
+    --red: #d10a22; --gold: #f5c400; --green: #3ccf6e;
+    color-scheme: dark;
+  }
+  @media (prefers-color-scheme: light) {
+    :root { --bg: #f2f3f7; --card: #ffffff; --text: #141826; --muted: #5b6582; --line: #d9dce6; color-scheme: light; }
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--bg); color: var(--text); font: 14px/1.35 'Segoe UI', system-ui, sans-serif; padding: 10px; }
+  h1 { font-size: 15px; margin: 0 0 8px; letter-spacing: .5px; display: flex; align-items: center; gap: 8px; }
+  h1 b { background: var(--red); color: #fff; padding: 2px 7px; font-size: 12px; letter-spacing: 1px; }
+  .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; }
+  button {
+    font: 600 13px/1.2 'Segoe UI', system-ui, sans-serif; color: var(--text); background: var(--card);
+    border: 1px solid var(--line); border-radius: 6px; padding: 9px 8px; cursor: pointer; text-align: left;
+  }
+  button:hover { border-color: var(--gold); }
+  button.big { grid-column: 1 / -1; font-size: 14px; padding: 11px 10px; }
+  button.on { background: var(--red); border-color: var(--red); color: #fff; }
+  button small { display: block; font-weight: 400; font-size: 11px; opacity: .8; margin-top: 2px; }
+  .status { margin-top: 10px; background: var(--card); border: 1px solid var(--line); border-radius: 6px; padding: 8px 10px; font-size: 12.5px; }
+  .status div { display: flex; justify-content: space-between; gap: 10px; padding: 2px 0; }
+  .status span { color: var(--muted); }
+  .dot { display: inline-block; width: 8px; height: 8px; border-radius: 50%; background: var(--muted); margin-right: 6px; }
+  .dot.ok { background: var(--green); }
+  .off { color: var(--muted); font-size: 12px; margin-top: 8px; }
+  .obsmsg { color: var(--muted); font-size: 12px; margin-top: 6px; }
+  h2 { font-size: 12px; color: var(--muted); letter-spacing: 1px; text-transform: uppercase; margin: 12px 0 6px; }
+</style>
+</head>
+<body>
+  <h1><b>BSN</b> Boss Sports News</h1>
+
+  <div class="grid">
+    <button class="big" id="hold" data-cmd="toggle-hold">Hold alerts<small id="holdNote">Goals will wait instead of covering your match</small></button>
+    <button data-cmd="lastgoal">Replay last goal<small>Same as !lastgoal</small></button>
+    <button data-cmd="roundup">Round-up now<small>Today’s results</small></button>
+    <button id="quick" data-cmd="quick">Quick alerts<small>No 3D replay</small></button>
+    <button id="sound" data-cmd="sound">Sound<small>Sting and crowd</small></button>
+  </div>
+
+  <h2>Test</h2>
+  <div class="grid">
+    <button data-cmd="test-goal">Test goal</button>
+    <button data-cmd="test-milan">Test Milan goal</button>
+    <button data-cmd="test-flash">Test ticker flash</button>
+    <button data-cmd="test-summary">Test “while you were playing”</button>
+    <button data-cmd="test-var">Test VAR</button>
+    <button data-cmd="test-roundup">Test round-up</button>
+  </div>
+
+  <div class="status" id="status">
+    <div><span>Server</span><b id="sServer">connecting…</b></div>
+    <div><span>Twitch chat</span><b id="sChat">–</b></div>
+    <div><span>OBS game box</span><b id="sObs">–</b></div>
+    <div><span>Next full takeover</span><b id="sFull">–</b></div>
+    <div><span>Games watched today</span><b id="sGames">–</b></div>
+    <div><span>Last goal</span><b id="sGoal">–</b></div>
+  </div>
+  <div class="obsmsg" id="obsMsg"></div>
+  <button id="obsCheck" type="button" style="margin-top:8px;width:100%">Check OBS connection</button>
+  <div class="off" id="offline" hidden>Can’t reach the app. Is the BBR Viewer Cards window open?</div>
+
+<script>
+  const $ = id => document.getElementById(id);
+  // Works whether the dock opens http://localhost:8765/control or the control.html file directly
+  const BASE = (location.protocol.startsWith('http') ? '' : 'http://localhost:3000') + '/bsn';
+  function show(st) {
+    $('offline').hidden = true;
+    $('sServer').innerHTML = '<i class="dot ok"></i>running';
+    $('hold').classList.toggle('on', st.holding);
+    $('hold').firstChild.textContent = st.holding ? 'Alerts on hold — click to release' : 'Hold alerts';
+    $('holdNote').textContent = st.holding
+      ? (st.held ? `${st.held} alert${st.held > 1 ? 's' : ''} waiting` : 'Nothing waiting yet')
+      : 'Goals will wait instead of covering your match';
+    $('quick').classList.toggle('on', st.quick);
+    $('sound').classList.toggle('on', st.sound);
+    $('sChat').innerHTML = st.chat_channel ? `<i class="dot ${st.chat_connected ? 'ok' : ''}"></i>${st.chat_connected ? 'listening' : 'connecting…'}` : 'off';
+    $('sObs').innerHTML = st.obs_ok === true ? '<i class="dot ok"></i>ready' : st.obs_ok === false ? '<i class="dot"></i>not set up' : 'not checked';
+    $('obsMsg').textContent = st.obs_ok ? '' : (st.obs_message || '');
+    $('sFull').textContent = st.full_ready_in > 0 ? `in ${Math.ceil(st.full_ready_in / 60)} min (Milan goals always)` : 'ready';
+    $('holdNote').textContent = st.holding
+      ? (st.held ? `${st.held} alert${st.held > 1 ? 's' : ''} waiting — they’ll come back as one summary` : 'Nothing waiting yet')
+      : 'Goals will wait instead of covering your match';
+    $('sGames').textContent = `${st.matches_today} (${st.live_now} live)`;
+    $('sGoal').textContent = st.last_goal || 'none yet';
+  }
+  async function refresh() {
+    try { show(await (await fetch(BASE + '/state', { cache: 'no-store' })).json()); }
+    catch (e) { $('offline').hidden = false; $('sServer').innerHTML = '<i class="dot"></i>not running'; }
+  }
+  document.querySelectorAll('button[data-cmd]').forEach(b => b.addEventListener('click', async () => {
+    try { const r = await fetch(BASE + '/command/' + b.dataset.cmd, { cache: 'no-store' }); show((await r.json()).state); }
+    catch (e) { refresh(); }
+  }));
+  $('obsCheck').addEventListener('click', async () => {
+    $('obsMsg').textContent = 'Checking…';
+    try { show(await (await fetch(BASE + '/obs/check', { cache: 'no-store' })).json()); } catch (e) { refresh(); }
+  });
+  refresh();
+  setInterval(refresh, 2000);
+</script>
+</body>
+</html>

@@ -1,0 +1,383 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>BBR Starting Soon</title>
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700;800&family=Inter:wght@400;600;700&family=VT323&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/card.css">
+<style>
+  html,body{margin:0;width:1920px;height:1080px;overflow:hidden;background:#061233;color:#f6f7fa;font-family:'Barlow Condensed','Arial Narrow',sans-serif}
+  #bg{position:absolute;inset:0;overflow:hidden}
+  #bg .lay{position:absolute;inset:-2%;background-size:cover;background-position:center;opacity:0;transition:opacity 1.6s ease}
+  #bg .lay.on{opacity:1}
+  body.zoom #bg .lay.on{animation:kb 34s ease-in-out infinite alternate}
+  @keyframes kb{from{transform:scale(1) translate(0,0)}to{transform:scale(1.09) translate(-1.5%,-1%)}}
+  .bsnset{background:radial-gradient(ellipse at 30% 20%,#16337a,#0d2459 45%,#061233)}
+  .bsnset .sw{position:absolute;left:-10%;top:60%;width:130%;height:300px;background:#e3132c;opacity:.85;transform:skewY(-8deg);animation:sweep 16s ease-in-out infinite alternate}
+  .bsnset .sw2{position:absolute;left:-10%;top:67%;width:130%;height:44px;background:#f5c400;transform:skewY(-8deg);animation:sweep 16s ease-in-out infinite alternate}
+  .bsnset .wm{position:absolute;right:-60px;top:-140px;font-size:820px;font-weight:800;color:rgba(255,255,255,.045);letter-spacing:-20px;line-height:1}
+  @keyframes sweep{from{transform:skewY(-8deg) translateX(-3%)}to{transform:skewY(-8deg) translateX(3%)}}
+  #shade{position:absolute;inset:0;background:linear-gradient(90deg,rgba(6,18,51,.92) 0%,rgba(6,18,51,.7) 45%,rgba(6,18,51,.25) 62%,rgba(6,18,51,.55) 100%),linear-gradient(0deg,rgba(6,18,51,.8),transparent 30%)}
+  .bug{position:absolute;left:90px;top:56px;display:flex;height:44px;box-shadow:0 10px 30px rgba(0,0,0,.4)}
+  .bug b{background:#e3132c;font-size:26px;letter-spacing:3px;padding:0 16px;display:flex;align-items:center}
+  .bug span{background:#0d2459;font-size:17px;font-weight:700;letter-spacing:3px;padding:0 14px;display:flex;align-items:center}
+  .bug i{background:#f6f7fa;color:#061233;font-style:normal;font-size:17px;font-weight:800;letter-spacing:2px;padding:0 12px;display:flex;align-items:center;gap:8px}
+  .bug i:before{content:'';width:10px;height:10px;border-radius:50%;background:#e3132c;animation:blink 1.2s infinite}
+  @keyframes blink{50%{opacity:.2}}
+  .left{position:absolute;left:90px;top:150px;width:1150px}
+  .kick{font-size:24px;letter-spacing:9px;color:#f5c400;font-weight:700}
+  .title{font-size:150px;white-space:nowrap;font-weight:800;line-height:.88;letter-spacing:1px;margin-top:6px;text-shadow:0 8px 40px rgba(0,0,0,.5)}
+  .tonight{font-size:40px;font-weight:700;letter-spacing:2px;color:#dfe5ee;margin-top:12px}
+  .chips{display:flex;gap:10px;margin-top:16px;flex-wrap:wrap}
+  .chips span{font-family:Inter,sans-serif;font-size:17px;font-weight:600;background:rgba(6,18,51,.75);border:1px solid rgba(255,255,255,.18);padding:6px 12px;display:flex;align-items:center;gap:8px}
+  .chips em{font-style:normal;font-weight:800;font-size:12px;padding:2px 6px;border-radius:3px;color:#061233}
+  .cd{position:relative;margin-top:26px;display:inline-flex;flex-direction:column;gap:0;filter:drop-shadow(0 18px 40px rgba(0,0,0,.45))}
+  .cd .lb{align-self:flex-start;background:#e3132c;font-size:24px;font-weight:800;letter-spacing:5px;padding:4px 16px}
+  .cd .box{display:flex;align-items:stretch;background:#f6f7fa;color:#061233}
+  .cd .box .bar{width:16px;background:#e3132c}
+  .cd .dig{font-size:190px;font-weight:800;line-height:.92;padding:4px 34px 0 26px;font-variant-numeric:tabular-nums;letter-spacing:4px;min-width:470px}
+  .cd .dig.hot{color:#e3132c;animation:pulse 1s infinite}
+  @keyframes pulse{50%{transform:scale(1.04)}}
+  .cd .pg{height:10px;background:rgba(255,255,255,.2)}.cd .pg i{display:block;height:100%;background:#f5c400;transition:width .5s linear}
+  .cd .st{font-family:Inter,sans-serif;font-size:16px;color:#c3cad3;margin-top:10px;font-weight:600;letter-spacing:.5px}
+  .cd .held{display:inline-block;margin-top:10px;background:#f5c400;color:#061233;font-size:20px;font-weight:800;letter-spacing:2px;padding:3px 12px}
+  .low{position:absolute;left:90px;top:800px;display:flex;gap:30px;align-items:flex-start}
+  .spot{display:flex;gap:18px;align-items:center;width:560px;height:200px}
+  .spot .cw{width:136px;height:200px;position:relative;flex:none}
+  .spot .cw .in{position:absolute;left:0;top:0;width:260px;height:380px;transform:scale(.525);transform-origin:0 0}
+  .spot .tx{display:flex;flex-direction:column;gap:4px;min-width:0}
+  .spot .lab{align-self:flex-start;background:#f5c400;color:#061233;font-size:18px;font-weight:800;letter-spacing:3px;padding:2px 10px}
+  .spot .nm{font-size:46px;font-weight:800;line-height:1;overflow:hidden;white-space:nowrap;text-overflow:ellipsis;max-width:400px}
+  .spot .vl{font-family:Inter,sans-serif;font-size:17px;color:#c3cad3}
+  .spot .st2{display:flex;gap:8px;margin-top:4px}.spot .st2 span{font-size:20px;font-weight:700;background:rgba(6,18,51,.8);padding:2px 8px}.spot .st2 b{color:#f5c400}
+  .spot.chg{animation:spotIn .7s cubic-bezier(.2,.9,.3,1.1)}
+  @keyframes spotIn{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:none}}
+  .arr{width:470px;background:rgba(6,18,51,.86);border-top:4px solid #f5c400}
+  .arr .h{display:flex;justify-content:space-between;align-items:center;padding:6px 12px;font-size:20px;font-weight:800;letter-spacing:3px}
+  .arr .h b{color:#f5c400}
+  .arr .rows{height:150px;overflow:hidden}
+  .arr .r{display:flex;align-items:center;gap:10px;height:30px;padding:0 12px;font-size:21px;font-weight:700;border-top:1px solid rgba(255,255,255,.07);animation:flip .5s ease-out both;transform-origin:top}
+  .arr .r .t{font-family:Inter,sans-serif;font-size:12px;color:#a7b0ba;width:44px}
+  .arr .r .n{flex:1;overflow:hidden;white-space:nowrap;text-overflow:ellipsis}
+  .arr .r .o{font-size:18px;padding:0 6px;color:#061233;min-width:26px;text-align:center}
+  .arr .hint{font-family:Inter,sans-serif;font-size:13px;color:#c3cad3;padding:5px 12px 7px}
+  @keyframes flip{from{transform:rotateX(90deg);opacity:0}to{transform:none;opacity:1}}
+  .chat{position:absolute;right:60px;top:150px;width:560px;height:830px;display:flex;flex-direction:column}
+  .chat .h{display:flex;align-items:stretch;height:46px}
+  .chat .h b{background:#e3132c;font-size:22px;letter-spacing:4px;padding:0 14px;display:flex;align-items:center}
+  .chat .h span{flex:1;background:#0d2459;font-size:17px;font-weight:700;letter-spacing:3px;padding:0 14px;display:flex;align-items:center;justify-content:space-between}
+  .chat .list{flex:1;display:flex;flex-direction:column;justify-content:flex-end;gap:8px;overflow:hidden;padding-top:10px;-webkit-mask-image:linear-gradient(180deg,transparent,#000 14%)}
+  .msg{display:flex;gap:12px;align-items:flex-start;background:rgba(6,18,51,.88);padding:10px 12px;border-left:5px solid var(--t,#c9ced6);animation:msgIn .45s cubic-bezier(.2,.9,.3,1.15) both;flex:none}
+  .msg .ov{width:52px;height:60px;flex:none;display:flex;flex-direction:column;align-items:center;justify-content:center;background:var(--t,#c9ced6);color:#061233;clip-path:polygon(0 0,100% 0,100% 82%,50% 100%,0 82%)}
+  .msg .ov b{font-size:28px;line-height:1}.msg .ov small{font-size:11px;font-weight:800;letter-spacing:1px}
+  .msg .bd{min-width:0;flex:1}
+  .msg .who{display:flex;align-items:center;gap:7px;font-size:22px;font-weight:800;letter-spacing:.5px}
+  .msg .who em{font-style:normal;font-family:Inter,sans-serif;font-size:11px;font-weight:800;padding:2px 5px;border-radius:3px;color:#061233}
+  .msg .tx{font-family:Inter,sans-serif;font-size:19px;line-height:1.35;color:#eef1f4;word-wrap:break-word;margin-top:2px}
+  .msg.boss{--t:#e3132c}.msg.boss .ov{color:#fff}
+  @keyframes msgIn{from{transform:translateX(60px) scale(.96);opacity:0}to{transform:none;opacity:1}}
+  .chat .empty{font-family:Inter,sans-serif;font-size:18px;color:#c3cad3;background:rgba(6,18,51,.7);padding:14px}
+  .al{position:absolute;right:60px;top:46px;display:flex;align-items:stretch;background:#f6f7fa;color:#061233;box-shadow:0 20px 60px rgba(0,0,0,.6);z-index:20;animation:alIn .6s cubic-bezier(.2,.9,.3,1.2) both;max-width:1100px}
+  .al.out{animation:alOut .4s ease-in both}
+  .al .k{background:#e3132c;color:#fff;font-size:28px;font-weight:800;letter-spacing:3px;padding:0 20px;display:flex;align-items:center}
+  .al .o{background:var(--t,#f5c400);font-size:40px;font-weight:800;padding:0 16px;display:flex;align-items:center}
+  .al .n{max-width:520px;overflow:hidden;white-space:nowrap;text-overflow:ellipsis;font-size:44px;font-weight:800;padding:8px 22px 0;line-height:1}.al .n small{display:block;font-family:Inter,sans-serif;font-size:16px;font-weight:600;color:#33404f;padding-bottom:8px}
+  @keyframes alIn{from{transform:translateY(-150%)}to{transform:none}}
+  @keyframes alOut{to{transform:translateY(-160%)}}
+  #ko{position:absolute;inset:0;z-index:30;pointer-events:none;display:none}
+  #ko.on{display:block}
+  #ko .b1,#ko .b2,#ko .b3{position:absolute;left:-20%;width:140%;transform:skewY(-8deg) translateX(-110%)}
+  #ko .b1{top:20%;height:46%;background:#e3132c;animation:koIn 1.1s cubic-bezier(.7,0,.25,1) forwards}
+  #ko .b2{top:62%;height:7%;background:#f5c400;animation:koIn 1.1s .12s cubic-bezier(.7,0,.25,1) forwards}
+  #ko .b3{top:10%;height:12%;background:#0d2459;animation:koIn 1.1s .2s cubic-bezier(.7,0,.25,1) forwards}
+  #ko .t{position:absolute;left:0;right:0;top:34%;text-align:center;font-size:240px;font-weight:800;letter-spacing:6px;opacity:0;animation:koT .5s .7s forwards;text-shadow:0 10px 40px rgba(0,0,0,.4)}
+  #ko .s{position:absolute;left:0;right:0;top:64.6%;text-align:center;font-size:40px;font-weight:800;letter-spacing:10px;color:#061233;opacity:0;animation:koT .5s .9s forwards}
+  @keyframes koIn{to{transform:skewY(-8deg) translateX(0)}}
+  @keyframes koT{from{opacity:0;transform:scale(1.3)}to{opacity:1;transform:none}}
+  #tick{position:absolute;inset:0;border:0;width:1920px;height:1080px;background:transparent;pointer-events:none;z-index:10}
+
+  /* ===== v29: Euro Truck Simulator theme (Theme tab) ===== */
+  .etsset{background:linear-gradient(180deg,#13284d 0%,#2b4f7e 42%,#d9874a 74%,#f0b066 82%)}
+  .etsset .hills{position:absolute;left:52%;top:560px;width:640px;height:200px;background:#0f1a2a;opacity:.8;clip-path:polygon(0 100%,8% 30%,20% 40%,34% 0,50% 35%,66% 15%,82% 45%,100% 100%)}
+  .etsset .road{position:absolute;left:0;right:0;top:760px;bottom:0;background:#1f2226}
+  .etsset .rail{position:absolute;left:0;right:0;top:752px;height:10px;background:#8f9499}
+  .etsset .dash{position:absolute;left:0;width:200%;top:890px;height:12px;background:repeating-linear-gradient(90deg,#f4f4f4 0 120px,transparent 120px 220px);animation:drive 1.6s linear infinite}
+  .etsset .edge{position:absolute;left:0;right:0;top:1000px;height:8px;background:#f4f4f4}
+  .etsset .gantry{position:absolute;left:60px;top:40px;width:1176px;height:14px;background:#6f757c}
+  .etsset .post{position:absolute;top:40px;width:14px;height:720px;background:#6f757c}
+  @keyframes drive{to{transform:translateX(-220px)}}
+  body.ets #shade{background:linear-gradient(0deg,rgba(10,14,20,.45),transparent 35%)}
+  body.ets .bug b{background:#ffd400;color:#111}
+  body.ets .bug span{background:#0b4fa8}
+  body.ets .bug i{background:#fff;color:#111}
+  body.ets .bug i:before{background:#127a3a}
+  body.ets .left{left:90px;top:100px;width:1100px;box-sizing:border-box;background:#0b4fa8;border:6px solid #fff;border-radius:18px;padding:28px 40px 30px;box-shadow:0 18px 40px rgba(0,0,0,.35)}
+  body.ets .bug{left:auto;right:660px;top:24px}
+  body.ets .kick{color:#fff;letter-spacing:4px;font-size:30px}
+  body.ets .tonight{color:#fff}
+  body.ets .chips span{background:#127a3a;border:3px solid #fff;border-radius:8px;font-family:'Barlow Condensed',sans-serif;font-size:21px;font-weight:700}
+  body.ets .cd{position:absolute;left:640px;top:520px;margin:0}
+  body.ets .cd .lb{background:#111;color:#ffd400;align-self:stretch;text-align:center}
+  body.ets .cd .box{background:#ffd400;color:#111;border:8px solid #111;border-top:0}
+  body.ets .cd .box .bar{display:none}
+  body.ets .cd .dig{font-size:150px;min-width:360px;text-align:center;padding:4px 20px 0}
+  body.ets .cd .pg i{background:#127a3a}
+  body.ets .low{top:620px}
+  body.ets .low .spot{display:none!important}
+  body.ets .arr{background:#0d0d0d;border:6px solid #3a3a3a;border-radius:12px;font-family:VT323,monospace;color:#ffb000;width:500px}
+  body.ets .arr .h{font-family:VT323,monospace;font-size:28px;color:#ffd27a;letter-spacing:1px;font-weight:400;white-space:nowrap}
+  body.ets .arr .h b{color:#ffd27a}
+  body.ets .arr .r{font-family:VT323,monospace;font-size:28px;font-weight:400;color:#ffb000;border-top-color:rgba(255,176,0,.12)}
+  body.ets .arr .r .t{font-family:VT323,monospace;font-size:22px;color:#9a7a3a;width:62px;flex:none}
+  body.ets .arr .r .o{background:#ffb000!important;color:#111}
+  body.ets .arr .hint{font-family:VT323,monospace;font-size:22px;color:#9a7a3a}
+  body.ets .chat{top:100px;height:800px;background:rgba(10,14,20,.86);border:2px solid #ffd400;border-radius:16px;overflow:hidden}
+  body.ets .chat .h b{background:#ffd400;color:#111}
+  body.ets .chat .h span{background:#111;color:#ffd400}
+  body.ets .chat .list{padding:10px 10px 0}
+  body.ets .msg{background:rgba(255,255,255,.04)}
+  body.ets #ko .b1{background:#0b4fa8}body.ets #ko .b2{background:#ffd400}body.ets #ko .b3{background:#127a3a}
+  body.ets #ko .s{color:#111}
+  /* ===== v31 Sunset Heist (GTA-style, original art) ===== */
+  .hxset{background:linear-gradient(180deg,#1d0b3a 0%,#5b1a6e 26%,#c2306f 46%,#ff6a5a 60%,#ffb35c 68%,#2a0f3d 68.2%,#120624 100%)}
+  .hxset .sun{position:absolute;left:820px;top:260px;width:460px;height:460px;border-radius:50%;background:linear-gradient(#ffe68a,#ff8a5b 70%,#ff4f7b);-webkit-mask:linear-gradient(#000 52%,transparent 52% 56%,#000 56% 63%,transparent 63% 67%,#000 67% 73%,transparent 73% 78%,#000 78% 83%,transparent 83% 89%,#000 89%);mask:linear-gradient(#000 52%,transparent 52% 56%,#000 56% 63%,transparent 63% 67%,#000 67% 73%,transparent 73% 78%,#000 78% 83%,transparent 83% 89%,#000 89%);filter:drop-shadow(0 0 60px rgba(255,120,90,.8))}
+  .hxset .city{position:absolute;left:0;right:0;top:560px;height:180px;background:#140726;clip-path:polygon(0 100%,0 60%,4% 60%,4% 35%,8% 35%,8% 55%,12% 55%,12% 20%,15% 20%,15% 8%,17% 8%,17% 20%,20% 20%,20% 50%,25% 50%,25% 30%,29% 30%,29% 62%,34% 62%,34% 42%,38% 42%,38% 70%,62% 70%,62% 38%,66% 38%,66% 15%,69% 15%,69% 0,71% 0,71% 15%,74% 15%,74% 45%,79% 45%,79% 25%,84% 25%,84% 55%,89% 55%,89% 35%,94% 35%,94% 60%,100% 60%,100% 100%)}
+  .hxset .win{position:absolute;left:0;right:0;top:560px;height:180px;background:radial-gradient(2px 3px at 10px 10px,#ffd27a 98%,transparent) 0 0/26px 22px;opacity:.35;clip-path:inherit}
+  .hxset .sea{position:absolute;left:0;right:0;top:740px;height:120px;background:repeating-linear-gradient(180deg,#2a0f3d 0 10px,#3f1550 10px 13px)}
+  .hxset .glint{position:absolute;left:880px;top:740px;width:340px;height:120px;background:repeating-linear-gradient(180deg,rgba(255,170,100,.7) 0 3px,transparent 3px 12px);-webkit-mask:linear-gradient(90deg,transparent,#000 30%,#000 70%,transparent);mask:linear-gradient(90deg,transparent,#000 30%,#000 70%,transparent);animation:hxGl 3s ease-in-out infinite}
+  @keyframes hxGl{50%{opacity:.5;transform:scaleX(.9)}}
+  .hxset .road{position:absolute;left:0;right:0;top:860px;bottom:0;background:#0d0418;border-top:4px solid #ff3d8b;box-shadow:0 -6px 30px rgba(255,61,139,.6)}
+  .hxset .dash{position:absolute;left:0;width:200%;top:960px;height:10px;background:repeating-linear-gradient(90deg,#2ef2ff 0 120px,transparent 120px 220px);box-shadow:0 0 14px #2ef2ff;animation:drive 1.2s linear infinite}
+  .hxset .palm{position:absolute;bottom:200px;width:16px;background:linear-gradient(90deg,#0b0316,#1d0a2c);border-radius:8px;transform-origin:bottom;animation:hxSway 6s ease-in-out infinite}
+  .hxset .palm::before{content:"";position:absolute;left:-110px;top:-60px;width:236px;height:120px;background:
+    radial-gradient(70px 16px at 30% 60%,#0b0316 96%,transparent),radial-gradient(70px 16px at 70% 60%,#0b0316 96%,transparent),
+    radial-gradient(60px 14px at 18% 82%,#0b0316 96%,transparent),radial-gradient(60px 14px at 82% 82%,#0b0316 96%,transparent),
+    radial-gradient(50px 12px at 50% 40%,#0b0316 96%,transparent)}
+  @keyframes hxSway{50%{transform:rotate(2.5deg)}}
+  body.heist #shade{background:linear-gradient(90deg,rgba(18,6,36,.82) 0%,rgba(18,6,36,.45) 45%,rgba(18,6,36,0) 62%,rgba(18,6,36,.4) 100%)}
+  body.heist .bug b{background:#ff3d8b;color:#fff}
+  body.heist .bug span{background:#12061f;color:#2ef2ff}
+  body.heist .bug i{background:#ffe48a;color:#12061f}
+  body.heist .kick{color:#2ef2ff;text-shadow:0 0 14px rgba(46,242,255,.7)}
+  body.heist .title{font-style:italic;font-weight:900;color:#ffe48a;text-shadow:6px 6px 0 #c2306f,12px 12px 0 #12061f}
+  body.heist .tonight{color:#fff;font-style:italic}
+  body.heist .chips span{background:#12061f;border:2px solid #ff3d8b;border-radius:2px;transform:skewX(-8deg)}
+  body.heist .cd .lb{background:#2ef2ff;color:#12061f;font-style:italic;transform:skewX(-8deg)}
+  body.heist .cd .box{background:#12061f;color:#ffe48a;border:4px solid #ff3d8b;box-shadow:8px 8px 0 #2ef2ff}
+  body.heist .cd .box .bar{background:#ff3d8b}
+  body.heist .cd .dig{font-style:italic;text-shadow:4px 4px 0 #c2306f}
+  body.heist .cd .dig.hot{color:#ff3d3d}
+  body.heist .cd .pg i{background:#ff3d8b}
+  body.heist .arr{background:rgba(18,6,36,.88);border-top:4px solid #2ef2ff}
+  body.heist .chat{background:rgba(18,6,36,.78);border:3px solid #12061f;border-radius:34px;padding:12px;box-sizing:border-box;box-shadow:0 0 0 6px #2ef2ff,0 20px 50px rgba(0,0,0,.5)}
+  body.heist .chat .h b{background:#ff3d8b;color:#fff;border-radius:12px 12px 12px 2px}
+  body.heist .chat .h span{background:#12061f;color:#2ef2ff}
+  body.heist .msg{background:rgba(255,255,255,.07);border-left:0;border-radius:16px 16px 16px 4px}
+  body.heist #ko .b1{background:#ff3d8b}body.heist #ko .b2{background:#2ef2ff}body.heist #ko .b3{background:#12061f}
+  body.heist #ko .t{font-style:italic;color:#ffe48a;text-shadow:8px 8px 0 #12061f}
+  body.heist #ko .s{color:#12061f}
+  body.heist #ets-tick{background:linear-gradient(90deg,#ff3d8b,#ff9a3c);color:#fff}
+  body.heist #ets-tick b{background:#12061f;color:#2ef2ff;font-style:italic}
+  .arr .h{gap:12px}.arr .h>span:first-child{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.arr .h>span:last-child{flex:none}
+  #ets-tick{position:absolute;left:0;right:0;bottom:0;height:64px;background:#ffd400;color:#111;display:flex;align-items:center;z-index:11;overflow:hidden}
+  #ets-tick b{background:#111;color:#ffd400;height:100%;display:flex;align-items:center;padding:0 26px;font-size:30px;letter-spacing:2px;flex:none;position:relative;z-index:1}
+  #ets-tick .run{white-space:nowrap;font-size:30px;font-weight:800;padding-left:40px;animation:etsRun 40s linear infinite}
+  @keyframes etsRun{from{transform:translateX(0)}to{transform:translateX(-50%)}}
+  .hide{display:none!important}
+</style>
+</head>
+<body>
+<div id="bg"></div>
+<div id="shade"></div>
+<div class="bug"><b>BBR</b><span id="bugt">BOSS SPORTS NEWS · PRE-MATCH</span><i id="air">ON AIR SOON</i></div>
+<div class="left">
+  <div class="kick" id="kick">TONIGHT ON BIGBOSSROBINSON</div>
+  <div class="title" id="title">STARTING SOON</div>
+  <div class="tonight" id="tonight"></div>
+  <div class="chips" id="chips"></div>
+  <div class="cd" id="cd">
+  <span class="lb" id="cdl">KICK-OFF IN</span>
+  <div class="box"><span class="bar"></span><span class="dig" id="dig">4:15</span></div>
+  <div class="pg"><i id="pg" style="width:0%"></i></div>
+  <div><span class="held hide" id="held"></span></div>
+</div>
+</div>
+<div class="low">
+  <div class="spot" id="spot"></div>
+  <div class="arr" id="arr"><div class="h"><span id="arrt">ARRIVALS</span><span><b id="here">0</b> <span id="heret">IN THE BUILDING</span></span></div><div class="rows" id="arows"></div><div class="hint">Say hi in chat to check in: your card goes on the board</div></div>
+</div>
+<div class="chat" id="chat"><div class="h"><b id="chatt">THE TERRACE</b><span><span id="chats">LIVE CHAT</span> <small id="plats"></small></span></div><div class="list" id="list"><div class="empty" id="empty">Chat shows here with everyone's card rating. Say hi!</div></div></div>
+<div id="ko"><div class="b3"></div><div class="b1"></div><div class="b2"></div><div class="t" id="kot">KICK-OFF!</div><div class="s" id="kos">WE ARE LIVE</div></div>
+<script src="/card.js"></script>
+<script src="/sfx.js"></script>
+<script src="/music.js"></script>
+<script src="/stinger.js"></script>
+<script>
+(function () {
+  const $ = (id) => document.getElementById(id);
+  const esc = (s) => String(s == null ? '' : s).replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+  const TIER = { bronze: '#c8894f', silver: '#c9ced6', gold: '#f6d77a', legend: '#3dff9a' };
+  const PL = { twitch: ['TW', '#b98cff'], kick: ['KICK', '#53fc18'], youtube: ['YT', '#ff6b6b'] };
+  const pt = (p) => PL[p] ? '<em style="background:' + PL[p][1] + '">' + PL[p][0] + '</em>' : '';
+  const sfx = (n, a, b) => { try { window.SFX && SFX.play(n, a, b); } catch (e) { /* no audio */ } };
+  // the words for this game (sent by the app); these are only a fallback while it loads
+  const WD0 = { bug: 'BOSS SPORTS NEWS · PRE-MATCH', airWait: 'PRE-MATCH', airRun: 'ON AIR SOON', airLive: 'LIVE', kick: 'TONIGHT ON BIGBOSSROBINSON', title: 'STARTING SOON', clock: 'KICK-OFF IN', clockDone: 'KICK-OFF', arrivals: 'ARRIVALS', here: 'IN THE BUILDING', chat: 'THE TERRACE', chatSub: 'LIVE CHAT', go: 'KICK-OFF!', goSub: 'WE ARE LIVE' };
+  const WD = () => Object.assign({}, WD0, (st && st.words) || {});
+  let ETS = false, HEIST = false, st = null, skew = 0, lastTick = -1, picIdx = 0, picT = null, picKey = '', spotI = 0, spotT = null, hold = false, alQ = [], alBusy = false, tickerOn = null;
+
+  // ---------- background picture(s) ----------
+  function bg() {
+    const S = st.S, list = S.pic === 'rotate' ? S.pics : S.pic === 'bsn' ? [] : S.pics.filter((u, i) => S.picIds[i] === S.pic);
+    document.body.classList.toggle('zoom', !!S.zoom);
+    const key = JSON.stringify([S.pic, list, S.rotateSecs, ETS, HEIST]);
+    if (key === picKey) return; picKey = key;
+    clearInterval(picT); $('bg').innerHTML = '';
+    if (!list.length) { const d = document.createElement('div'); if (HEIST) { d.className = 'lay on hxset'; d.innerHTML = '<div class="sun"></div><div class="city"></div><div class="win"></div><div class="sea"></div><div class="glint"></div><div class="road"></div><div class="dash"></div><div class="palm" style="left:1300px;height:520px"></div><div class="palm" style="left:1420px;height:430px;animation-delay:-2s"></div><div class="palm" style="left:1840px;height:560px;animation-delay:-4s"></div>'; } else if (ETS) { d.className = 'lay on etsset'; d.innerHTML = '<div class="hills"></div><div class="rail"></div><div class="road"></div><div class="dash"></div><div class="edge"></div><div class="post" style="left:60px"></div><div class="post" style="left:1222px"></div><div class="gantry"></div>'; } else { d.className = 'lay on bsnset'; d.innerHTML = '<div class="sw"></div><div class="sw2"></div><div class="wm">BSN</div>'; } $('bg').appendChild(d); return; }
+    const lays = list.map((u) => { const d = document.createElement('div'); d.className = 'lay'; d.style.backgroundImage = 'url("' + u + '")'; $('bg').appendChild(d); return d; });
+    picIdx = 0; lays[0].classList.add('on');
+    if (lays.length > 1) picT = setInterval(() => { lays[picIdx].classList.remove('on'); picIdx = (picIdx + 1) % lays.length; lays[picIdx].classList.add('on'); }, S.rotateSecs * 1000);
+  }
+  // ---------- the countdown ----------
+  const fmt = (ms) => { const s = Math.max(0, Math.ceil(ms / 1000)); return Math.floor(s / 60) + ':' + String(s % 60).padStart(2, '0'); };
+  function left() { if (!st) return 0; return st.running && st.endsAt ? Math.max(0, st.endsAt - (Date.now() + skew)) : st.left; }
+  function clock() {
+    if (!st) return;
+    const l = left(), secs = Math.ceil(l / 1000);
+    $('dig').textContent = st.ended ? '0:00' : fmt(l);
+    $('dig').classList.toggle('hot', st.running && secs <= 10 && secs > 0);
+    $('pg').style.width = (st.dur ? Math.min(100, 100 * (1 - l / st.dur)) : 0) + '%';
+    // v32: the words follow the game you're playing (and can be changed in the dashboard)
+    const W = WD();
+    $('cdl').textContent = st.ended ? W.clockDone : st.running ? W.clock : st.left < st.dur && !st.ended ? 'PAUSED · ' + W.clock : W.clock;
+    $('air').textContent = st.running ? W.airRun : st.ended ? W.airLive : W.airWait;
+    if (st.running && secs !== lastTick) { if (secs <= 5 && secs > 0) sfx('tick'); lastTick = secs; }
+  }
+  setInterval(clock, 200);
+  // ---------- card spotlight ----------
+  let spotKey = '';
+  function spot() {
+    const L = (st.spot || []).filter((x) => x && x.card);
+    const key = JSON.stringify([st.S.spotlight, L.map((x) => x.label + x.card.display + x.card.ovr)]);
+    if (key === spotKey) return; spotKey = key;
+    clearInterval(spotT);
+    if (!st.S.spotlight || !L.length) { $('spot').classList.add('hide'); return; }
+    $('spot').classList.remove('hide');
+    const show = () => {
+      const x = L[spotI % L.length], c = x.card; spotI++;
+      let cardHtml = '';
+      try { cardHtml = '<div class="' + BBR.wrapClass(c.tier) + '"><div class="in">' + BBR.render(c, { accent: '#f5c400' }) + '</div></div>'; } catch (e) { cardHtml = ''; }
+      const s = c.stats || {}, top = Object.keys(s).sort((a, b) => s[b] - s[a]).slice(0, 3);
+      $('spot').innerHTML = '<div class="cw">' + cardHtml + '</div><div class="tx"><span class="lab">' + esc(x.label) + '</span><span class="nm">' + esc(String(c.display).toUpperCase()) + '</span>' +
+        '<span class="vl">OVR ' + c.ovr + ' · ' + esc(String(c.tier || '').toUpperCase()) + (x.value != null && x.unit !== 'OVR' ? ' · ' + x.value + ' ' + esc(x.unit) : '') + '</span>' +
+        '<div class="st2">' + top.map((k) => '<span><b>' + s[k] + '</b> ' + esc(k) + '</span>').join('') + '</div></div>';
+      $('spot').classList.remove('chg'); void $('spot').offsetWidth; $('spot').classList.add('chg');
+    };
+    show(); if (L.length > 1) spotT = setInterval(show, 9000);
+  }
+  // ---------- arrivals board ----------
+  function arrRow(a) {
+    const d = new Date(a.at), t = String(d.getHours()).padStart(2, '0') + ':' + String(d.getMinutes()).padStart(2, '0');
+    return '<div class="r"><span class="t">' + t + '</span><span class="n">' + esc(a.display) + '</span>' + (PL[a.platform] ? '<em style="font-style:normal;font-family:Inter,sans-serif;font-size:11px;font-weight:800;padding:2px 5px;border-radius:3px;color:#061233;background:' + PL[a.platform][1] + '">' + PL[a.platform][0] + '</em>' : '') + (a.ovr ? '<span class="o" style="background:' + (TIER[a.tier] || '#c9ced6') + '">' + a.ovr + '</span>' : '') + '</div>';
+  }
+  function arrivals() { $('arows').innerHTML = (st.arrivals || []).slice(0, 5).map(arrRow).join(''); $('here').textContent = st.here || 0; }
+  // ---------- chat ----------
+  function chat(a) {
+    if (!st || !st.S.chat) return;
+    const e = $('empty'); if (e) e.remove();
+    const el = document.createElement('div');
+    el.className = 'msg' + (a.boss ? ' boss' : '');
+    el.style.setProperty('--t', a.boss ? '#e3132c' : TIER[a.tier] || '#c9ced6');
+    el.innerHTML = '<div class="ov">' + (a.boss ? '<small>THE</small><b style="font-size:20px">BOSS</b>' : a.ovr ? '<b>' + a.ovr + '</b><small>' + esc(String(a.tier || '').toUpperCase().slice(0, 6)) + '</small>' : '<b>--</b><small>NO CARD</small>') + '</div>' +
+      '<div class="bd"><div class="who">' + esc(a.display) + pt(a.platform) + (a.first ? '<em style="background:#f5c400">NEW FACE</em>' : '') + (a.sub ? '<em style="background:#c58bff">SUB</em>' : '') + (a.mod ? '<em style="background:#4dc3ff">MOD</em>' : '') + '</div><div class="tx">' + esc(a.text) + '</div></div>';
+    const list = $('list'); list.appendChild(el);
+    while (list.children.length > 9) list.removeChild(list.firstChild);
+  }
+  // ---------- alerts shown on this screen (when set to show here) ----------
+  const LAB = { follow: 'NEW FOLLOWER', sub: 'NEW SUB', resub: 'RESUB', gift: 'GIFTED SUBS', bits: 'BITS', kicks: 'KICKS', superchat: 'SUPER CHAT', raid: 'RAID', upgrade: 'CARD UPGRADE', battle: 'BATTLE', newcard: 'NEW CARD', streak: 'STREAK' };
+  function alertNext() {
+    if (alBusy || !alQ.length) return; alBusy = true;
+    const a = alQ.shift(), c = a.card || (a.cards && a.cards[0]) || {};
+    if (a.type === 'pack') { a.kind = a.kind === 'follow' ? 'follow' : 'newcard'; a.reason = a.reason || 'New card: OVR ' + (c.ovr || '') + ' ' + String(c.tier || '').toUpperCase(); }
+    if (a.type === 'streakup') { a.kind = 'streak'; a.reason = (a.cards || []).map((x) => x.display + ' ' + ((x.streak || {}).now || '') + ' in a row').join(' · '); }
+    const el = document.createElement('div'); el.className = 'al'; el.style.setProperty('--t', TIER[c.tier] || '#f5c400');
+    el.innerHTML = '<span class="k">' + esc(LAB[a.kind] || 'THANK YOU') + '</span>' + (c.ovr ? '<span class="o">' + c.ovr + '</span>' : '') + '<span class="n">' + esc(String(c.display || '').toUpperCase()) + '<small>' + esc(a.reason || '') + '</small></span>';
+    document.body.appendChild(el);
+    sfx('impact'); sfx('ding', 0.15); if (c.tier) try { SFX.tierFx(c.tier, 0.3); } catch (e) { /* ignore */ }
+    setTimeout(() => el.classList.add('out'), 5600);
+    setTimeout(() => { el.remove(); alBusy = false; alertNext(); }, 6100);
+  }
+  // ---------- kick-off ----------
+  function kickoff() { const k = $('ko'); k.classList.remove('on'); void k.offsetWidth; k.classList.add('on'); sfx('whistle', 0, true); sfx('cheer', 0.3, 3); sfx('impact', 0.7); setTimeout(() => k.classList.remove('on'), 7000); }
+  // ---------- the BSN ticker along the bottom ----------
+  function ticker(on) {
+    const want = on ? (HEIST ? 'heist' : ETS ? 'ets' : 'bsn') : '';
+    if ((ETS || HEIST) && on) etsTicker();
+    if (want === tickerOn) return; tickerOn = want;
+    const old = $('tick'); if (old) old.remove();
+    const o2 = $('ets-tick'); if (o2) o2.remove();
+    if (!on) return;
+    if (ETS || HEIST) { const d = document.createElement('div'); d.id = 'ets-tick'; d.innerHTML = '<b>' + (HEIST ? 'COAST NEWS 24' : document.body.dataset.look === 'ats' ? 'CB RADIO' : 'TRAFFIC NEWS') + '</b><div class="run" id="etsrun"></div>'; document.body.appendChild(d); etsTicker(); return; }
+    const f = document.createElement('iframe'); f.id = 'tick'; f.src = '/bsn/'; f.title = 'Boss Sports News'; f.setAttribute('allowtransparency', 'true');
+    document.body.appendChild(f);
+    // the ticker page hides itself unless it's the stream's own; keep it showing here
+    setInterval(() => { try { f.contentDocument.body.classList.remove('bsn-hide-ticker'); } catch (e) { /* loading */ } }, 1000);
+  }
+  // the ETS ticker: a traffic-radio strip made from tonight's numbers
+  function etsTicker() {
+    const el = $('etsrun'); if (!el || !st) return;
+    const top = (st.spot || []).find((x) => x && x.card);
+    const L = HEIST ? ['BREAKING: CREW ASSEMBLING ON THE SUNSET COAST', 'SAY HI IN CHAT TO JOIN THE CREW', 'TYPE !CARD TO SEE YOUR CREW FILE', st.cards + ' KNOWN ASSOCIATES ON FILE'] : ['SAY HI IN CHAT TO JOIN THE CONVOY', 'TYPE !CARD TO SEE YOUR CARD', st.cards + ' CARDS IN THE CLUB', 'TRUCK RACE TONIGHT: TYPE !JOIN WHEN IT OPENS'];
+    if (top) L.splice(1, 0, esc(top.label) + ': ' + esc(String(top.card.display).toUpperCase()) + ' ' + top.card.ovr);
+    if (st.here) L.push(st.here + (HEIST ? ' IN THE CREW SO FAR' : ' IN THE CONVOY SO FAR'));
+    const s = L.join('  ·  ') + '  ·  ';
+    if (el.dataset.s !== s) { el.dataset.s = s; el.textContent = s + s; }
+  }
+  // the big title fills the left side but never runs into the chat
+  function fitTitle() { const t = $('title'), W = ETS ? 1010 : HEIST ? 1080 : 1150; let fs = 150; t.style.fontSize = fs + 'px'; while (t.scrollWidth > W && fs > 70) { fs -= 4; t.style.fontSize = fs + 'px'; } }
+  function apply(a) {
+    st = a; skew = (a.now || Date.now()) - Date.now();
+    const S = a.S;
+    // the look follows the game too: trucks = the motorway, GTA = the sunset coast, otherwise the stream theme
+    const LK = a.look || '';
+    ETS = LK === 'ets' || LK === 'ats' || (!/^(football|heist)$/.test(LK) && a.theme === 'ets'); HEIST = !ETS && (LK === 'heist' || (LK !== 'football' && a.theme === 'heist'));
+    document.body.classList.toggle('ets', ETS); document.body.classList.toggle('heist', HEIST); document.body.dataset.look = LK;
+    const W = WD();
+    $('bugt').textContent = W.bug; $('kick').textContent = W.kick;
+    $('arrt').textContent = W.arrivals; $('heret').textContent = W.here;
+    $('chatt').textContent = W.chat; $('chats').textContent = W.chatSub;
+    $('kot').textContent = W.go; $('kos').textContent = W.goSub;
+    // your own title (Starting soon settings) wins; otherwise the game's title
+    $('title').textContent = S.title && S.title !== 'STARTING SOON' ? S.title : W.title; fitTitle(); if (document.fonts && document.fonts.ready) document.fonts.ready.then(fitTitle);
+    $('tonight').textContent = S.tonight || (a.game ? 'TONIGHT: ' + String(a.game).toUpperCase() : '');
+    const so = a.socials || {}, chips = [];
+    if (S.socials) { if (so.twitch) chips.push('<span><em style="background:#b98cff">TW</em>twitch.tv/' + esc(so.twitch) + '</span>'); if (so.kick) chips.push('<span><em style="background:#53fc18">KICK</em>kick.com/' + esc(so.kick) + '</span>'); if (so.youtube) chips.push('<span><em style="background:#ff6b6b">YT</em>youtube.com/' + esc(so.youtube) + '</span>'); }
+    if (S.cardsStat) { chips.push('<span>' + a.cards + ' CARDS IN THE CLUB</span>'); if (a.result && !ETS && !HEIST) chips.push('<span>' + esc(a.result) + '</span>'); }
+    $('chips').innerHTML = chips.join('');
+    const h = $('held'); h.classList.toggle('hide', !(a.held > 0)); h.textContent = a.held + ' ALERT' + (a.held === 1 ? '' : 'S') + ' WAITING FOR KICK-OFF';
+    $('chat').classList.toggle('hide', !S.chat); $('arr').classList.toggle('hide', !S.arrivals);
+    bg(); arrivals(); spot(); clock(); ticker(!!S.ticker);
+    // v30: music while the countdown is on (fades out at kick-off)
+    MUSIC.set(a.on && !a.ended ? (a.music || {}) : { on: false });
+  }
+  function load() { fetch('/api/starting').then((r) => r.json()).then(apply).catch(() => setTimeout(load, 3000)); }
+  load();
+  try {
+    const es = new EventSource('/events');
+    es.onmessage = (m) => {
+      let a; try { a = JSON.parse(m.data); } catch (e) { return; }
+      if (a.volume != null) try { SFX.setVolume && SFX.setVolume(a.volume); } catch (e) { /* ignore */ }
+      if (a.type === 'starting' && a.action === 'kickoff') { MUSIC.set({ on: false }); return kickoff(); }
+      if (a.type === 'music') return MUSIC.event(a);
+      if (a.type === 'stinger') return STINGER.play(a, { sound: false });
+      if (a.type === 'starting') return apply(a);
+      if (a.type === 'theme') { load(); return; }
+      if (a.type === 'schat') return chat(a);
+      if (a.type === 'sarrive' && st) { st.arrivals = [a.a].concat(st.arrivals || []).slice(0, 12); st.here = a.here; arrivals(); sfx('ding'); return; }
+      if (a.type === 'sceneHold') { hold = !!a.hold; return; }
+      if ((a.type === 'levelup' || a.type === 'pack' || a.type === 'streakup') && st && st.on && !st.ended && st.S.alerts === 'show' && !hold) { alQ.push(a); alertNext(); }
+    };
+  } catch (e) { /* no live updates */ }
+})();
+</script>
+</body>
+</html>

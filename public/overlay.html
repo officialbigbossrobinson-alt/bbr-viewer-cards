@@ -1,0 +1,571 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>BBR Cards Overlay</title>
+<link rel="stylesheet" href="/card.css">
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700;800&family=Inter:wght@400;600&display=swap" rel="stylesheet">
+<style>
+html,body{margin:0;background:transparent;overflow:hidden}
+#stage{position:relative;width:1920px;height:1080px;font-family:'Barlow Condensed',sans-serif;color:#f2f5f7;overflow:hidden}
+
+/* ---- side panel (level-up and !card) ---- */
+.panel{position:absolute;right:60px;bottom:60px;display:flex;align-items:center;gap:26px;background:rgba(10,12,15,.92);border:2px solid var(--acc);border-radius:14px;padding:20px 30px 20px 20px;animation:panelIn var(--dur) ease-in-out both}
+@keyframes panelIn{0%{transform:translateX(130%);opacity:0}8%{transform:translateX(0);opacity:1}88%{transform:translateX(0);opacity:1}100%{transform:translateX(130%);opacity:0}}
+.flip{position:relative;width:195px;height:285px;flex-shrink:0;transform-style:preserve-3d;animation:flip var(--dur) ease-out both}
+@keyframes flip{0%,8%{transform:perspective(800px) rotateY(-180deg) scale(.8)}20%{transform:perspective(800px) rotateY(18deg) scale(1.05)}26%{transform:perspective(800px) rotateY(-6deg) scale(1)}32%,100%{transform:perspective(800px) rotateY(0deg) scale(1)}}
+.mini{position:absolute;left:0;top:0;width:260px;height:380px;transform:scale(.75);transform-origin:0 0;transform-style:preserve-3d}
+.txt{display:flex;flex-direction:column;gap:8px;min-width:300px;max-width:440px;animation:txtIn var(--dur) ease-out both}
+@keyframes txtIn{0%,16%{opacity:0;transform:translateY(12px)}26%,100%{opacity:1;transform:translateY(0)}}
+.kicker{font-size:17px;font-weight:700;letter-spacing:4px;color:var(--acc)}
+.who{font-size:48px;font-weight:800;line-height:1;text-transform:uppercase;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.why{font-family:Inter,sans-serif;font-size:16px;color:#b8c0ca}
+.deltas{display:flex;gap:20px;margin-top:6px;flex-wrap:wrap}
+.delta{display:flex;flex-direction:column}
+.delta .k{font-size:14px;font-weight:700;letter-spacing:2px;color:#b8c0ca}
+.delta .v{font-size:34px;font-weight:800}
+.delta .arrow{color:#6b7480}
+.pop{display:inline-block;color:var(--acc);animation:pop var(--dur) ease-out both}
+@keyframes pop{0%,32%{transform:scale(1)}38%{transform:scale(1.45)}46%,100%{transform:scale(1)}}
+.hint{font-family:Inter,sans-serif;font-size:14px;color:#8f99a5;margin-top:4px}
+.panel .bbr-ribbon{animation:ribbonIn var(--dur) ease-out both}
+@keyframes ribbonIn{0%,36%{opacity:0;transform:translateZ(8px) scale(1.7) rotate(-6deg)}44%{opacity:1;transform:translateZ(8px) scale(.94) rotate(1deg)}49%,100%{opacity:1;transform:translateZ(8px) scale(1) rotate(0deg)}}
+
+/* ---- pack opening ---- */
+.packstage{position:absolute;left:0;top:0;width:1920px;height:1080px;animation:fadeAll var(--dur) linear both}
+@keyframes fadeAll{0%{opacity:1}94%{opacity:1}100%{opacity:0}}
+.dim{position:absolute;inset:0;background:radial-gradient(circle at 50% 50%,rgba(20,26,34,.85) 0%,rgba(5,6,8,0) 70%);animation:dimIn .6s ease-out both}
+@keyframes dimIn{from{opacity:0}to{opacity:1}}
+.pack{position:absolute;left:850px;top:370px;width:220px;height:340px;animation:packIn 2.2s ease-out both}
+@keyframes packIn{0%{transform:scale(.4) translateY(80px);opacity:0}25%{transform:scale(1) translateY(0);opacity:1}60%{transform:scale(1) rotate(0deg)}64%{transform:scale(1.01) rotate(-2deg)}68%{transform:scale(1.02) rotate(2deg)}72%{transform:scale(1.03) rotate(-3deg)}76%{transform:scale(1.04) rotate(3deg)}80%{transform:scale(1.05) rotate(-4deg)}84%{transform:scale(1.06) rotate(4deg)}88%{transform:scale(1.07) rotate(-5deg)}92%{transform:scale(1.08) rotate(5deg)}96%{transform:scale(1.09) rotate(-6deg)}100%{transform:scale(1.1) rotate(0deg);opacity:1;filter:drop-shadow(0 0 40px var(--acc))}}
+.half{position:absolute;left:0;width:220px;height:170px;overflow:hidden}
+.half.top{top:0;animation:topFly .7s 2.2s ease-in both}
+.half.bot{top:170px;animation:botFly .7s 2.2s ease-in both}
+@keyframes topFly{0%{transform:none;opacity:1}100%{transform:translateY(-460px) rotate(-28deg);opacity:0}}
+@keyframes botFly{0%{transform:none;opacity:1}100%{transform:translateY(460px) rotate(20deg);opacity:0}}
+.art{position:absolute;left:0;width:220px;height:340px;box-sizing:border-box;background:linear-gradient(160deg,#252c34,#0b0d10);border:3px solid var(--acc);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;clip-path:polygon(10% 0,90% 0,100% 6%,100% 94%,90% 100%,10% 100%,0 94%,0 6%)}
+.flash{position:absolute;inset:0;background:#fff;opacity:0;animation:flash .7s 2.15s ease-out both}
+@keyframes flash{0%{opacity:0}20%{opacity:.9}100%{opacity:0}}
+.beams{position:absolute;left:510px;top:90px;width:900px;height:900px;border-radius:50%;-webkit-mask-image:radial-gradient(circle,#000 15%,transparent 68%);mask-image:radial-gradient(circle,#000 15%,transparent 68%);opacity:0;animation:beamsIn 1s 2.3s ease-out both,bbr-spin 14s linear infinite}
+@keyframes beamsIn{from{opacity:0}to{opacity:1}}
+.wo{position:absolute;left:0;top:430px;width:1920px;display:flex;flex-direction:column;align-items:center;gap:4px;opacity:0;animation:woIn .65s ease-out both}
+@keyframes woIn{0%{opacity:0;transform:scale(2.2)}30%{opacity:1;transform:scale(1)}80%{opacity:1;transform:scale(1)}100%{opacity:0;transform:scale(.9)}}
+.wo .lbl{font-size:20px;font-weight:700;letter-spacing:6px;color:#b8c0ca}
+.wo .big{font-size:130px;font-weight:800;line-height:1;text-transform:uppercase}
+.reveal{position:absolute;left:830px;top:290px;width:260px;height:380px;transform-style:preserve-3d;animation:cardIn 1.1s 4.75s cubic-bezier(.2,.8,.2,1) both}
+@keyframes cardIn{0%{transform:perspective(900px) rotateY(540deg) scale(1.7);opacity:0}15%{opacity:1}100%{transform:perspective(900px) rotateY(0deg) scale(1);opacity:1}}
+.sway{width:260px;height:380px;transform-style:preserve-3d;animation:sway 6s 5.9s ease-in-out infinite}
+@keyframes sway{0%,100%{transform:perspective(900px) rotateY(0deg)}25%{transform:perspective(900px) rotateY(-16deg) rotateX(4deg)}75%{transform:perspective(900px) rotateY(16deg) rotateX(-3deg)}}
+.packstage .bbr-ribbon{animation:packRibbon .5s 6.1s ease-out both}
+@keyframes packRibbon{0%{opacity:0;transform:translateZ(8px) scale(1.8) rotate(-6deg)}70%{opacity:1;transform:translateZ(8px) scale(.94) rotate(1deg)}100%{opacity:1;transform:translateZ(8px) scale(1) rotate(0deg)}}
+.newtxt{position:absolute;left:0;top:730px;width:1920px;display:flex;flex-direction:column;align-items:center;gap:4px;animation:newIn .6s 5.7s ease-out both}
+@keyframes newIn{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:translateY(0)}}
+
+/* ---- battle: join banner ---- */
+.dreel{position:absolute;left:460px;top:300px;width:1000px;box-sizing:border-box;padding:24px 30px;background:rgba(10,12,15,.95);border:2px solid var(--acc);border-radius:20px;font-family:'Barlow Condensed',sans-serif;color:#f2f5f7;z-index:6;text-align:center;animation:dropIn .6s cubic-bezier(.2,.9,.3,1.2) both;transition:opacity .5s}
+.dreel.out{opacity:0}
+.dreel .dk{font-size:22px;font-weight:800;letter-spacing:6px;color:var(--acc);margin-bottom:14px}
+.dreel .rr{display:flex;align-items:center;justify-content:center;gap:30px}
+.dreel .rw{width:380px;height:70px;overflow:hidden;border-radius:12px;background:#13161b;border:2px solid #2b313b;-webkit-mask:linear-gradient(transparent,#000 25%,#000 75%,transparent)}
+.dreel .rl{animation:dreel 2.6s cubic-bezier(.15,.7,.2,1) both}
+.dreel .rl div{height:70px;line-height:70px;font-size:40px;font-weight:800;text-transform:uppercase;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;color:#9aa4af}
+.dreel .rl .win{color:#fff}
+.dreel .vs{font-size:44px;font-weight:800;color:var(--acc)}
+@keyframes dreel{from{transform:translateY(0)}to{transform:translateY(-1820px)}}
+.bjoin{position:absolute;left:540px;top:36px;width:840px;box-sizing:border-box;display:flex;align-items:center;gap:24px;background:rgba(10,12,15,.93);border:2px solid var(--acc);border-radius:16px;padding:18px 26px;animation:dropIn .6s cubic-bezier(.2,.9,.3,1.2) both}
+@keyframes dropIn{from{transform:translateY(-170%)}to{transform:none}}
+.bjoin.out{animation:upOut .5s ease-in both}
+@keyframes upOut{to{transform:translateY(-170%)}}
+.bjoin .mid{flex:1;min-width:0}
+.bjoin .big{font-size:52px;font-weight:800;line-height:1;text-transform:uppercase}
+.bjoin .big b{color:var(--acc)}
+.bjoin .sub{font-family:Inter,sans-serif;font-size:16px;color:#b8c0ca;margin-top:6px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.bjoin .count{width:86px;height:86px;flex-shrink:0;border-radius:50%;border:4px solid var(--acc);display:flex;align-items:center;justify-content:center;font-size:44px;font-weight:800}
+.spinball{width:64px;height:64px;flex-shrink:0;animation:bbr-spin 2.5s linear infinite}
+
+/* ---- battle: arena ---- */
+.arena{position:absolute;left:300px;top:440px;width:1320px;height:610px;animation:arenaIn .7s cubic-bezier(.2,.9,.3,1.1) both}
+@keyframes arenaIn{from{transform:translateY(115%)}to{transform:none}}
+.arena.out{animation:arenaOut .6s ease-in both}
+@keyframes arenaOut{to{transform:translateY(115%)}}
+.abg{position:absolute;inset:0;background:rgba(10,12,15,.92);border:2px solid var(--acc);border-radius:18px}
+.fighter{position:absolute;top:28px;width:300px;display:flex;flex-direction:column;align-items:center;gap:10px;transition:transform .3s}
+.fighter.l{left:16px}.fighter.r{right:16px}
+.fighter.active{transform:scale(1.06)}
+.fighter.active .fname{color:var(--acc)}
+.fcard{width:180px;height:263px;position:relative}
+.fcard .m2{position:absolute;left:0;top:0;width:260px;height:380px;transform:scale(.69);transform-origin:0 0;transform-style:preserve-3d}
+.fname{font-size:30px;font-weight:800;text-transform:uppercase;max-width:290px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;line-height:1}
+.blabel{font-size:13px;letter-spacing:3px;color:#9aa4af;font-weight:700}
+.boostbar{display:flex;gap:4px}
+.seg{width:22px;height:12px;border-radius:3px;background:#2a3038;transition:background .2s}
+.seg.on{background:var(--acc);box-shadow:0 0 8px var(--acc)}
+.dots{display:flex;gap:6px;flex-wrap:wrap;justify-content:center;max-width:290px}
+.dot{width:22px;height:22px;border-radius:50%;border:2px solid #4a525c;box-sizing:border-box}
+.dot.hit{background:var(--acc);border-color:var(--acc)}
+.dot.fail{background:#ff4d5e;border-color:#ff4d5e}
+.floaty{position:absolute;top:110px;left:0;width:300px;text-align:center;font-size:40px;font-weight:800;color:var(--acc);pointer-events:none;text-shadow:0 0 14px var(--acc)}
+.goalwrap{position:absolute;left:340px;top:16px;width:640px;height:520px;overflow:hidden;border-radius:12px}
+.scorebar{position:absolute;left:0;top:4px;width:640px;text-align:center;font-size:50px;font-weight:800;letter-spacing:4px;line-height:1}
+.field{position:absolute;left:0;top:320px;width:640px;height:200px;background:repeating-linear-gradient(90deg,rgba(255,255,255,.035) 0 80px,transparent 80px 160px),linear-gradient(180deg,#2f6b3a,#1d4626)}
+.boxline{position:absolute;left:110px;top:320px;width:420px;height:96px;box-sizing:border-box;border:3px solid rgba(255,255,255,.55);border-top:none}
+.spot{position:absolute;left:314px;top:464px;width:12px;height:12px;border-radius:50%;background:rgba(255,255,255,.8)}
+.goal{position:absolute;left:20px;top:70px;width:600px;height:250px;box-sizing:border-box;border:10px solid #f2f5f7;border-bottom:none;border-radius:4px 4px 0 0;box-shadow:0 0 0 2px rgba(0,0,0,.35)}
+.net{position:absolute;left:0;top:0;width:580px;height:240px;background:repeating-linear-gradient(90deg,rgba(255,255,255,.2) 0 2px,transparent 2px 18px),repeating-linear-gradient(0deg,rgba(255,255,255,.2) 0 2px,transparent 2px 18px),rgba(0,0,0,.35)}
+.keeper{position:absolute;left:275px;top:170px;width:90px;height:150px;transform-origin:45px 75px}
+.k-head{position:absolute;left:31px;top:0;width:28px;height:28px;border-radius:50%;background:#d9a77c}
+.k-body{position:absolute;left:21px;top:28px;width:48px;height:66px;border-radius:12px 12px 8px 8px}
+.k-arm{position:absolute;top:32px;width:13px;height:56px;border-radius:7px;transform-origin:50% 4px}
+.k-arm.a1{left:12px;transform:rotate(38deg)}.k-arm.a2{left:65px;transform:rotate(-38deg)}
+.k-arm::after{content:"";position:absolute;left:-4px;bottom:-8px;width:21px;height:19px;border-radius:50%;background:#f2f5f7}
+.k-leg{position:absolute;top:92px;width:16px;height:56px;border-radius:6px;background:#1b1f25}
+.k-leg.l1{left:27px}.k-leg.l2{left:47px}
+.ball{position:absolute;left:0;top:0;width:34px;height:34px;border-radius:50%;background:radial-gradient(circle at 50% 50%,#222 0 5px,transparent 6px),radial-gradient(circle at 18% 32%,#222 0 3px,transparent 4px),radial-gradient(circle at 82% 32%,#222 0 3px,transparent 4px),radial-gradient(circle at 30% 86%,#222 0 3px,transparent 4px),radial-gradient(circle at 72% 84%,#222 0 3px,transparent 4px),radial-gradient(circle at 35% 35%,#fff,#cfd4da 70%,#8a9099);box-shadow:0 4px 6px rgba(0,0,0,.5)}
+.shout{position:absolute;left:0;top:140px;width:640px;text-align:center;font-size:118px;font-weight:800;letter-spacing:4px;opacity:0;pointer-events:none;text-shadow:0 6px 0 rgba(0,0,0,.45)}
+.vsbig{position:absolute;left:0;top:120px;width:640px;text-align:center;font-size:150px;font-weight:800;color:var(--acc);text-shadow:0 0 30px var(--acc);animation:vsPulse 1.2s ease-in-out infinite}
+@keyframes vsPulse{50%{transform:scale(1.08)}}
+.status{position:absolute;left:0;bottom:22px;width:1320px;text-align:center;font-size:30px;font-weight:700;letter-spacing:1px}
+.status b{color:var(--acc)}
+.res{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;gap:56px;background:rgba(10,12,15,.97);border-radius:18px;animation:resIn .5s ease-out both;overflow:hidden}
+@keyframes resIn{from{opacity:0}to{opacity:1}}
+.res .wcard{width:260px;height:380px;transform-style:preserve-3d;animation:cardIn 1s cubic-bezier(.2,.8,.2,1) both}
+.res .rt{display:flex;flex-direction:column;gap:8px;max-width:560px}
+.res .rk{font-size:22px;font-weight:700;letter-spacing:6px;color:var(--acc)}
+.res .rn{font-weight:800;line-height:.95;text-transform:uppercase;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.res .rs{font-size:34px;font-weight:700;color:#d6dce3}
+.res .rr{font-family:Inter,sans-serif;font-size:18px;color:#b8c0ca}
+.aarena .ahelp,.rarena .rhelp{display:none!important}
+.conf{position:absolute;top:-20px;width:10px;height:16px;border-radius:2px;animation:fall linear forwards}
+@keyframes fall{to{transform:translateY(680px) rotate(720deg)}}
+
+  /* ===== v29: Euro Truck Simulator theme (dashboard › Theme) ===== */
+  #stage.theme-ets > iframe[title="Boss Sports News"]{visibility:hidden!important}
+  #stage.theme-ets > .xr{display:none!important}   /* football results: football only */
+  #stage.theme-ets .al-panel{background:#f4f1e8;border:0;border-radius:6px;box-shadow:0 16px 40px rgba(0,0,0,.45)}
+  #stage.theme-ets .al-panel::before{content:"NEW DELIVERY · BBR HAULAGE";position:absolute;left:0;right:0;top:0;height:44px;display:flex;align-items:center;justify-content:flex-end;padding:0 18px;background:#0b4fa8;color:#fff;font:800 22px 'Barlow Condensed',sans-serif;letter-spacing:2px}
+  #stage.theme-ets .al-sheen,#stage.theme-ets .al-edge,#stage.theme-ets .al-streak{display:none}
+  #stage.theme-ets .al-badge{border-radius:6px;background:#ffd400;color:#111;box-shadow:0 6px 16px rgba(0,0,0,.4)}
+  #stage.theme-ets .al-badge .ic{background:#111;color:#ffd400}
+  #stage.theme-ets .al-txt{top:62px}
+  #stage.theme-ets .al-kick{color:#0b4fa8}
+  #stage.theme-ets .al-name{color:#1a1a1a}
+  #stage.theme-ets .al-why{color:#3a3a3a}
+  #stage.theme-ets .al-why b{color:#0b4fa8}
+  #stage.theme-ets .al-amt{color:#111;text-shadow:none;background:#ffd400;padding:2px 8px;border-radius:4px}
+  #stage.theme-ets .xchat::before{content:"CB RADIO · CH 19";align-self:flex-start;background:#ffd400;color:#111;font:800 18px 'Barlow Condensed',sans-serif;letter-spacing:2px;padding:3px 10px;border-radius:4px}
+  #stage.theme-ets .xchat .m{background:rgba(10,14,20,.86);border:1px solid rgba(255,212,0,.45);border-radius:8px}
+  #ets-tick{position:absolute;left:0;right:0;bottom:0;height:56px;background:#ffd400;color:#111;display:flex;align-items:center;z-index:2;overflow:hidden;font-family:'Barlow Condensed',sans-serif;pointer-events:none}
+  #ets-tick b{background:#111;color:#ffd400;height:100%;display:flex;align-items:center;padding:0 22px;font-size:26px;letter-spacing:2px;flex:none;position:relative;z-index:1}
+  #ets-tick .run{white-space:nowrap;font-size:26px;font-weight:800;padding-left:40px;animation:etsRun 45s linear infinite}
+  @keyframes etsRun{from{transform:translateX(0)}to{transform:translateX(-50%)}}
+  /* ===== v31: Sunset Heist theme (GTA-style: sunset, neon, comic-panel, original art) ===== */
+  #stage.theme-heist > iframe[title="Boss Sports News"]{visibility:hidden!important}
+  #stage.theme-heist > .xr{display:none!important}
+  #stage.theme-heist .al-panel{background:linear-gradient(160deg,#2b0f4d,#a0216f 55%,#ff5e62);border:3px solid #fff;border-radius:4px;box-shadow:8px 8px 0 #12061f,0 0 30px rgba(255,61,139,.6)}
+  #stage.theme-heist .al-panel::before{content:"WORD ON THE STREET";position:absolute;left:auto;bottom:auto;right:22px;top:12px;font-size:18px!important;background:#2ef2ff;color:#12061f;font:900 italic 24px 'Barlow Condensed',sans-serif;letter-spacing:3px;padding:2px 16px;transform:skewX(-10deg);box-shadow:4px 4px 0 #12061f}
+  #stage.theme-heist .al-sheen,#stage.theme-heist .al-edge,#stage.theme-heist .al-streak{display:none}
+  #stage.theme-heist .al-badge{border-radius:4px;background:#ffe48a;color:#12061f;box-shadow:4px 4px 0 #12061f}
+  #stage.theme-heist .al-badge .ic{background:#12061f;color:#ffe48a}
+  #stage.theme-heist .al-kick{color:#2ef2ff;text-shadow:0 0 10px #2ef2ff}
+  #stage.theme-heist .al-name{color:#fff;font-style:italic;text-shadow:3px 3px 0 #12061f}
+  #stage.theme-heist .al-why{color:#ffe7f1}
+  #stage.theme-heist .al-why b{color:#ffe48a}
+  #stage.theme-heist .al-amt{color:#12061f;text-shadow:none;background:#ffe48a;padding:2px 8px;border-radius:2px;transform:skewX(-8deg)}
+  #stage.theme-heist .xchat::before{content:"BURNER PHONE · 3 NEW";align-self:flex-start;background:#12061f;color:#2ef2ff;font:800 18px 'Barlow Condensed',sans-serif;letter-spacing:2px;padding:4px 12px;border-radius:12px 12px 12px 2px;border:2px solid #2ef2ff;box-shadow:0 0 12px rgba(46,242,255,.5)}
+  #stage.theme-heist .xchat .m{background:rgba(18,6,31,.88);border:1px solid rgba(255,61,139,.6);border-radius:16px 16px 16px 4px}
+  #stage.theme-heist #ets-tick{background:linear-gradient(90deg,#ff3d8b,#ff9a3c);color:#fff}
+  #stage.theme-heist #ets-tick b{background:#12061f;color:#2ef2ff;font-style:italic}
+  #stage.theme-heist #ets-tick b::before{content:"";width:12px;height:12px;border-radius:50%;background:#ff3d3d;margin-right:10px;box-shadow:0 0 10px #ff3d3d;animation:hxBlink 1s steps(2) infinite}
+  #stage.theme-heist #ets-tick .run{text-shadow:2px 2px 0 rgba(18,6,31,.5)}
+  @keyframes hxBlink{50%{opacity:0}}
+  .hx-banner{position:absolute;left:50%;top:38%;transform:translate(-50%,-50%);z-index:60;pointer-events:none;text-align:center;font-family:'Barlow Condensed',sans-serif}
+  .hx-banner .a{font:900 italic 96px/1 'Barlow Condensed',sans-serif;letter-spacing:4px;color:#ffe48a;text-shadow:5px 5px 0 #a0216f,10px 10px 0 #12061f}
+  .hx-banner .b{display:inline-block;margin-top:10px;background:#12061f;color:#2ef2ff;font:800 30px 'Barlow Condensed',sans-serif;letter-spacing:4px;padding:4px 20px;transform:skewX(-10deg)}
+</style>
+</head>
+<body>
+<div id="stage"></div>
+<script src="/card.js"></script>
+<script src="/sfx.js"></script>
+<script src="/scene3d.js"></script>
+<script src="/textures.js"></script>
+<script src="/landmarks.js"></script>
+<script src="/race.js"></script>
+<script src="/links.js"></script>
+<script src="/gmeter.js"></script>
+<script src="/stinger.js"></script>
+<script src="/kits.js"></script>
+<script src="/stadium3d.js"></script>
+<script src="/pen3d.js"></script>
+<script src="/penalty.js"></script>
+<script src="/teampens.js"></script>
+<script src="/bp.js"></script>
+<script src="/arc.js"></script>
+<script src="/alerts.js"></script>
+<script src="/giveaway.js"></script>
+<script src="/hud.js"></script>
+<script src="/screen.js"></script>
+<script src="/challenges.js"></script>
+<script src="/camfx.js"></script>
+<script src="/boards.js"></script>
+<script src="/raidnight.js"></script>
+<script src="/extras.js"></script>
+<script src="/broadcast.js"></script>
+<script src="/draw.js"></script>
+<script>
+(function () {
+  const stage = document.getElementById('stage');
+  const esc = BBR.esc;
+  const queue = [];
+  let shownN = 0, busy = false, battleBusy = false, busySince = 0, lastBattleAt = 0, lastErr = '';
+  // only these are card alerts: anything else (new screens, chat, states) never goes in the card queue
+  const QUEUED = /^(pack|levelup|show|streakup|checkin|challenge)$/;
+  const DUR = { pack: 10000, levelup: 8000, show: 7000 };
+  const ms = (s) => s * 1000;
+
+  // ================= card alerts =================
+  // Tangia / Streamlabs playing: cards wait. Our own sub / follow / bits / raid cards also wait a few seconds,
+  // so the Streamlabs video for the same event plays first.
+  let otherBusy = false, otherSince = 0, holdT = null;
+  // off-air hold: the overlay isn't in the scene on air, so nothing plays until it is; then one at a time, gapSecs apart
+  let sceneHold = false, gapMode = false, gapSecs = 8;
+  function releaseHeld() {
+    // all the check-ins become one strip, and lots of follows become one strip too
+    const ci = queue.filter((x) => x.type === 'checkin');
+    if (ci.length > 1) { const all = [].concat(...ci.map((x) => x.list)); queue.splice(0, queue.length, ...queue.filter((x) => x.type !== 'checkin')); queue.push(Object.assign({}, ci[0], { list: all.slice(0, 12), more: Math.max(0, all.length - 12) })); }
+    const fol = queue.filter((x) => (x.type === 'levelup' || x.type === 'pack') && x.kind === 'follow');
+    if (fol.length > 2) {
+      const rest = fol.slice(2);
+      queue.splice(0, queue.length, ...queue.filter((x) => !rest.includes(x)));
+      queue.push({ type: 'checkin', accent: fol[0].accent, title: rest.length + ' NEW FOLLOWERS', list: rest.slice(0, 12).map((x) => ({ display: x.card.display, avatar: x.card.avatar, platform: x.card.platform, follow: true })) });
+    }
+    queue.forEach((x) => { x.holdUntil = 0; });
+    gapMode = queue.length > 1;
+  }
+  const OWN = /^(follow|sub|resub|giftsub|gift|giftbomb|bits|kicks|superchat|raid)$/;
+  function next() {
+    if (busy || battleBusy || !queue.length || sceneHold || (window.EXTRAS && EXTRAS.panic())) return;
+    if (stage.classList.contains('rp-on')) { clearTimeout(next.rp); next.rp = setTimeout(next, 1500); return; }   // a replay is on: alerts wait
+    const A = (window.BBR_SCREEN && BBR_SCREEN.alerts) || {};
+    if (otherBusy && A.on !== false && A.wait !== false) return;
+    const wait = (queue[0].holdUntil || 0) - Date.now();
+    if (wait > 0) { clearTimeout(holdT); holdT = setTimeout(next, wait + 50); return; }
+    busy = true; busySince = Date.now();
+    const a = queue.shift();
+    let el, dur;
+    try {
+    if (a.type === 'pack') {
+      dur = ALERTS.duration(a);
+      el = document.createElement('div');
+      el.style.setProperty('--acc', a.accent);
+      el.style.setProperty('--dur', dur + 'ms');
+      el.innerHTML = packHtml(a);
+      stage.appendChild(el);
+      packSounds(a);
+      ALERTS.packFx(el.firstChild, a);
+      requestAnimationFrame(() => ALERTS.dodge(el, '.reveal, .newtxt, .pack, .wo'));
+    } else if (a.type === 'challenge') {
+      dur = CH.event(a); el = document.createElement('i');
+    } else {
+      const r = ALERTS.play(stage, a);
+      el = r.el; dur = r.dur;
+    }
+      shownN++;
+    } catch (err) {
+      // one broken alert must never stop every card after it
+      lastErr = (a && a.type) + ': ' + (err && err.message); console.error('[alert]', err);
+      if (el && el.remove) el.remove();
+      busy = false; setTimeout(next, 400); return;
+    }
+    setTimeout(() => { el.remove(); busy = false; if (gapMode && queue.length) setTimeout(next, gapSecs * 1000); else { gapMode = false; next(); } }, dur + 300);
+  }
+
+  function packSounds(a) {
+    const t = a.card.tier;
+    SFX.play('whoosh', 0.2); SFX.play('pop', 0.3);
+    SFX.play('rumble', 0.5, 1.7); SFX.play('riser', 0.6, 1.6); SFX.play('burst', 2.2); SFX.play('explosion', 2.25);
+    SFX.play('boom', 2.85); SFX.play('boom', 3.5); SFX.play('boom', 4.15);
+    SFX.play('whoosh', 4.75); SFX.play('impact', 5.6); SFX.tierFx(t, 5.7);
+    SFX.play('fanfare', 5.9); SFX.play('cheer', 5.9, 2.4); SFX.play('impact', 6.15); SFX.play('sparkle', 6.2);
+  }
+
+  function packHtml(a) {
+    const c = a.card;
+    const T = BBR.tier(c.tier, a.accent);
+    const beam = c.tier === 'legend' ? a.accent : T.color;
+    const cardData = Object.assign({}, c, { ribbon: c.ribbon || 'NEW SIGNING' });
+    const wo = (delay, lbl, big, color) => '<div class="wo" style="animation-delay:' + delay + 's"><div class="lbl">' + lbl + '</div><div class="big" style="color:' + (color || '#f2f5f7') + '">' + big + '</div></div>';
+    const art = '<div style="font-size:15px;font-weight:700;letter-spacing:4px;color:' + a.accent + '">VIEWER PACK</div><div style="font-size:96px;font-weight:800;line-height:.9">BBR</div><div style="font-size:14px;font-weight:600;letter-spacing:3px;color:#b8c0ca">1 CARD · GUARANTEED</div>';
+    return '<div class="packstage"><div class="dim"></div>' +
+      '<div class="beams" style="background:repeating-conic-gradient(from 0deg,' + beam + '66 0deg 5deg,transparent 5deg 22deg)"></div>' +
+      '<div class="pack"><div class="half top"><div class="art" style="top:0">' + art + '</div></div><div class="half bot"><div class="art" style="top:-170px">' + art + '</div></div></div>' +
+      '<div class="flash"></div>' +
+      wo(2.85, 'PLATFORM', esc(String(c.platform).toUpperCase())) +
+      wo(3.5, 'ROLE', esc(c.role)) +
+      wo(4.15, 'RATING', c.ovr, T.color) +
+      '<div class="reveal"><div class="' + BBR.wrapClass(c.tier) + '"><div class="sway">' + BBR.render(cardData, { accent: a.accent }) + '</div></div></div>' +
+      '<div class="newtxt"><div style="font-size:20px;font-weight:700;letter-spacing:6px;color:' + a.accent + '">NEW CARD UNLOCKED</div>' +
+      '<div style="font-size:58px;font-weight:800;line-height:1;text-transform:uppercase">' + esc(c.display) + ' · ' + esc(T.label) + '</div>' +
+      '<div style="font-family:Inter,sans-serif;font-size:16px;color:#b8c0ca">Welcome to the club. Type !card to see yours.</div></div></div>';
+  }
+
+  // ================= penalty shootout =================
+  const B = { join: null, arena: null, fighters: null, kicks: [], timers: [], tick: null };
+  const Z = { TL: [120, 135], TM: [320, 122], TR: [520, 135], BL: [120, 268], BM: [320, 272], BR: [520, 268], WL: [-30, 220], WR: [670, 220], OVER: [330, 20], OVERL: [140, 20], OVERR: [520, 20], STAY: [320, 245] };
+  const SPOT = [320, 470];
+  const TRUCK_ICON = '<svg class="spinball" style="animation:none" viewBox="0 0 64 64" aria-hidden="true"><rect x="2" y="16" width="36" height="26" rx="3" fill="var(--acc)"/><path d="M38 22h12l10 10v10H38z" fill="#f2f5f7"/><rect x="48" y="25" width="6" height="7" fill="#7fb6e6"/><circle cx="14" cy="46" r="6" fill="#111" stroke="#f2f5f7" stroke-width="2"/><circle cx="50" cy="46" r="6" fill="#111" stroke="#f2f5f7" stroke-width="2"/></svg>';
+  const BALL_SVG = '<svg class="spinball" viewBox="0 0 64 64" aria-hidden="true"><circle cx="32" cy="32" r="30" fill="#f2f5f7" stroke="#222" stroke-width="2"/><path d="M32 18 L44 27 L40 41 L24 41 L20 27 Z" fill="#222"/><path d="M32 18 V6 M44 27 L56 22 M40 41 L48 52 M24 41 L16 52 M20 27 L8 22" stroke="#222" stroke-width="2.5"/></svg>';
+
+  function later(fn, t) { B.timers.push(setTimeout(fn, t)); }
+  function clearBattle(keepJoin) {
+    B.timers.forEach(clearTimeout); B.timers = [];
+    clearInterval(B.tick); B.tick = null;
+    if (B.join && !keepJoin) { B.join.remove(); B.join = null; }
+    if (B.arena) { B.arena.remove(); B.arena = null; }
+  }
+  function endBattle() { clearBattle(); RACE.clear(); PEN.clear(); ARC.clear(); battleBusy = false; next(); }
+  function hideJoin() { if (B.join) { const j = B.join; j.classList.add('out'); setTimeout(() => j.remove(), 600); B.join = null; clearInterval(B.tick); } }
+  const battleDone = () => { battleBusy = false; next(); };
+  RACE.init({ stage, done: battleDone });
+  PEN.init({ stage, done: battleDone });
+  TPEN.init({ stage });
+  BPM.init({ stage });
+  ARC.init({ stage, done: battleDone });
+  GIVE.init({ stage });
+  HUD.init({ stage });
+  SCREEN.init({ stage });
+  CH.init({ stage });
+  CAMFX.init({ stage });
+  BC.init({ stage });
+  LB.init({ stage });
+  RN.init({ stage });
+  EXTRAS.init({ stage });
+  // ---- Boss Sports News: the ticker + goal alerts page, layered under everything else ----
+  let bsnFrame = null;
+  function bsnSet(a) {
+    if (!a.on || a.separate) { if (bsnFrame) { bsnFrame.remove(); bsnFrame = null; } stage.classList.remove('bsnOn'); return; }
+    if (!bsnFrame) {
+      bsnFrame = document.createElement('iframe');
+      bsnFrame.src = '/bsn/'; bsnFrame.title = 'Boss Sports News';
+      bsnFrame.setAttribute('allowtransparency', 'true');
+      bsnFrame.style.cssText = 'position:absolute;left:0;top:0;width:1920px;height:1080px;border:0;background:transparent;pointer-events:none;z-index:0;color-scheme:normal';
+      stage.insertBefore(bsnFrame, stage.firstChild);
+    }
+    stage.classList.add('bsnOn');
+    const apply = () => { try { bsnFrame.contentDocument.body.classList.toggle('bsn-hide-ticker', !!a.hide); } catch (e) { /* still loading */ } };
+    apply(); bsnFrame.onload = apply;
+  }
+
+  function onBattle(a) {
+    lastBattleAt = Date.now();
+    if (a.teams && a.mode === 'shootout') {
+      HUD.cmdsOff();
+      if (a.phase === 'join') { clearBattle(); return TPEN.join(a); }
+      if (a.phase === 'count') return TPEN.count(a);
+      if (a.phase === 'matchup') { battleBusy = true; return TPEN.matchup(a); }
+      if (a.phase === 'order') return TPEN.order(a);
+      if (a.phase === 'boost') return TPEN.boosted(a);
+      if (a.phase === 'paused') return TPEN.paused(a);
+      battleBusy = true;
+      if (a.phase === 'shootout') { TPEN.start(a); return PEN.start(a); }
+      if (a.phase === 'aim') { TPEN.aim(a); return PEN.aim(a); }
+      if (a.phase === 'kick') { TPEN.kick(a); return PEN.kick(a); }
+      if (a.phase === 'result') { const el = document.querySelector('.pen'); if (el) el.classList.add('out'); setTimeout(() => PEN.clear(), 700); return TPEN.result(a, battleDone); }
+    }
+    if (a.phase === 'cancel') TPEN.clear();
+    if (a.cmds && (a.phase === 'join' || a.phase === 'matchup' || a.phase === 'arc' || a.phase === 'race' || a.phase === 'shootout')) HUD.cmds(a);
+    if (a.phase === 'result' || a.phase === 'cancel') HUD.cmdsOff();
+    if (a.phase === 'join') return showJoin(a);
+    if (a.phase === 'count') return joinCount(a);
+    if (a.phase === 'draw') return drawReel(a);
+    if (a.phase === 'cancel') { RACE.clear(); PEN.clear(); ARC.clear(); return cancelBattle(a); }
+    const M = a.mode === 'race' ? RACE : a.mode === 'arc' ? ARC : PEN;
+    if (a.phase === 'matchup') { hideJoin(); battleBusy = true; return M.matchup(a); }
+    if (a.phase === 'boost') return M.boosted(a);
+    if (a.mode === 'race' && a.phase === 'race') { hideJoin(); battleBusy = true; return RACE.run(a); }
+    if (a.mode === 'arc' && a.phase === 'arc') { hideJoin(); battleBusy = true; return ARC.run(a); }
+    if (a.mode === 'arc' && a.phase === 'tick') return ARC.tick(a);
+    if (a.mode === 'race' && a.phase === 'tick') return RACE.tick(a);
+    if (a.mode === 'race' && a.phase === 'result') return RACE.result(a);
+    if (a.mode === 'shootout' && a.phase === 'crowd') return PEN.crowd(a);
+    if (a.mode === 'arc' && a.phase === 'result') return ARC.result(a);
+    if (a.mode === 'shootout') {
+      battleBusy = true;
+      if (a.phase === 'shootout') return PEN.start(a);
+      if (a.phase === 'aim') return PEN.aim(a);
+      if (a.phase === 'lock') return PEN.lock(a);
+      if (a.phase === 'kick') return PEN.kick(a);
+      if (a.phase === 'result') return PEN.result(a);
+    }
+  }
+
+  function showJoin(a) {
+    clearBattle();
+    const el = document.createElement('div');
+    el.className = 'bjoin';
+    el.style.setProperty('--acc', a.accent);
+    const race = a.mode === 'race', arc = a.mode === 'arc';
+    const ARC_ICON = '<svg class="spinball" style="animation:none" viewBox="0 0 64 64" aria-hidden="true"><circle cx="32" cy="32" r="28" fill="none" stroke="var(--acc)" stroke-width="4"/><circle cx="32" cy="32" r="10" fill="#ff2a2a"/><path d="M32 4v12M32 48v12M4 32h12M48 32h12" stroke="#f2f5f7" stroke-width="4"/></svg>';
+    el.innerHTML = (race ? TRUCK_ICON : arc ? ARC_ICON : BALL_SVG) + '<div class="mid"><div class="kicker">' + esc(a.label || 'PENALTY SHOOTOUT') + '</div>' +
+      '<div class="big">' + (race ? 'Truckers: type <b>!join</b>' : arc ? 'Everyone: type <b>!join</b>' : 'Type <b>!join</b> to play') + '</div>' +
+      '<div class="sub" id="bjsub">' + (race ? 'Up to 8 drivers · drivers use !turbo and !dodge · chat can call !rain, !wind, !lightning' : arc ? 'Everyone drops in together · keep typing <b style="color:var(--acc)">!fire</b> to shoot · beat the Queen in 3 minutes' : (a.draw ? '2 players drawn at random from everyone who joins' : 'First 2 to join play') + ' · type <b style="color:var(--acc)">L</b>, <b style="color:var(--acc)">C</b> or <b style="color:var(--acc)">R</b> on your kick · crowd: !boo !flare !firework !chant') + '</div></div>' +
+      '<div class="count" id="bjc">' + a.secs + '</div>';
+    stage.appendChild(el);
+    B.join = el;
+    if (race) { SFX.play('horn', 0, 0.8); SFX.play('cb', 0.9); } else if (arc) { SFX.play('alarm', 0, 2); SFX.play('riser', 0.2, 1.4); } else { SFX.play('whistle', 0, true); SFX.play('cheer', 0.3, 1.8); }
+    B.tick = setInterval(() => {
+      const left = Math.max(0, Math.ceil((a.endsAt - Date.now()) / 1000));
+      const c = document.getElementById('bjc');
+      if (c) c.textContent = left;
+      if (left > 0 && left <= 5) SFX.play('tick');
+    }, 1000);
+  }
+  // shootout draw: two reels spin through everyone who joined, then land on the players
+  function drawReel(a) {
+    if (B.join) { const j = B.join; j.classList.add('out'); setTimeout(() => j.remove(), 600); B.join = null; clearInterval(B.tick); }
+    battleBusy = true;
+    const el = document.createElement('div');
+    el.className = 'dreel';
+    el.style.setProperty('--acc', a.accent);
+    const names = a.names.length ? a.names : a.picked;
+    const col = (win, k) => { let h = ''; for (let i = 0; i < 26; i++) h += '<div>' + esc(names[(i * 7 + k * 3) % names.length]) + '</div>'; return '<div class="rw"><div class="rl" style="animation-delay:' + (k * 0.5) + 's">' + h + '<div class="win">' + esc(win) + '</div></div></div>'; };
+    el.innerHTML = '<div class="dk">THE DRAW · ' + a.count + ' JOINED</div><div class="rr">' + col(a.picked[0], 0) + '<div class="vs">VS</div>' + col(a.picked[1], 1) + '</div>';
+    stage.appendChild(el);
+    SFX.play('riser', 0, 2.5); SFX.play('tick', 0.3); SFX.play('impact', 2.6); SFX.play('impact', 3.1); SFX.play('cheer', 3.2, 1.6);
+    setTimeout(() => { el.classList.add('out'); setTimeout(() => el.remove(), 600); }, 4900);
+  }
+  function joinCount(a) {
+    const s = document.getElementById('bjsub');
+    if (s) s.innerHTML = '<b style="color:var(--acc)">' + a.count + '</b> joined · latest: ' + esc(a.last);
+    SFX.play('tick');
+  }
+  function cancelBattle(a) {
+    if (B.join) {
+      const s = document.getElementById('bjsub');
+      if (s) s.textContent = a.reason || 'Shootout cancelled';
+      clearInterval(B.tick);
+      const el = B.join;
+      later(() => { el.classList.add('out'); }, 2500);
+      later(() => endBattle(), 3100);
+    } else endBattle();
+  }
+
+  // ================= small pop-up (link codes) =================
+  let lastToast = null;
+  function clearToast() { if (lastToast) { lastToast.remove(); lastToast = null; } }
+  // ---------- v29: theme (football / Euro Truck Simulator) ----------
+  let THEME = 'football';
+  const etsNews = [];
+  function etsTick() {
+    let el = document.getElementById('ets-tick');
+    if (THEME === 'football') { if (el) el.remove(); return; }
+    const hd = THEME === 'heist' ? 'COAST NEWS 24' : 'TRAFFIC NEWS';
+    if (el && el.dataset.th !== THEME) { el.remove(); el = null; }
+    if (!el) { el = document.createElement('div'); el.id = 'ets-tick'; el.dataset.th = THEME; el.innerHTML = '<b>' + hd + '</b><div class="run"></div>'; stage.appendChild(el); }
+    const L = etsNews.slice(-5).reverse().concat(THEME === 'heist' ? ['BREAKING: TYPE !CARD TO SEE YOUR CREW FILE', 'POLICE BAFFLED AS CHAT KEEPS GROWING', 'SAY HI IN CHAT TO JOIN THE CREW'] : ['TYPE !CARD TO SEE YOUR CARD', 'SAY HI IN CHAT TO JOIN THE CONVOY', 'TRUCK RACE: TYPE !JOIN WHEN IT OPENS']);
+    const s = L.join('  ·  ') + '  ·  ', run = el.querySelector('.run');
+    if (run.dataset.s !== s) { run.dataset.s = s; run.textContent = s + s; }
+  }
+  function etsNote(a) {
+    if (THEME === 'football') return;
+    const c = a.card || (a.cards && a.cards[0]) || {}, who = String(c.display || '').toUpperCase(); if (!who) return;
+    const k = a.kind || a.type, n = a.amount;
+    const line = k === 'giftbomb' || k === 'gift' ? who + ' JUST GIFTED ' + (n || '') : k === 'sub' || k === 'resub' ? who + ' SUBSCRIBED' : k === 'bits' ? who + ' SENT ' + (n || '') + ' BITS' : k === 'kicks' ? who + ' SENT ' + (n || '') + ' KICKS' : k === 'raid' ? who + ' RAIDED WITH ' + (n || '') : k === 'follow' ? who + (THEME === 'heist' ? ' JOINED THE CREW' : ' JOINED THE CONVOY') : null;
+    if (line) { etsNews.push(line); while (etsNews.length > 10) etsNews.shift(); etsTick(); }
+  }
+  function setTheme(th) { const was = THEME; THEME = th === 'ets' || th === 'heist' ? th : 'football'; stage.classList.toggle('theme-ets', THEME === 'ets'); stage.classList.toggle('theme-heist', THEME === 'heist'); if (was !== THEME) { etsNews.length = 0; if (THEME === 'heist' && themeSeen) hxBanner('SUNSET HEIST', 'THEME ON'); } themeSeen = true; etsTick(); }
+  let themeSeen = false;
+  // v31: big comic-style banner (theme on, game won). Original wording, not GTA's.
+  function hxBanner(a, b, ms) {
+    const el = document.createElement('div'); el.className = 'hx-banner';
+    el.innerHTML = '<div class="a"></div><div class="b"></div>'; el.querySelector('.a').textContent = a; el.querySelector('.b').textContent = b || '';
+    stage.appendChild(el);
+    el.animate([{ opacity: 0, transform: 'translate(-50%,-50%) scale(1.6)' }, { opacity: 1, transform: 'translate(-50%,-50%) scale(1)', offset: 0.12 }, { opacity: 1, transform: 'translate(-50%,-50%) scale(1)', offset: 0.85 }, { opacity: 0, transform: 'translate(-50%,-50%) scale(.95)' }], { duration: ms || 3200, fill: 'forwards' }).onfinish = () => el.remove();
+  }
+  function showToast(a) {
+    clearToast();
+    const t = document.createElement('div');
+    lastToast = t;
+    const tl = (window.BBR_SCREEN && (BBR_SCREEN.avoid || []).some((o) => o.x + o.w > 1240 && o.y < 160));
+    t.style.cssText = 'position:absolute;' + (tl ? 'left' : 'right') + ':60px;top:40px;max-width:640px;padding:16px 22px;border-radius:12px;background:rgba(10,12,15,.94);border:2px solid ' + a.accent + ';font-family:Barlow Condensed,sans-serif;color:#f2f5f7';
+    t.innerHTML = '<div style="font-size:30px;font-weight:800;letter-spacing:1px">' + esc(a.text) + '</div>' + (a.sub ? '<div style="font-family:Inter,sans-serif;font-size:16px;color:#b8c0ca;margin-top:4px">' + esc(a.sub) + '</div>' : '');
+    stage.appendChild(t);
+    t.animate([{ opacity: 0, transform: 'translateY(-20px)' }, { opacity: 1, transform: 'none', offset: Math.min(0.06, 540 / (a.ms || 9000)) }, { opacity: 1, offset: 1 - Math.min(0.08, 720 / (a.ms || 9000)) }, { opacity: 0 }], { duration: a.ms || 9000, fill: 'forwards' });
+    SFX.play('ding');
+    setTimeout(() => { t.remove(); if (lastToast === t) lastToast = null; }, (a.ms || 9000) + 100);
+  }
+
+  // ================= connection =================
+  function connect() {
+    const es = new EventSource('/events');
+    es.onmessage = (m) => {
+      let a;
+      try { a = JSON.parse(m.data); } catch (e) { return; }
+      // the app was restarted (maybe updated): reload so OBS always runs the newest overlay
+      if (a.type === 'reload') return location.reload();
+      if (a.type === 'hello') {
+        if (window.BBR_BOOT && window.BBR_BOOT !== a.boot) return location.reload();
+        window.BBR_BOOT = a.boot;
+        return;
+      }
+      if (typeof a.volume === 'number') SFX.setVolume(a.volume);
+      if (EXTRAS.handles(a.type)) { const was = EXTRAS.panic(); EXTRAS.event(a); if (was && !EXTRAS.panic()) setTimeout(next, 300); return; }
+      if (a.type === 'gfx') { if (window.PEN3D) PEN3D.setLight(a.light); return BC.light(a.light); }
+      if (a.type === 'pen3d') { if (window.PEN3D) PEN3D.config(a); return; }
+      if (a.type === 'theme') return setTheme(a.theme);
+      if (a.type === 'stinger') { try { STINGER.play(a, { sound: true }); } catch (e) { /* ignore */ } return; }
+      if (a.type === 'gmeter') { try { GMETER.init(stage); GMETER.event(a.where === 'own' ? Object.assign({}, a, { on: false }) : a); } catch (e) { /* ignore */ } return; }
+      if (a.type === 'links') { try { if (!(window.EXTRAS && EXTRAS.panic && EXTRAS.panic())) { LINKS.init(stage); LINKS.show(a); } } catch (e) { /* ignore */ } return; }
+      if (a.type === 'linkscfg' || a.type === 'brb' || a.type === 'bigcam' || a.type === 'music') return;
+      if (a.type === 'levelup' || a.type === 'pack') { try { etsNote(a); } catch (e) { /* ignore */ } }
+      if (a.type === 'bp') return BPM.event(a);
+      if (a.type === 'battle') { try { BC.ev(a); } catch (e) { /* ignore */ } return onBattle(a); }
+      if (a.type === 'screen') return SCREEN.on(a);
+      if (a.type === 'challenges') return CH.state(a);
+      if (a.type === 'camfx') return CAMFX.event(a);
+      if (a.type === 'lb') { if (battleBusy) return; return LB.show(a); }
+      if (a.type === 'raidnight') return RN.event(a);
+      if (a.type === 'challenge' && a.kind !== 'accepted' && a.kind !== 'complete') return CH.event(a);
+      if (a.type === 'bsnTicker') return bsnSet(a);
+      if (a.type === 'bsnReload') { if (bsnFrame) bsnFrame.contentWindow.location.reload(); return; }
+      if (a.type === 'nextBattle') return HUD.nextBattle(a);
+      if (a.type === 'board') return HUD.board(a);
+      if (a.type === 'sound') return SFX.play(a.name);
+      if (a.type === 'toast') return showToast(a);
+      if (a.type === 'pot' && (RACE.active() || PEN.active() || ARC.active())) return;   // don't cover a battle
+      if (a.type === 'giveaway' || a.type === 'pot') return GIVE.onMsg(a);
+      if (a.type === 'sceneHold') { const was = sceneHold; sceneHold = !!a.hold; gapSecs = a.gapSecs != null ? a.gapSecs : 8; if (was && !sceneHold) { releaseHeld(); next(); } return; }
+      if (a.type === 'queueClear') { queue.length = 0; return; }
+      if (a.type === 'alertBusy') { otherBusy = !!a.busy; otherSince = Date.now(); if (!otherBusy) setTimeout(next, 400); return; }
+      { const A = (window.BBR_SCREEN && BBR_SCREEN.alerts) || {}; if (A.on !== false && OWN.test(a.kind || '') && (a.type === 'levelup' || a.type === 'pack')) a.holdUntil = Date.now() + (A.delaySecs != null ? A.delaySecs : 6) * 1000; }
+      if (a.note === 'CARDS LINKED') clearToast();
+      if (!QUEUED.test(a.type || '')) return;
+      if (queue.length < 30) queue.push(a);
+      next();
+    };
+  }
+  connect();
+  // watchdog: nothing can leave the cards stuck. An alert that never finished, or a battle screen that never closed, gets cleared.
+  setInterval(() => {
+    const now = Date.now();
+    if (busy && now - busySince > 45000) { busy = false; lastErr = 'an alert never finished: cleared'; next(); }
+    if (otherBusy && now - (otherSince || now) > 90000) { otherBusy = false; next(); }
+  }, 5000);
+  // the app says what's really going on: a battle or replay the overlay still thinks is on, but isn't, gets cleared
+  let idleChecks = 0, rpChecks = 0;
+  function serverSays(r) {
+    if (!r) return;
+    idleChecks = battleBusy && r.battle === 'idle' && Date.now() - lastBattleAt > 20000 ? idleChecks + 1 : 0;
+    if (idleChecks >= 2) { idleChecks = 0; battleBusy = false; RACE.clear(); PEN.clear(); ARC.clear(); TPEN.clear(); lastErr = 'a battle screen never closed: cleared'; next(); }
+    rpChecks = stage.classList.contains('rp-on') && !r.replay ? rpChecks + 1 : 0;
+    if (rpChecks >= 2) { rpChecks = 0; EXTRAS.event({ type: 'replay', action: 'stop' }); lastErr = 'a replay screen never closed: cleared'; next(); }
+  }
+  // tell the app how the cards are doing (Setup > System check shows it)
+  setInterval(() => {
+    try { fetch('/api/overlay-state', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ queue: queue.length, busy, battleBusy, sceneHold, otherBusy, rpOn: stage.classList.contains('rp-on'), panic: !!(window.EXTRAS && EXTRAS.panic()), err: lastErr, shown: shownN, next: queue[0] ? queue[0].type : null, g3: window.PEN3D ? PEN3D.status() : null }) }).then((x) => x.json()).then(serverSays).catch(() => {}); } catch (e) { /* ignore */ }
+  }, 5000);
+  window.BBR_DEBUG = { battle: onBattle, alert: (a) => { queue.push(a); next(); } };
+})();
+</script>
+</body>
+</html>

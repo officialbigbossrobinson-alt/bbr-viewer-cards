@@ -1,0 +1,70 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>BBR Scenes</title>
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700;800&family=Inter:wght@400;600&display=swap" rel="stylesheet">
+<style>
+  html,body{margin:0;width:1920px;height:1080px;overflow:hidden;background:transparent;color:#f2f5f7;font-family:'Barlow Condensed',sans-serif}
+  body.solid{background:radial-gradient(ellipse at 20% 0%,#1d3a2a,#0b0d10 70%)}
+  .k{position:absolute;left:110px;top:90px;font-size:30px;font-weight:700;letter-spacing:12px;color:var(--acc)}
+  .big{position:absolute;left:104px;top:130px;font-size:230px;font-weight:800;line-height:1;white-space:nowrap}
+  .ton{position:absolute;left:110px;top:430px;width:900px}
+  .ton small{display:block;font-size:26px;letter-spacing:6px;color:#a7b0ba;font-weight:700}
+  .ton b{display:block;font-size:52px;font-weight:700;line-height:1.1;margin-top:6px}
+  .ton p{font-family:Inter,sans-serif;font-size:26px;color:#c9d0d7;margin:12px 0 0}
+  .side{position:absolute;right:110px;top:90px;width:470px;border-radius:20px;background:rgba(10,12,15,.85);border:2px solid #2b313b;padding:22px 26px;box-sizing:border-box}
+  .side h3{margin:0 0 10px;font-size:26px;letter-spacing:6px;color:#f6d77a}
+  .side .r{display:flex;justify-content:space-between;font-size:36px;font-weight:700;padding:4px 0;border-bottom:1px solid rgba(255,255,255,.07)}
+  .side .r span:last-child{color:#f6d77a}
+  .side .c{font-size:28px;font-weight:700;padding:5px 0;border-bottom:1px solid rgba(255,255,255,.07)}.side .c i{font-style:normal;color:#ffb020}
+  .bar{position:absolute;left:0;right:0;bottom:0;height:78px;background:#f2f2f2;color:#0b0d10;display:flex;align-items:center;gap:20px;padding:0 50px;font-weight:800;font-size:36px}
+  .bar b{color:#c8102e}
+  .fade{animation:fd .6s ease-out}@keyframes fd{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:none}}
+</style>
+</head>
+<body>
+<div id="root"></div>
+<script>
+(function () {
+  const q = new URLSearchParams(location.search), mode = q.get('mode') || 'start';
+  if (q.get('bg') === '1') document.body.classList.add('solid');
+  const esc = (s) => String(s == null ? '' : s).replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+  const root = document.getElementById('root');
+  let D = null, endAt = 0, rot = 0;
+  const mmss = (s) => String(Math.floor(s / 60)).padStart(2, '0') + ':' + String(s % 60).padStart(2, '0');
+  function side() {
+    // BRB rotates between the top cards, the challenge list and the results
+    const panes = [];
+    if (D.top.length) panes.push('<h3>TOP CARDS</h3>' + D.top.map((t) => '<div class="r"><span>' + esc(t.name) + '</span><span>' + t.ovr + '</span></div>').join(''));
+    if (mode !== 'start' && D.challenges.length) panes.push('<h3>CHALLENGES</h3>' + D.challenges.map((c) => '<div class="c">' + esc(c.name) + ' <i>' + c.left + ' left</i></div>').join(''));
+    if (mode !== 'start' && D.results) panes.push('<h3>RESULTS</h3><div class="c">' + esc(D.results) + '</div>');
+    if (!panes.length) return '';
+    return '<div class="side fade">' + panes[rot++ % panes.length] + '</div>';
+  }
+  function draw() {
+    if (!D) return;
+    document.documentElement.style.setProperty('--acc', D.accent || '#3dff9a');
+    let h = '';
+    if (mode === 'start') {
+      const left = Math.max(0, Math.round((endAt - Date.now()) / 1000));
+      h = '<div class="k">BIGBOSSROBINSON · STARTING SOON</div><div class="big" id="cd">' + (left ? mmss(left) : 'ANY SECOND') + '</div>' +
+        '<div class="ton">' + (D.tonight ? '<small>TONIGHT</small><b>' + esc(D.tonight) + '</b>' : '') + (D.lastLine ? '<p>Last time: ' + esc(D.lastLine) + '</p>' : '') + '</div>' + side() +
+        '<div class="bar"><b>CHAT:</b> type hello to check in before we start' + (D.checkins ? ' · ' + D.checkins + ' checked in' : '') + '</div>';
+    } else if (mode === 'brb') {
+      h = '<div class="k">BIGBOSSROBINSON</div><div class="big">BE RIGHT BACK</div><div class="ton">' + (D.results ? '<small>SO FAR</small><b>' + esc(D.results) + '</b>' : '') + '</div>' + side() +
+        '<div class="bar"><b>CHAT:</b> type !card to see your card · !leaderboard for the top 20</div>';
+    } else {
+      h = '<div class="k">BIGBOSSROBINSON</div><div class="big" style="font-size:150px;white-space:nowrap">THANKS FOR WATCHING</div><div class="ton" style="top:330px">' + (D.results ? '<small>TONIGHT</small><b>' + esc(D.results) + '</b>' : '') +
+        (D.thanks && D.thanks.length ? '<p>' + D.thanks.map((s) => esc(s.role) + ': ' + s.names.slice(0, 4).map((n) => esc(n.name)).join(', ')).join('<br>') + '</p>' : '') + '</div>' + side() +
+        '<div class="bar"><b>NEXT:</b> ' + (D.next ? esc(D.next.text) : 'see you next stream!') + '</div>';
+    }
+    root.innerHTML = h;
+  }
+  async function load() { try { D = await (await fetch('/api/scenes')).json(); if (!endAt) endAt = Date.now() + (+q.get('min') || D.startMin || 5) * 60000; draw(); } catch (e) { /* app restarting */ } }
+  load(); setInterval(load, 15000);
+  setInterval(() => { const el = document.getElementById('cd'); if (el && mode === 'start') { const left = Math.max(0, Math.round((endAt - Date.now()) / 1000)); el.textContent = left ? mmss(left) : 'ANY SECOND'; } }, 1000);
+})();
+</script>
+</body>
+</html>

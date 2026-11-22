@@ -1,0 +1,112 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>BBR Credits</title>
+<style>
+  html,body{margin:0;width:1920px;height:1080px;overflow:hidden;background:transparent;color:#f2f5f7;font-family:'Barlow Condensed','Arial Narrow',sans-serif}
+  body.card{width:auto;height:auto;overflow:auto;background:#0b0d10;font-family:Inter,Arial,sans-serif;padding:20px}
+  .shade{position:absolute;left:560px;top:0;width:800px;height:1080px;background:linear-gradient(90deg,transparent,rgba(0,0,0,.55) 18%,rgba(0,0,0,.55) 82%,transparent);opacity:0;transition:opacity 1.2s}
+  .roll{position:absolute;left:560px;top:1080px;width:800px;text-align:center;will-change:transform}
+  .on .shade{opacity:1}
+  .t0{font-size:26px;letter-spacing:12px;color:#3dff9a;font-weight:700}
+  .t1{font-size:96px;font-weight:800;line-height:.95;margin:8px 0 6px;text-shadow:0 4px 20px rgba(0,0,0,.8)}
+  .t2{font-family:Inter,Arial,sans-serif;font-size:22px;color:#d6dbe0}
+  .sec{margin-top:110px}
+  .role{font-size:24px;letter-spacing:10px;color:#3dff9a;font-weight:700;text-transform:uppercase}
+  .sub{font-family:Inter,Arial,sans-serif;font-size:16px;color:#aeb6bf;margin-top:4px}
+  .nm{font-size:46px;font-weight:800;margin-top:14px;text-transform:uppercase;text-shadow:0 3px 14px rgba(0,0,0,.9);line-height:1.05}
+  .nm small{display:block;font-family:Inter,Arial,sans-serif;font-size:16px;font-weight:500;color:#c9d0d7;text-transform:none;letter-spacing:0}
+  .grid{display:flex;flex-wrap:wrap;justify-content:center;gap:6px 26px;margin-top:16px}
+  .grid span{font-size:30px;font-weight:700;text-transform:uppercase;text-shadow:0 2px 10px rgba(0,0,0,.9)}
+  .stats{display:grid;grid-template-columns:repeat(3,1fr);gap:18px;margin-top:20px}
+  .stats div{font-size:58px;font-weight:800;line-height:1}
+  .stats small{display:block;font-family:Inter,Arial,sans-serif;font-size:15px;font-weight:500;color:#aeb6bf;letter-spacing:1px}
+  .gag{font-family:Inter,Arial,sans-serif;font-style:italic;font-size:20px;color:#c9d0d7;margin-top:18px}
+  .post{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;opacity:0;pointer-events:none;background:radial-gradient(ellipse at center,rgba(0,0,0,.7),rgba(0,0,0,.2) 70%,transparent)}
+  .post .a{font-size:24px;letter-spacing:12px;color:#c58bff;font-weight:700}
+  .post .b{font-size:84px;font-weight:800;text-align:center;max-width:1400px;line-height:1;text-shadow:0 0 40px rgba(197,139,255,.6)}
+  .post.show{animation:postIn 9s forwards}
+  @keyframes postIn{0%{opacity:0}10%{opacity:1}85%{opacity:1}100%{opacity:0}}
+  .help{position:absolute;left:30px;bottom:30px;font-family:Inter,Arial,sans-serif;font-size:16px;color:#c9d0d7;background:rgba(0,0,0,.6);padding:10px 14px;border-radius:10px}
+  canvas{max-width:100%;height:auto;border-radius:12px;display:block}
+  .dl{display:inline-block;margin:14px 0;padding:12px 18px;border-radius:10px;background:#3dff9a;color:#06110b;font-weight:700;text-decoration:none}
+</style>
+</head>
+<body>
+<div class="shade" id="shade"></div>
+<div class="roll" id="roll"></div>
+<div class="post" id="post"><div class="a">AFTER THE CREDITS</div><div class="b" id="postB"></div></div>
+<div class="help" id="help" hidden></div>
+<script>
+(function () {
+  const $ = (id) => document.getElementById(id);
+  const esc = (s) => String(s == null ? '' : s).replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+  const Q = new URLSearchParams(location.search);
+  let D = null, anim = null, rolling = false;
+  async function load() { D = await fetch('/api/credits' + (Q.get('no') ? '?no=' + encodeURIComponent(Q.get('no')) : ''), { cache: 'no-store' }).then((r) => r.json()); return D; }
+  function build() {
+    const T = D.totals || {}, date = new Date(D.start || Date.now()).toLocaleDateString('en-GB', { weekday: 'long', day: 'numeric', month: 'long' });
+    let h = '<div class="t0">A BIGBOSSROBINSON PRODUCTION</div><div class="t1">STREAM #' + esc(D.no) + '</div><div class="t2">' + esc(date) + (D.games && D.games.length ? ' · ' + esc(D.games.slice(0, 3).join(' · ')) : '') + '</div>';
+    for (const s of D.sections || []) {
+      h += '<div class="sec"><div class="role">' + esc(s.role) + '</div>' + (s.sub ? '<div class="sub">' + esc(s.sub) + '</div>' : '');
+      if (s.names.length > 8) h += '<div class="grid">' + s.names.map((n) => '<span>' + esc(n.name) + '</span>').join('') + '</div>';
+      else h += s.names.map((n) => '<div class="nm">' + esc(n.name) + (n.note ? '<small>' + esc(n.note) + '</small>' : '') + '</div>').join('');
+      h += '</div>';
+    }
+    if (D.raid) h += '<div class="sec"><div class="role">Raid Night</div><div class="nm">' + (D.raid.win ? 'THE QUEEN FELL' : 'THE QUEEN SURVIVED') + '<small>' + D.raid.squad + ' raiders' + (D.raid.mvp ? ' · MVP ' + esc(D.raid.mvp) : '') + '</small></div></div>';
+    h += '<div class="sec"><div class="role">By the numbers</div><div class="stats">' +
+      '<div>' + (T.follows || 0) + '<small>NEW FOLLOWERS</small></div><div>' + ((T.subs || 0) + (T.gifted || 0)) + '<small>SUBS + GIFTS</small></div><div>' + (T.messages || 0) + '<small>CHAT MESSAGES</small></div>' +
+      '<div>' + (T.bits || 0) + '<small>BITS</small></div><div>' + (T.battles || 0) + '<small>BATTLES</small></div><div>' + (D.peak || 0) + '<small>PEAK IN CHAT</small></div></div></div>';
+    h += '<div class="sec">' + (D.gags || []).map((g) => '<div class="gag">' + esc(g) + '</div>').join('') + '</div>';
+    h += '<div class="sec" style="margin-bottom:200px"><div class="t1" style="font-size:72px">THANK YOU</div><div class="t2">for watching. You made this stream.</div></div>';
+    $('roll').innerHTML = h;
+    $('postB').textContent = D.teaser || 'See you next stream!';
+  }
+  async function roll(secs) {
+    if (rolling && anim) anim.cancel();
+    await load(); build();
+    const total = Math.max(15, +secs || D.secs || 60), post = 9, run = Math.max(8, total - post) * 1000;
+    const height = $('roll').scrollHeight;
+    document.body.classList.add('on'); rolling = true;
+    anim = $('roll').animate([{ transform: 'translateY(0)' }, { transform: 'translateY(' + (-(1080 + height)) + 'px)' }], { duration: run, easing: 'linear', fill: 'forwards' });
+    anim.onfinish = () => { document.body.classList.remove('on'); const p = $('post'); p.classList.remove('show'); void p.offsetWidth; p.classList.add('show'); rolling = false; };
+  }
+  function reset() { if (anim) anim.cancel(); anim = null; rolling = false; document.body.classList.remove('on'); $('post').classList.remove('show'); }
+
+  // ---- share picture (1200x675) ----
+  async function card() {
+    document.body.className = 'card'; document.body.innerHTML = '<p>Right-click the picture to copy it, or download it, then post it in Discord.</p>';
+    await load();
+    const c = document.createElement('canvas'); c.width = 1200; c.height = 675; const g = c.getContext('2d');
+    const gr = g.createLinearGradient(0, 0, 1200, 675); gr.addColorStop(0, '#0b0d10'); gr.addColorStop(1, '#1a1030'); g.fillStyle = gr; g.fillRect(0, 0, 1200, 675);
+    g.fillStyle = '#3dff9a'; g.fillRect(0, 0, 1200, 8);
+    g.font = '700 22px Arial'; g.fillStyle = '#3dff9a'; g.fillText('BIGBOSSROBINSON · STREAM #' + D.no + ' · ' + new Date(D.start || Date.now()).toLocaleDateString('en-GB'), 50, 60);
+    g.font = '800 64px Arial Narrow, Arial'; g.fillStyle = '#fff'; g.fillText('THANKS FOR TONIGHT', 50, 130);
+    const T = D.totals || {};
+    const tiles = [['FOLLOWS', T.follows || 0], ['SUBS + GIFTS', (T.subs || 0) + (T.gifted || 0)], ['BITS', T.bits || 0], ['BATTLES', T.battles || 0], ['NEW FACES', T.newFaces || 0], ['PEAK CHAT', D.peak || 0]];
+    tiles.forEach(([k, v], i) => { const x = 50 + (i % 3) * 230, y = 170 + Math.floor(i / 3) * 110; g.fillStyle = 'rgba(255,255,255,.06)'; g.fillRect(x, y, 210, 92); g.fillStyle = '#fff'; g.font = '800 44px Arial'; g.fillText(String(v), x + 16, y + 52); g.fillStyle = '#aeb6bf'; g.font = '600 14px Arial'; g.fillText(k, x + 16, y + 78); });
+    let y = 190; g.textAlign = 'left';
+    for (const s of (D.sections || []).slice(0, 5)) {
+      g.fillStyle = '#3dff9a'; g.font = '700 16px Arial'; g.fillText(s.role.toUpperCase(), 760, y);
+      g.fillStyle = '#fff'; g.font = '700 22px Arial'; const line = s.names.slice(0, 4).map((n) => n.name).join(', ') + (s.names.length > 4 ? ' +' + (s.names.length - 4) : '');
+      g.fillText(line.length > 34 ? line.slice(0, 33) + '…' : line, 760, y + 28); y += 72;
+    }
+    if (D.raid) { g.fillStyle = D.raid.win ? '#3dff9a' : '#c58bff'; g.font = '800 34px Arial'; g.fillText(D.raid.win ? 'RAID NIGHT: THE QUEEN FELL' : 'RAID NIGHT: THE QUEEN SURVIVED', 50, 470); g.fillStyle = '#d6dbe0'; g.font = '500 20px Arial'; g.fillText(D.raid.squad + ' raiders' + (D.raid.mvp ? ' · MVP ' + D.raid.mvp : ''), 50, 502); }
+    g.fillStyle = '#c58bff'; g.font = '700 26px Arial'; g.fillText(D.teaser || '', 50, 620);
+    document.body.appendChild(c);
+    const a = document.createElement('a'); a.className = 'dl'; a.download = 'bbr-stream-' + D.no + '.png'; a.href = c.toDataURL('image/png'); a.textContent = 'Download picture'; document.body.appendChild(a);
+  }
+  if (Q.get('card')) { card(); return; }
+
+  // ---- when to roll ----
+  try { const es = new EventSource('/events'); es.onmessage = (m) => { try { const a = JSON.parse(m.data); if (a.type === 'credits' && a.action === 'roll') roll(a.secs); } catch (e) { /* ignore */ } }; } catch (e) { /* ignore */ }
+  if (window.obsstudio) {
+    window.addEventListener('obsSourceActiveChanged', (e) => { if (e.detail && e.detail.active) { load().then(() => { if (D.settings && D.settings.auto) roll(); }); } else reset(); });
+  } else if (Q.get('play')) roll(+Q.get('secs') || 0);
+  else { const h = $('help'); h.hidden = false; h.textContent = 'BBR Credits: add this page as a Browser Source on your end screen. It rolls when that scene goes live. Preview: add ?play=1 to the address.'; }
+})();
+</script>
+</body>
+</html>

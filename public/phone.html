@@ -1,0 +1,60 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>BBR Remote</title>
+<style>
+  :root{color-scheme:dark}
+  body{margin:0;background:#0b0d10;color:#eef1f4;font-family:system-ui,-apple-system,Segoe UI,sans-serif;padding:16px}
+  h1{font-size:20px;margin:0 0 4px}
+  .st{font-size:14px;color:#a7b0ba;margin-bottom:14px;min-height:20px}
+  .g{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+  button{min-height:96px;border-radius:14px;border:1px solid var(--c,#2b313b);background:#13161b;color:#eef1f4;font:inherit;text-align:left;padding:12px;display:flex;flex-direction:column;justify-content:space-between}
+  button small{font-size:11px;letter-spacing:1.5px;color:var(--c)}
+  button b{font-size:17px}
+  button:active{background:#1f2a24}
+  .msg{position:fixed;left:16px;right:16px;bottom:16px;padding:12px 14px;border-radius:12px;background:#1f2a24;border:1px solid #3dff9a;font-size:15px;opacity:0;transition:opacity .3s}
+  .msg.on{opacity:1}
+</style>
+</head>
+<body>
+<h1>BBR Remote</h1>
+<div class="st" id="st">Loading…</div>
+<div class="g" id="g"></div>
+<div class="msg" id="msg" role="status"></div>
+<a id="anl" href="#" style="display:block;margin:14px 0;padding:14px;border-radius:12px;border:1px solid #f5c400;color:#f5c400;text-align:center;font-weight:700;text-decoration:none">Analysis desk: draw on replays</a>
+<script>
+(function () {
+  const key = new URLSearchParams(location.search).get('key') || '';
+  const T = {
+    'replay': ['REPLAY', 'Replay last 30 s', '#4dc3ff', '/control/replay'], 'replay-slow': ['REPLAY', 'Replay in slow-mo', '#4dc3ff', '/control/replay-slow'], 'replay-stop': ['REPLAY', 'Stop replay', '#4dc3ff', '/control/replay-stop'], 'redcard-y2': ['RED CARD', 'Two yellows', '#ffd23f', '/control/redcard?kind=yellow2'], 'redcard-red': ['RED CARD', 'Straight red', '#ff3b3b', '/control/redcard?kind=red'], 'redcard-clear': ['RED CARD', 'Clear the card', '#ff3b3b', '/control/redcard-clear'], 'challenge-pause': ['CHALLENGE', 'Pause / show', '#ffb020', '/control/challenge-pause'], 'motm-open': ['MATCHDAY', 'Man of the match vote', '#f6d77a', '/control/motm-open'], 'undo-last': ['UNDO', 'Undo the last thing', '#a7b0ba', '/control/undo-last'],
+    'start': ['BATTLE', 'Start a battle now', '#3dff9a', '/control/start'], 'delay': ['BATTLE', '+5 minutes', '#3dff9a', '/control/delay?min=5'],
+    'challenge-done': ['CHALLENGE', 'Game done', '#ffb020', '/control/challenge-done'], 'top20': ['LEADERBOARD', 'Show Top 20 cards', '#3dff9a', '/control/board?type=cards&top=20'],
+    'gifters': ['LEADERBOARD', 'Show top gifters', '#c58bff', '/control/board?type=gifts&top=20'], 'board-rotate': ['LEADERBOARD', 'Rotate boards on/off', '#3dff9a', '/control/board-rotate'],
+    'cam-reset': ['CAMERA', 'Reset camera', '#ff5aa0', '/control/cam-reset'], 'cam-goal': ['CAMERA', 'Goal cam', '#ff5aa0', '/control/cam-goal'], 'cam-bighead': ['CAMERA', 'Big head', '#ff5aa0', '/control/cam-bighead'], 'cam-spin': ['CAMERA', 'Spin', '#ff5aa0', '/control/cam-spin'],
+    'raidnight-brief': ['RAID NIGHT', 'Start the briefing', '#c58bff', '/control/raidnight-brief'], 'raidnight-drone': ['RAID NIGHT', 'Send a drone', '#c58bff', '/control/raidnight-drone'],
+    'credits': ['END', 'Roll the credits', '#4dc3ff', '/control/credits'], 'held-play': ['ALERTS', 'Play waiting alerts', '#4dc3ff', '/control/held-play'],
+    'panic': ['PANIC', 'Hide everything / back', '#ff6b7d', '/control/panic'], 'marker': ['TWITCH', 'Mark this moment', '#9146ff', '/control/marker'], 'result-win': ['RESULT', 'Win', '#3dff9a', '/control/result-win'], 'result-draw': ['RESULT', 'Draw', '#ffd23f', '/control/result-draw'], 'result-loss': ['RESULT', 'Loss', '#ff6b7d', '/control/result-loss'], 'result-undo': ['RESULT', 'Undo last result', '#a7b0ba', '/control/result-undo'], 'scores': ['SCORES', 'Scores round-up', '#e01e2e', '/control/scores'], 'counter-plus': ['GODFATHER', '+1 penalty', '#ff3b3b', '/control/counter-plus'], 'counter-minus': ['GODFATHER', '-1 penalty', '#ff3b3b', '/control/counter-minus'], 'queen-wake': ['RAID NIGHT', 'Wake the Queen', '#c58bff', '/control/queen-wake'], 'queen-now': ['RAID NIGHT', 'Queen: start now', '#c58bff', '/control/queen-now'], 'queen-aftergame': ['RAID NIGHT', 'Queen after this game', '#c58bff', '/control/queen-aftergame'], 'queen-later': ['RAID NIGHT', 'Queen later +10', '#c58bff', '/control/queen-later'], 'mvp': ['MVP', 'Viewer of the Stream', '#f6d77a', '/control/mvp'], 'redcard': ['RULE', 'Red card (again = clear)', '#ff3b3b', '/control/redcard'], 'boss-start': ['BATTLE', 'Beat the Boss', '#ff3b3b', '/control/boss-start'], 'boss-l': ['BOSS', 'LEFT', '#ff3b3b', '/control/boss-l'], 'boss-c': ['BOSS', 'CENTRE', '#ff3b3b', '/control/boss-c'], 'boss-r': ['BOSS', 'RIGHT', '#ff3b3b', '/control/boss-r'], 'squad-next': ['SQUAD', 'Next team sheet', '#f6d77a', '/control/squad-next'], 'chat-toggle': ['CHAT', 'Chat on / off', '#4dc3ff', '/control/show?k=chat']
+  };
+  const DEF = ['replay', 'redcard-y2', 'redcard-red', 'start', 'challenge-done', 'top20', 'cam-reset', 'cam-goal', 'raidnight-brief', 'raidnight-drone', 'credits', 'held-play'];
+  const esc = (s) => String(s == null ? '' : s).replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+  document.getElementById('anl').href = '/analysis?key=' + encodeURIComponent(key);
+  const withKey = (u) => u + (u.includes('?') ? '&' : '?') + 'key=' + encodeURIComponent(key);
+  let shown = '';
+  function say(t) { const m = document.getElementById('msg'); m.textContent = t; m.classList.add('on'); clearTimeout(say.t); say.t = setTimeout(() => m.classList.remove('on'), 2500); }
+  async function load() {
+    try {
+      const d = await fetch(withKey('/phone/state'), { cache: 'no-store' }).then((r) => r.json());
+      const n = d.next || {};
+      document.getElementById('st').textContent = (d.battle !== 'idle' ? 'A battle is on' : n.paused ? 'Battles paused' : 'Next: ' + (n.label || '') + (n.inMs != null ? ' in ' + Math.ceil(n.inMs / 60000) + ' min' : '')) + (d.challenge ? ' · ' + d.challenge.name + ' ' + d.challenge.left + ' left' : '') + (d.held ? ' · ' + d.held + ' alerts waiting' : '');
+      const pins = (d.replayPlaying ? ['replay-stop'] : []).concat(d.red ? ['redcard-clear'] : []).concat(d.bossRole ? ['boss-l', 'boss-c', 'boss-r'] : []).concat(d.queen === 'ready' ? ['queen-now', 'queen-aftergame', 'queen-later'] : []).concat((d.pins || DEF).filter((id) => T[id] && !(d.queen === 'ready' && /^queen-/.test(id)) && !(d.replayPlaying && id === 'replay-stop') && !(d.red && id === 'redcard-clear')));
+      const html = pins.map((id) => '<button style="--c:' + T[id][2] + '" data-id="' + id + '"><small>' + T[id][0] + '</small><b>' + esc(T[id][1]) + '</b></button>').join('');
+      if (html !== shown) { shown = html; const g = document.getElementById('g'); g.innerHTML = html; g.querySelectorAll('button').forEach((b) => { b.onclick = async () => { const t = await fetch(withKey(T[b.dataset.id][3])).then((r) => r.text()).catch(() => 'Could not reach the app'); say(t); load(); }; }); }
+    } catch (e) { document.getElementById('st').textContent = 'Can\'t reach the app. Same Wi-Fi as the streaming PC?'; }
+  }
+  load(); setInterval(load, 5000);
+})();
+</script>
+</body>
+</html>
