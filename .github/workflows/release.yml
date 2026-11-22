@@ -30,6 +30,13 @@ jobs:
       - run: node desktop/check-version.js
       - name: Test the app's own parts (no Electron window needed)
         run: node desktop/test/unit.js
+      - name: Tag this version (when started with the Run workflow button)
+        if: github.ref_type != 'tag' && inputs.publish
+        shell: bash
+        run: |
+          V=v$(node -p "require('./package.json').version")
+          if git ls-remote --exit-code --tags origin "refs/tags/$V" >/dev/null; then echo "$V already tagged"; else
+            git tag "$V" && git push origin "$V"; fi
       - name: Build and publish
         shell: bash
         run: |
