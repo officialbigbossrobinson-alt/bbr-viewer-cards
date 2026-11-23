@@ -1,4 +1,35 @@
-WHAT'S NEW IN v38 (giveaway bot check, bans, Ballon d'Or vote, Starting Soon fixes)
+WHAT'S NEW IN v39 (giveaway spin, secret end time, Ballon d'Or fixes)
+   SPIN FOR A WINNER (Giveaways > Giveaway list > Spin for a winner)
+   - Press SPIN: the names scroll on stream for 30 seconds and stop on a random winner in the
+     gold band. The winner then has 60 seconds to type !claim in chat FROM THE SAME ACCOUNT they
+     entered with (Twitch name on Twitch, Kick name on Kick). Anyone else typing it is ignored.
+   - Claimed: CLAIMED! with confetti and applause; they go on the winners list.
+     Not claimed in time: NOT CLAIMED, they're taken out of the list (and can't enter again this
+     round), and the button says SPIN AGAIN. Spin as many times as you need.
+   - "They claimed it" / "Not claimed: take them out" buttons if you need to decide yourself.
+     Banned while picked = out at once. People waiting for a bot check and earlier winners
+     aren't in the spin. If the list is empty, it spins the giveaway meter's !enter entries.
+   - Spin settings, music & applause: upload your own spin music and applause sound (they also
+     go into Photos & music), volumes, spin length, claim time, the command, title, prize and
+     the chat messages. No music = ticking sounds. No applause = the app's fanfare + cheer.
+   - It shows on the BBR overlay. Or pick "Its own Browser Source" and add
+     http://localhost:3000/spin (1920 x 1080, top of your scenes, tick "Control audio via OBS").
+   - Dock: SPIN on the Giveaway tab. Stream Deck: /control/spin-start, /control/spin-claim,
+     /control/spin-skip, /control/spin-hide. "Test spin" = made-up names, chat isn't told.
+   SECRET END TIME (Giveaways > Giveaway meter)
+   - Tick "Secret end time": the clock still runs (you see it in the dashboard and the dock) and
+     still ends the giveaway on time, but the stream shows ENTRIES OPEN with no time, and chat
+     isn't told how long is left. Stream Deck: /control/gmeter-hideclock.
+   BANS
+   - Banned or timed out also = out of the giveaway meter's own !enter entries (and can't enter
+     again until you clear the entries), and out of the spin if they were the one picked.
+   FIXES
+   - Ballon d'Or: the Edit button works (a small form: name, position, club).
+   - Ballon d'Or: after Remove you can type and add names again. The cause was the app window's
+     own yes/no box, which on Windows can stop text boxes taking typing. Every yes/no question in
+     the dashboard and the dock is now asked inside the page (Enter = OK, Esc = Cancel).
+
+WHAT WAS NEW IN v38 (giveaway bot check, bans, Ballon d'Or vote, Starting Soon fixes)
    BANS
    - Ban or time someone out on Twitch, Kick or YouTube and they're taken out of the giveaway
      straight away (the Giveaway list and the ticket giveaway) and can't enter again that round.

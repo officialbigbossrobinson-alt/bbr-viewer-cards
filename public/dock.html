@@ -6,6 +6,10 @@
 <title>BBR Dock</title>
 <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 <style>
+  /* v39: in-page yes / no (the app window's own confirm box breaks typing on Windows) */
+  .spinst{display:block;margin-top:8px;font-size:15px;font-weight:800}.spinst.y{color:#E8C468}.spinst.g{color:var(--grn)}.spinst.r{color:var(--red)}
+  .askd{position:fixed;inset:0;z-index:99;background:rgba(0,0,0,.65);display:grid;place-items:center;padding:14px}.askd[hidden]{display:none}
+  .askd>div{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:16px;max-width:380px;display:flex;flex-direction:column;gap:12px}.askd p{margin:0;white-space:pre-wrap;font-size:14px;line-height:1.45}.askd .r{display:flex;gap:8px;justify-content:flex-end}
   /* v29: the simple dock. Four tabs, big buttons. Everything else lives in the dashboard. */
   :root{--bg:#101317;--panel:#181c22;--line:#2b313b;--text:#eef1f4;--muted:#a7b0ba;--blue:#4dc3ff;--yel:#f5c400;--grn:#3dff9a;--red:#ff6b7d;--org:#ffb020}
   *{box-sizing:border-box}
@@ -74,6 +78,7 @@
 </style>
 </head>
 <body>
+<div class="askd" id="askD" hidden role="dialog" aria-modal="true" aria-labelledby="askDp"><div><p id="askDp"></p><div class="r"><button id="askDno" type="button">Cancel</button><button id="askDyes" type="button">OK</button></div></div></div>
 <div class="w">
   <div class="top" id="top"></div>
   <div id="body"></div>
@@ -90,7 +95,11 @@
   try { tab = localStorage.getItem('bbr-dock29') || 'live'; } catch (e) { /* ignore */ }
   if (!/^(live|replay|games|give|search|fix)$/.test(tab)) tab = 'live';
   const say = (t) => { $('msg').textContent = t; };
-  const go = async (u, ask) => { if (ask && !confirm(ask)) return; const t = await fetch(u).then((r) => r.text()).catch(() => 'Could not reach the app'); say(t); setTimeout(load, 300); if (/clip-(get|pull)/.test(u) && typeof TW !== 'undefined' && TW.open) setTimeout(twLoad, 1500); };
+  // v39: confirm() as a promise, drawn in the page
+  const askYN = (t) => new Promise((done) => { const d = $('askD'), back = document.activeElement; $('askDp').textContent = t; d.hidden = false; $('askDyes').focus();
+    const end = (v) => { d.hidden = true; d.onkeydown = null; try { if (back) back.focus(); } catch (e) { /* gone */ } done(v); };
+    $('askDyes').onclick = () => end(true); $('askDno').onclick = () => end(false); d.onkeydown = (e) => { if (e.key === 'Escape') end(false); }; });
+  const go = async (u, ask) => { if (ask && !(await askYN(ask))) return; const t = await fetch(u).then((r) => r.text()).catch(() => 'Could not reach the app'); say(t); setTimeout(load, 300); if (/clip-(get|pull)/.test(u) && typeof TW !== 'undefined' && TW.open) setTimeout(twLoad, 1500); };
   const post = (u, b) => fetch(u, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(b || {}) }).then((r) => r.json());
   const mmss = (ms) => { const s = Math.max(0, Math.ceil(ms / 1000)); return Math.floor(s / 60) + ':' + String(s % 60).padStart(2, '0'); };
   const B = (u, label, cls, extra) => '<button data-u="' + esc(u) + '"' + (cls ? ' class="' + cls + '"' : '') + (extra || '') + '>' + label + '</button>';
@@ -239,7 +248,15 @@
     const G = d.sgw; if (!G || G.on === false || (!G.open && !G.count)) return '';
     return '<div class="card ' + (G.open ? 'g' : 'b') + '"><div class="hd"><span class="t">GIVEAWAY ' + (G.open ? 'OPEN' : 'CLOSED') + ' · ' + G.count + ' entered</span><span class="muted">' + esc(G.cmd) + (G.needMins ? ' · ' + G.needMins + ' min' : '') + '</span></div>' +
       (G.winners && G.winners[0] ? '<span>Winner: <b>' + esc(G.winners[0].display) + '</b></span>' : '') +
-      '<div class="g3">' + B('/control/sgw-toggle', G.open ? 'CLOSE' : 'OPEN', '', ' style="border-color:' + (G.open ? '#ff8080;color:#ff8080' : '#3dff9a;color:#3dff9a') + '"') + B('/control/sgw-pick', 'Pick winner', '', ' style="border-color:#ffd23f;color:#ffd23f"' + (G.count ? '' : ' disabled')) + '<button data-t="give">See the list</button></div></div>';
+      '<div class="g3">' + B('/control/sgw-toggle', G.open ? 'CLOSE' : 'OPEN', '', ' style="border-color:' + (G.open ? '#ff8080;color:#ff8080' : '#3dff9a;color:#3dff9a') + '"') + B('/control/spin-start', 'SPIN', '', ' style="background:#E8C468;border-color:#E8C468;color:#14110A;font-weight:800"' + (G.count && !(d.spin && /^(spin|claim)$/.test(d.spin.phase)) ? '' : ' disabled')) + '<button data-t="give">See the list</button></div>' + (d.spin && d.spin.phase !== 'idle' ? spinLine(d) : '') + '</div>';
+  }
+  // v39: where the spin is, with its buttons
+  function spinLine(d) {
+    const P = d.spin; if (!P || !P.phase || P.phase === 'idle') return '<span class="muted">' + B('/control/sgw-pick', 'Quick pick (no spin)', '', ' style="margin-top:6px"' + (d.sgw && d.sgw.count ? '' : ' disabled')) + '</span>';
+    const sk = (P.now || Date.now()) - Date.now(), t = Date.now() + sk, w = P.winner ? esc(P.winner.display) : '';
+    if (P.phase === 'spin') return '<span class="spinst">Spinning… ' + Math.max(0, Math.ceil((P.spinEndsAt - t) / 1000)) + 's' + (P.test ? ' (test)' : '') + '</span>';
+    if (P.phase === 'claim') return '<span class="spinst y">' + w + ': ' + Math.max(0, Math.ceil((P.claimEndsAt - t) / 1000)) + 's to type ' + esc(P.cmd) + '</span><div class="g2">' + B('/control/spin-claim', 'They claimed it', '', ' style="border-color:#3dff9a;color:#3dff9a"') + B('/control/spin-skip', 'Not claimed: out', '', ' style="border-color:#ff6b7d;color:#ffb3bc"') + '</div>';
+    return '<span class="spinst ' + (P.phase === 'claimed' ? 'g' : 'r') + '">' + w + (P.phase === 'claimed' ? ' claimed it ✓' : ' didn\'t claim: out') + '</span><div class="g2">' + B('/control/spin-start', 'SPIN AGAIN') + B('/control/spin-hide', 'Hide') + '</div>';
   }
   function giveTab(d) {
     const G = d.sgw || { entries: [], count: 0 };
@@ -248,7 +265,7 @@
     let h = '<div class="card ' + (G.open ? 'g' : 'b') + '"><div class="hd"><span class="t">GIVEAWAY ' + (G.open ? 'OPEN' : 'CLOSED') + '</span><b>' + G.count + ' entered</b></div>' +
       '<span class="muted">Chat types <b>' + esc(G.cmd) + '</b>' + (G.needMins ? ' · needs <b>' + G.needMins + ' min</b> of watch time this stream (counted every 5 min)' : ' · no watch time needed') + ' · <b>!watchtime</b> tells them theirs</span>' +
       '<div class="g2">' + B('/control/sgw-' + (G.open ? 'close' : 'open'), G.open ? 'CLOSE ENTRIES' : 'OPEN ENTRIES', '', ' style="min-height:54px;font-weight:800;border-color:' + (G.open ? '#ff8080;color:#ff8080' : '#3dff9a;color:#3dff9a') + '"') +
-      B('/control/sgw-pick', 'PICK A WINNER', '', ' style="min-height:54px;font-weight:800;border-color:#ffd23f;color:#ffd23f"' + (G.count ? '' : ' disabled')) + '</div></div>';
+      B('/control/spin-start', 'SPIN', '', ' style="min-height:54px;font-weight:800;background:#E8C468;border-color:#E8C468;color:#14110A"' + (G.count && !(d.spin && /^(spin|claim)$/.test(d.spin.phase)) ? '' : ' disabled')) + '</div>' + spinLine(d) + '</div>';
     if (G.winners && G.winners.length) h += '<div class="card y"><div class="hd"><span class="t">WINNER: ' + esc(G.winners[0].display) + '</span><span class="muted">' + (G.winners[0].mins || 0) + ' min watched</span></div>' +
       '<div class="g2"><button id="gwCopyWin" data-name="' + esc(G.winners[0].display) + '">Copy winner\'s name</button>' + B('/control/sgw-pick', 'Pick again (re-roll)') + '</div>' + (G.winners.length > 1 ? '<span class="muted">Before: ' + G.winners.slice(1).map((w) => esc(w.display)).join(', ') + '</span>' : '') + '</div>';
     h += '<div class="g3"><button id="gwCopy">Copy names</button><select id="gwSep" aria-label="How to copy"><option value="line"' + (GW.sep === 'line' ? ' selected' : '') + '>one per line</option><option value="comma"' + (GW.sep === 'comma' ? ' selected' : '') + '>a, b, c</option><option value="space"' + (GW.sep === 'space' ? ' selected' : '') + '>a b c</option></select>' + B('/control/sgw-clear', 'Clear list', '', ' data-ask="Clear all ' + G.count + ' names from the giveaway list?" style="border-color:#ff6b7d;color:#ffb3bc"') + '</div>';
@@ -389,7 +406,7 @@
     if (!g || !g.best) { say('No backup from before this stream'); return; }
     const p = await post('/api/cardreset', { file: g.best, apply: false });
     if (p.error) { say(p.error); return; }
-    if (!confirm('Put every card back to how it was before this stream (' + new Date(p.backupAt).toLocaleString() + ')?\n\n' + p.viewers + ' cards change. Tonight\'s subs, gifts and bits are kept, and everyone who chatted tonight gets one normal check-in.\n\nA backup of right now is saved first.')) return;
+    if (!(await askYN('Put every card back to how it was before this stream (' + new Date(p.backupAt).toLocaleString() + ')?\n\n' + p.viewers + ' cards change. Tonight\'s subs, gifts and bits are kept, and everyone who chatted tonight gets one normal check-in.\n\nA backup of right now is saved first.'))) return;
     const r = await post('/api/cardreset', { file: g.best, apply: true });
     say(r.error || 'Done: ' + r.viewers + ' cards put back to before this stream'); load();
   }

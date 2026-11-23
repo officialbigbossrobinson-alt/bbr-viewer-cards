@@ -51,6 +51,7 @@ window.GMETER = (function () {
 .gm.tmode .tm{margin:14px 16px 2px;padding:10px 16px;flex-direction:column;align-items:flex-start;gap:2px}
 .gm.tmode .tm span{font-size:24px;color:var(--acc2)}.gm.tmode .tm b{margin-left:0;font-size:84px;letter-spacing:2px}
 .gm.tmode .ban{font-size:40px}
+.gm .ban.open{animation:none;background:rgba(0,0,0,.28);color:var(--acc2)}
 .gm.hit .bx{box-shadow:0 0 0 4px var(--acc2),0 0 50px var(--acc2),0 18px 44px rgba(0,0,0,.5)}
 /* looks */
 .gm.lk-football{--bg:linear-gradient(160deg,#16337a,#0d2459 60%,#061233);--acc:#e3132c;--acc2:#f5c400}
@@ -95,7 +96,7 @@ window.GMETER = (function () {
       // countdown only: no target, just "GIVEAWAY IN 3:59:59"
       el.innerHTML = '<div class="bx"><div class="hd"><span class="ic">' + iconOf(L) + '</span><b>' + esc(W.title) + '</b><i>' + tag + '</i></div>' +
         (W.prize ? '<div class="pz">' + esc(W.prize) + '</div>' : '') +
-        (a.winner ? '<div class="win"><small>WINNER</small><b>' + esc(a.winner.name) + '</b></div>' : a.ended ? '<div class="ban">' + esc(W.timeUp) + '</div>' : (a.hasTimer ? '<div class="tm"><span>' + esc(W.timer) + '</span><b></b></div>' : '')) +
+        (a.winner ? '<div class="win"><small>WINNER</small><b>' + esc(a.winner.name) + '</b></div>' : a.ended ? '<div class="ban">' + esc(W.timeUp) + '</div>' : a.hideClock ? '<div class="ban open">ENTRIES OPEN</div>' : (a.hasTimer ? '<div class="tm"><span>' + esc(W.timer) + '</span><b></b></div>' : '')) +
         (W.enter && !a.ended && !a.winner ? '<div class="ln en">' + esc(W.enter) + '</div>' : '') +
         (a.showEntries && a.entries ? '<div class="ent"><em>' + a.entries + '</em> ENTERED' + (a.recent && a.recent.length ? ' · ' + a.recent.map(esc).join(', ') : '') + '</div>' : '') + '</div>';
       return after(a, L, fresh);
@@ -106,7 +107,7 @@ window.GMETER = (function () {
       '<div class="nums"><b>' + fmtN(a.value) + '<small>/ ' + fmtN(a.goal) + '</small></b><span>' + esc(W.unit || '') + '</span></div>' +
       (a.winner ? '<div class="win"><small>WINNER</small><b>' + esc(a.winner.name) + '</b></div>' : a.ended ? '<div class="ban">' + esc(W.timeUp) + '</div>' : a.hit ? '<div class="ban">' + esc(W.done) + '</div>' : (W.sub ? '<div class="ln">' + esc(W.sub) + '</div>' : '')) +
       (W.enter && !a.ended && !a.winner ? '<div class="ln en">' + esc(W.enter) + '</div>' : '') +
-      (a.hasTimer ? '<div class="tm"><span>' + esc(a.ended ? 'TIME' : W.timer) + '</span><b></b></div>' : '') +
+      (a.hasTimer && !a.hideClock ? '<div class="tm"><span>' + esc(a.ended ? 'TIME' : W.timer) + '</span><b></b></div>' : '') +
       (a.showEntries && a.entries ? '<div class="ent"><em>' + a.entries + '</em> ENTERED' + (a.recent && a.recent.length ? ' · ' + a.recent.map(esc).join(', ') : '') + '</div>' : '') + '</div>';
     return after(a, L, fresh);
   }

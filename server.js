@@ -18,7 +18,7 @@ const TU = require('./lib/tuning');
 const { OBS } = require('./lib/obs');
 const { Diag } = require('./lib/diag');
 const { BSN, BSN_IMAGES, normTokens, fillStory, LEFTOVER_RE } = require('./lib/bsn');
-const APP_VERSION = '38';
+const APP_VERSION = '39';
 const ARCX = require('./lib/arc');
 const RLX = require('./lib/race');
 const BTX = require('./lib/battle');
@@ -122,6 +122,7 @@ function shutdown(code) {
   try { store.flush(); } catch (e) { console.error('Could not save the cards: ' + e.message); }
   try { saveCfg(); } catch (e) { console.error('Could not save the settings: ' + e.message); }
   try { ballon.saveNow(); } catch (e) { /* not started */ }
+  try { spin.saveNow(); } catch (e) { /* not started */ }
   process.exit(code || 0);
 }
 if (DESK.on) {
@@ -907,6 +908,8 @@ setInterval(() => { try { if (sgw.st.open && sgw.count()) sgw.rescore(); } catch
 function onBanned(platform, e) {
   const how = (e.either ? 'banned or timed out' : e.timeout ? 'timed out' : 'banned') + ' on ' + ({ twitch: 'Twitch', kick: 'Kick', youtube: 'YouTube' }[platform] || platform);
   let out = []; try { if (sgw.ban(platform, e.login, how)) out.push('the giveaway list'); } catch (x) { console.error('[ban]', x.message); }
+  try { if (spin.ban(platform, e.login)) out.push('the spin'); } catch (x) { console.error('[ban]', x.message); }
+  try { if (gmeter.ban(platform, e.login)) { out.push('the giveaway meter'); feedAdd('Giveaway meter: ' + (e.display || e.login) + ' removed (' + how + ')', '#ff6b7d'); } } catch (x) { console.error('[ban]', x.message); }
   try {
     const v0 = store.get(platform, e.login), p0 = v0 && store.primary(v0);
     const keys = [...new Set([v0 && v0.key, p0 && p0.key, platform + ':' + String(e.login).toLowerCase()].filter(Boolean))];
@@ -924,6 +927,30 @@ const ballon = new (require('./lib/ballon').Ballon)({ file: path.join(DATA, 'bal
 setInterval(() => { try { ballon.tick(); } catch (e) { console.error('[ballon]', e.message); } }, 10000).unref();
 // the giveaway timer shows the count as people enter
 const _sgwPush = sgw.changed.bind(sgw); sgw.changed = () => { _sgwPush(); try { if (gmeter.st.on) push(gmeter.payload()); } catch (e) { /* ignore */ } };
+// v39: giveaway spin (lib/spin.js): names scroll on stream, land on a winner, the winner has to type !claim from their own account
+function spinCandidates() {
+  const won = new Set(sgw.st.winners.map((w) => w.key));
+  const all = sgw.st.entries.filter((x) => !won.has(x.key));
+  const L = all.filter((x) => !x.held);
+  if (L.length) return { from: 'sgw', list: L.map((x) => ({ key: x.key, display: x.display, platform: x.platform, login: x.login })) };
+  if (all.length) return { from: 'sgw', list: [], why: 'Everyone left is waiting for a bot check: approve them first' };
+  if (sgw.count()) return { from: 'sgw', list: [], why: 'Everyone in the giveaway list has already won' };
+  const G = gmeter.st.entries || [];
+  if (G.length) return { from: 'gmeter', list: G.map((x) => ({ key: x.key, display: x.name, platform: x.platform, login: x.key.split(':').slice(1).join(':') })) };
+  return { from: null, list: [], why: 'Nobody to spin for: the giveaway list is empty (people type ' + sgw.S().cmd + ')' };
+}
+const spin = new (require('./lib/spin').Spin)({ cfg: () => cfg, saveCfg: () => saveCfg(), push: (e) => push(e), file: path.join(DATA, 'spin.json'), media,
+  say: (pf, m) => say(pf, m), feed: (a, b) => feedAdd(a, b), candidates: spinCandidates,
+  onClaim: (r) => {
+    if (r.from === 'sgw') { sgw.st.winners.unshift({ key: r.key, display: r.display, platform: r.platform, at: r.at, mins: sgw.mins(r.platform, r.login), claimed: true }); sgw.st.winners = sgw.st.winners.slice(0, 20); sgw.changed(); }
+    try { if (gmeter.st.on) { gmeter.st.winner = { name: r.display, platform: r.platform, at: r.at }; gmeter.note('Winner: ' + r.display + ' (claimed)'); gmeter.save(); push(gmeter.payload({ fx: 'winner' })); } } catch (e) { /* ignore */ }
+  },
+  onMissed: (r) => {
+    const why = r.result === 'banned' ? 'Banned while picked' : 'Didn\'t claim in time';
+    if (r.from === 'sgw') { const x = sgw.st.entries.find((e) => e.key === r.key); if (x) sgw.drop(x, why); else { sgw.st.blocked[r.key] = { why, at: Date.now(), display: r.display }; sgw.changed(); } }
+    if (r.from === 'gmeter') { gmeter.st.blocked = gmeter.st.blocked || {}; gmeter.st.blocked[r.key] = Date.now(); gmeter.drop(r.key); gmeter.note('Removed ' + r.display + ' (' + why.toLowerCase() + ')'); }
+  } });
+setImmediate(() => connectHooks.push(() => spin.payload()));
 const screens = new SCR.Screens({ cfg: () => cfg, saveCfg: () => saveCfg(), push: (e) => push(e), obs, media, game: () => currentGame(), theme: () => themeName(), feed: (a, b) => feedAdd(a, b), socials: () => screenSettings().socials, live: () => isLive() });
 setInterval(() => { screens.sceneList().catch(() => {}); }, 60000).unref(); setTimeout(() => { screens.sceneList().catch(() => {}); }, 8000).unref();
 connectHooks.push(() => ({ type: 'music', act: cfg.musicMuted ? 'mute' : 'unmute' }), () => screens.brbState(), () => screens.bigState(), () => Object.assign({ type: 'linkscfg' }, screens.linksPayload()));
@@ -1216,6 +1243,8 @@ function actionList() {
   add('Replay', 'replay-freeze', 'Freeze / play (analysis)', '/control/replay-freeze', '#f5c400'); add('Replay', 'replay-clear', 'Clear the drawings', '/control/replay-clear', '#f5c400');
   add('Replay', 'replay-stop', 'Stop replay (back to live)', '/control/replay-stop', '#4dc3ff');
   add('Giveaway', 'sgw-toggle', 'Giveaway list: open / close', '/control/sgw-toggle', '#ffd23f'); add('Giveaway', 'sgw-open', 'Giveaway list: open', '/control/sgw-open', '#3dff9a'); add('Giveaway', 'sgw-close', 'Giveaway list: close', '/control/sgw-close', '#ff6b7d');
+  add('Giveaway', 'spin-start', 'Giveaway: SPIN for a winner', '/control/spin-start', '#ffd23f'); add('Giveaway', 'spin-claim', 'Giveaway spin: mark as claimed', '/control/spin-claim', '#3dff9a'); add('Giveaway', 'spin-skip', 'Giveaway spin: not claimed (out)', '/control/spin-skip', '#ff6b7d'); add('Giveaway', 'spin-hide', 'Giveaway spin: hide', '/control/spin-hide', '#a7b0ba');
+  add('Giveaway', 'gmeter-hideclock', 'Giveaway clock: hide / show on stream', '/control/gmeter-hideclock', '#ffd23f');
   add('Giveaway', 'sgw-pick', 'Giveaway list: pick a winner', '/control/sgw-pick', '#ffd23f'); add('Giveaway', 'sgw-clear', 'Giveaway list: clear', '/control/sgw-clear', '#ff6b7d');
   add('Giveaway', 'gmeter-toggle', 'Giveaway meter: on / off', '/control/gmeter-toggle', '#ffd23f'); add('Giveaway', 'gmeter-start', 'Giveaway meter: start', '/control/gmeter-start', '#3dff9a');
   add('Giveaway', 'gmeter-pause', 'Giveaway meter: pause / resume', '/control/gmeter-pause', '#f5c400'); add('Giveaway', 'gmeter-stop', 'Giveaway meter: stop (hide)', '/control/gmeter-stop', '#ff6b7d');
@@ -1285,7 +1314,7 @@ function deckPack() {
   k('Timers', 'SOON 10:00', '10:00', '#4dc3ff', '/control/starting-set?secs=600'); k('Timers', 'SOON RESET', '↺', '#4dc3ff', '/control/starting-reset'); k('Timers', 'I\'M BACK', 'BACK', '#c58bff', '/control/brb-end');
   // Replay
   k('Replay', 'CLIP', '●', '#4dc3ff', '/control/replay'); k('Replay', 'VIEW LAST', '▶', '#4dc3ff', '/control/replay-again'); k('Replay', 'SLOW-MO', '½', '#f6d77a', '/control/replay-last-slow');
-  k('Giveaway', 'GIVEAWAY OPEN/CLOSE', '!GW', '#ffd23f', '/control/sgw-toggle'); k('Giveaway', 'GIVEAWAY WINNER', 'WIN', '#ffd23f', '/control/sgw-pick');
+  k('Giveaway', 'GIVEAWAY OPEN/CLOSE', '!GW', '#ffd23f', '/control/sgw-toggle'); k('Giveaway', 'GIVEAWAY WINNER', 'WIN', '#ffd23f', '/control/sgw-pick'); k('Giveaway', 'GIVEAWAY SPIN', 'SPIN', '#ffd23f', '/control/spin-start');
   k('Giveaway', 'GW ON/OFF', 'GW', '#ffd23f', '/control/gmeter-toggle'); k('Giveaway', 'GW PAUSE', '❚❚', '#f5c400', '/control/gmeter-pause'); k('Giveaway', 'GW STOP', '■', '#ff6b7d', '/control/gmeter-stop');
   k('Giveaway', 'GW RESTART', '↺', '#4dc3ff', '/control/gmeter-restart'); k('Giveaway', 'GW +1', '+1', '#3dff9a', '/control/gmeter-add'); k('Giveaway', 'GW -1', '-1', '#ff6b7d', '/control/gmeter-minus');
   k('Giveaway', 'GW +5', '+5', '#3dff9a', '/control/gmeter-add?n=5'); k('Giveaway', 'GW +1 MIN', '+1m', '#ffd23f', '/control/gmeter-plus1'); k('Giveaway', 'GW -1 MIN', '-1m', '#ffd23f', '/control/gmeter-minus1');
@@ -1344,6 +1373,7 @@ function dockState() {
   st.health = { twitch: twitch.configured() ? !!twitch.connected : null, kick: kick.configured() ? !!kick.connected : null, youtube: youtube.configured() ? !!youtube.connected : null, obs: !!obs.ready, overlay: clients.size > 0, cards: !(st.safety && st.safety.frozen) };
   st.gamesOpts = { letMePlay: cfg.letMePlay !== false, joinReplies: cfg.joinReplies !== false, idle: TV.general.startIdleSecs != null ? TV.general.startIdleSecs : 10, battlesPaused: !!cfg.battlesPaused };
   st.theme = themeName();
+  try { const P = spin.payload(); st.spin = { phase: P.phase, winner: P.winner, spinEndsAt: P.spinEndsAt, claimEndsAt: P.claimEndsAt, cmd: P.cmd, test: P.test, now: P.now }; } catch (e) { /* ignore */ }
   try { const X = sgw.state(); st.sgw = { open: X.open, count: X.count, cmd: X.settings.cmd, needMins: X.settings.needMins, on: X.settings.on, winners: X.winners.slice(0, 3), entries: X.entries.slice(0, 400).map((e) => ({ key: e.key, d: e.display, p: e.platform, m: e.mins, h: !!e.byHand })) }; } catch (e) { /* ignore */ }
   try { const G = gmeter.payload(); st.gmeter = { mode: G.mode, enabled: G.enabled, prize: G.words.prize, on: G.on, running: G.running, paused: G.paused, ended: G.ended, left: G.left, endsAt: G.endsAt, value: G.value, goal: G.goal, hit: G.hit, entries: G.entries, title: G.words.title, unit: G.words.unit, hasTimer: G.hasTimer, winner: G.winner }; } catch (e) { /* ignore */ }
   try { const B = screens.brbState(); st.brb = { on: B.on, running: B.running, left: B.left, look: B.look }; st.bigcam = screens.bigState().name; st.linksNext = screens.linksNext(); st.musicMuted = !!cfg.musicMuted; } catch (e) { /* ignore */ }
@@ -2380,6 +2410,7 @@ async function onChat(platform, e, test) {
   const cmd = parts[0].toLowerCase();
   // v35: the simple giveaway's command (!giveaway) and !watchtime
   try { botcheck.noteChat(platform, e); } catch (err) { /* ignore */ }
+  try { if (spin.chat(platform, e)) return; } catch (err) { console.error('[spin]', err.message); }
   try { if (ballon.chat(platform, e, { follower: !!v.followedAt || platform !== 'twitch', broadcaster: b.includes('broadcaster') || !!v.isBroadcaster, motmOpen: !!clubStats.vote })) return; } catch (err) { console.error('[ballon]', err.message); }
   try { if (sgw.chat(platform, e, { mod: b.includes('moderator') || b.includes('broadcaster') || !!v.isBroadcaster, sub: b.some((x) => /sub|founder|member/i.test(x)) || !!v.subMonths && v.lastSubAt > Date.now() - 32 * 86400000, follower: !!v.followedAt || platform !== 'twitch' })) return; } catch (err) { console.error('[giveaway]', err.message); }
   if (battle.chatInput(platform, e.login, text)) return;
@@ -2993,7 +3024,7 @@ function importList(platform, text, kind) {
 // ---------- web server ----------
 const TYPES = { '.html': 'text/html; charset=utf-8', '.js': 'text/javascript; charset=utf-8', '.css': 'text/css; charset=utf-8' };
 const PAGES = { '/gmeter': 'gmeter.html', '/gmeter.js': 'gmeter.js', '/brb': 'brb.html', '/bigcam': 'bigcam.html', '/music.js': 'music.js', '/links.js': 'links.js', '/stinger.js': 'stinger.js', '/': 'dashboard.html', '/overlay': 'overlay.html', '/credits': 'credits.html', '/card.js': 'card.js', '/card.css': 'card.css', '/sfx.js': 'sfx.js',
-  '/race.js': 'race.js', '/scene3d.js': 'scene3d.js', '/penalty.js': 'penalty.js', '/teampens.js': 'teampens.js', '/bp.js': 'bp.js', '/starting': 'starting.html', '/ballon': 'ballon.html', '/arc.js': 'arc.js', '/alerts.js': 'alerts.js', '/textures.js': 'textures.js', '/giveaway.js': 'giveaway.js', '/hud.js': 'hud.js', '/challenges.js': 'challenges.js', '/camfx.js': 'camfx.js', '/boards.js': 'boards.js', '/raidnight.js': 'raidnight.js', '/landmarks.js': 'landmarks.js', '/screen.js': 'screen.js', '/extras.js': 'extras.js', '/broadcast.js': 'broadcast.js', '/scenes': 'scenes.html', '/teeth-tracker': 'teeth.html', '/dock': 'dock.html', '/analysis': 'analysis.html', '/draw.js': 'draw.js', '/stadium3d.js': 'stadium3d.js', '/kits.js': 'kits.js', '/pen3d.js': 'pen3d.js' };
+  '/race.js': 'race.js', '/scene3d.js': 'scene3d.js', '/penalty.js': 'penalty.js', '/teampens.js': 'teampens.js', '/bp.js': 'bp.js', '/starting': 'starting.html', '/ballon': 'ballon.html', '/spin': 'spin.html', '/spin.js': 'spin.js', '/arc.js': 'arc.js', '/alerts.js': 'alerts.js', '/textures.js': 'textures.js', '/giveaway.js': 'giveaway.js', '/hud.js': 'hud.js', '/challenges.js': 'challenges.js', '/camfx.js': 'camfx.js', '/boards.js': 'boards.js', '/raidnight.js': 'raidnight.js', '/landmarks.js': 'landmarks.js', '/screen.js': 'screen.js', '/extras.js': 'extras.js', '/broadcast.js': 'broadcast.js', '/scenes': 'scenes.html', '/teeth-tracker': 'teeth.html', '/dock': 'dock.html', '/analysis': 'analysis.html', '/draw.js': 'draw.js', '/stadium3d.js': 'stadium3d.js', '/kits.js': 'kits.js', '/pen3d.js': 'pen3d.js' };
 // your own textures / sounds: the user folder first, then the ones that come with the app
 const TEX_DIRS = [...new Set([path.join(HOME, 'textures'), path.join(ROOT, 'textures')])];
 const IMG = { '.jpg': 'image/jpeg', '.jpeg': 'image/jpeg', '.png': 'image/png', '.webp': 'image/webp' };
@@ -3294,10 +3325,14 @@ const server = http.createServer(async (req, res) => {
           set: () => gmeter.setValue(isFinite(n) ? n : 0), goal: () => gmeter.setGoal(isFinite(n) && n > 0 ? n : gmeter.S().goal), plus1: () => gmeter.addTime(60000), minus1: () => gmeter.addTime(-60000),
           time: () => gmeter.setTime((+q2.get('hours') || 0) * 3600000 + (+q2.get('mins') || 0) * 60000 + (+q2.get('secs') || 0) * 1000),
           addtime: () => gmeter.addTime(((+q2.get('hours') || 0) * 60 + (+q2.get('mins') || 0)) * 60000 || 60000), at: () => gmeter.setAt(q2.get('time') || ''),
-          on: () => gmeter.enable(true), off: () => gmeter.enable(false), mode: () => { const m = q2.get('m'); if (!/^(meter|timer|meteronly)$/.test(m || '')) return 'Use m=meter, m=timer or m=meteronly'; gmeter.set({ mode: m }); return 'Giveaway: ' + require('./lib/gmeter').MODES[m]; }, pick: () => { const r = gmeter.pick(); return r.error || 'Winner: ' + r.winner.name; }, clear: () => gmeter.clearEntries() };
+          on: () => gmeter.enable(true), off: () => gmeter.enable(false), mode: () => { const m = q2.get('m'); if (!/^(meter|timer|meteronly)$/.test(m || '')) return 'Use m=meter, m=timer or m=meteronly'; gmeter.set({ mode: m }); return 'Giveaway: ' + require('./lib/gmeter').MODES[m]; }, pick: () => { const r = gmeter.pick(); return r.error || 'Winner: ' + r.winner.name; }, clear: () => gmeter.clearEntries(), hideclock: () => { const on = !gmeter.S().hideClock; gmeter.set({ hideClock: on }); return on ? 'Giveaway clock hidden on stream' : 'Giveaway clock shown on stream'; } };
         msg = G[k] ? G[k]() : 'Unknown giveaway meter button';
       }
       else if (a === 'showcard') { const v0 = store.data.viewers[url.searchParams.get('key') || '']; const v = v0 && (store.primary(v0) || v0); if (!v) msg = 'No such viewer'; else { await withAvatar(v).catch(() => {}); push({ type: 'show', card: card(v), profile: showOn('cardProfile') || showOn('cardFlip') ? profileOf(v) : null, flip: showOn('cardFlip'), wide: showOn('cardProfile') }); msg = 'Showing ' + v.display + '\'s card'; } }
+      else if (/^spin-/.test(a)) {
+        const k = a.slice(5), r = k === 'start' ? spin.start() : k === 'test' ? spin.start({ test: true }) : k === 'claim' ? spin.claim('you') : k === 'skip' ? spin.skip() : k === 'hide' ? spin.hide() : { error: 'Unknown spin button' };
+        msg = r.error || r.msg;
+      }
       else if (/^sgw-/.test(a)) {
         const k = a.slice(4), q2 = url.searchParams;
         if (k === 'open') msg = sgw.open(); else if (k === 'close') msg = sgw.close(); else if (k === 'toggle') msg = sgw.toggle(); else if (k === 'clear') msg = sgw.clear();
@@ -3570,6 +3605,16 @@ const server = http.createServer(async (req, res) => {
       const S0 = botcheck.S(); const q = String(url.searchParams.get('q') || '').toLowerCase();
       return send(res, 200, { settings: S0, defaults: require('./lib/botcheck').DEF_POINTS, labels: require('./lib/botcheck').LABEL, trusted: S0.trusted.length,
         log: botcheck.d.log.filter((x) => !q || String(x.display || '').toLowerCase().includes(q) || String(x.key).includes(q)).slice(0, 100) });
+    }
+    if (p === '/api/spin') {
+      if (req.method === 'POST') {
+        const b = await readBody(req); let r = {};
+        if (b.settings && typeof b.settings === 'object') { spin.set(b.settings); r.msg = 'Spin settings saved'; }
+        const A = { start: () => spin.start(), test: () => spin.start({ test: true }), claim: () => spin.claim('you'), skip: () => spin.skip(), hide: () => spin.hide() };
+        if (b.action && A[b.action]) { const x = A[b.action](); r = x.error ? { error: x.error } : { msg: x.msg }; }
+        return send(res, 200, Object.assign(spin.state(), r));
+      }
+      return send(res, 200, spin.state());
     }
     if (p === '/api/sgw') {
       if (req.method === 'POST') {

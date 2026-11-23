@@ -321,6 +321,11 @@ input[type=color]{height:42px;padding:3px;min-width:64px;cursor:pointer}
 .bb-lcr{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}.bb-lcr button{min-height:70px;font-size:22px;font-weight:800}
 .sqd-sheet{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:6px;margin-top:10px}.sqd-sheet span{padding:6px 10px;border-radius:8px;background:#13161b;border:1px solid var(--line)}
 a.btnlike{display:inline-flex;align-items:center;min-height:40px;padding:0 14px;border-radius:8px;border:1px solid var(--line);background:#1b1f26;color:var(--text);text-decoration:none;font-weight:600}
+  .sp-now{display:flex;align-items:baseline;gap:16px;flex-wrap:wrap;margin:6px 0 10px}.sp-now b{font-size:40px;font-weight:800;line-height:1.1}.sp-now span{color:var(--muted);font-size:15px}
+  .sp-now.sp-ph-claim b{color:#E8C468}.sp-now.sp-ph-claimed b{color:#3dff9a}.sp-now.sp-ph-missed b{color:#ff8a98}
+  .sp-go{min-height:56px;min-width:170px;font-size:22px;font-weight:800;letter-spacing:2px;background:#E8C468!important;border-color:#E8C468!important;color:#14110A!important}.sp-go:disabled{opacity:.45}
+  .sp-snd{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:18px;margin:8px 0}.sp-snd>div{display:flex;flex-direction:column;gap:8px}
+  .sp-up{display:inline-flex;align-items:center;gap:8px;cursor:pointer;color:var(--ui);font-weight:600}.sp-up input{font-size:12px;max-width:220px}
   .ss-clock{display:flex;align-items:baseline;gap:14px;margin:6px 0 10px}.ss-clock span{font-size:64px;font-weight:800;font-variant-numeric:tabular-nums;line-height:1}.ss-clock small{color:#a7b0ba;font-size:14px}
   .ss-pics{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:10px;margin-top:10px}.ss-pic{border:2px solid #232831;border-radius:10px;overflow:hidden;background:#0b0d10}.ss-pic.on{border-color:var(--ui)}.ss-pic img{display:block;width:100%;aspect-ratio:16/9;object-fit:cover}.ss-pic div{display:flex;gap:6px;padding:6px}
   .bp-now{display:flex;align-items:center;gap:14px;flex-wrap:wrap;margin:6px 0}.bp-now b{font-size:60px;font-weight:800;line-height:1;font-variant-numeric:tabular-nums}.bp-now span{color:#061233;font-weight:800;padding:2px 10px;border-radius:5px}.bp-now small{color:#a7b0ba}
@@ -337,6 +342,10 @@ section[data-tab=app] [hidden]{display:none!important}
 .ap-radio input[type=radio]{width:18px!important;height:18px;margin:0!important;flex:0 0 auto;accent-color:var(--ui)}.ap-radio input[type=number]{margin:0 4px}
 .ap-rows{width:100%;border-collapse:collapse;margin-top:10px}.ap-rows td,.ap-rows th{padding:7px 8px;border-bottom:1px solid var(--line);text-align:left;font-size:13px}.ap-rows th{color:var(--muted);font-weight:600}
 .app-modal{position:fixed;inset:0;z-index:100;background:rgba(0,0,0,.6);display:grid;place-items:center;padding:20px}
+/* v39: in-page questions (the app window's own confirm / prompt boxes break typing on Windows) */
+.ask-box{width:min(480px,100%);gap:14px}.ask-box p{margin:0;white-space:pre-wrap;line-height:1.5;font-size:15px}.ask-box h3{margin:0;font-size:20px}
+.ask-box label{display:flex;flex-direction:column;gap:4px;font-size:13px;color:var(--muted)}.ask-box input{font-size:15px}
+#askDlg{z-index:120}
 .app-modal-box{width:min(720px,100%);max-height:90vh;overflow:auto;background:#14181e;border:1px solid var(--line);border-radius:14px;padding:22px 26px;display:flex;flex-direction:column;gap:12px}
 .au-top{display:flex;justify-content:space-between;align-items:center}.au-top b{font:800 30px/1 "Bahnschrift SemiBold Condensed","Bahnschrift","Barlow Condensed","Arial Narrow",sans-serif;letter-spacing:1px;color:var(--ui)}
 .au-top button{background:none;border:0;color:var(--muted);font-size:20px;cursor:pointer}
@@ -542,6 +551,7 @@ body.bl-hide .bl-std,body.bl-hide .bl-stdc{visibility:hidden}
 </aside>
 <div class="content">
 <div class="app-banner" id="appBanner" hidden role="status"><span id="abText"></span><button id="abNotes">What's new</button><button class="primary" id="abNow">Update now</button></div>
+<div class="app-modal" id="askDlg" hidden role="dialog" aria-modal="true" aria-labelledby="askT"><div class="app-modal-box ask-box"><h3 id="askT" hidden></h3><p id="askP"></p><div id="askF"></div><div class="au-btns"><button id="askNo" type="button">Cancel</button><button id="askYes" type="button" class="primary">OK</button></div></div></div>
 <div class="app-modal" id="appUpd" hidden role="dialog" aria-modal="true" aria-labelledby="auTitle">
   <div class="app-modal-box">
     <div class="au-top"><b id="auTitle">VERSION … IS READY</b><button id="auX" aria-label="Close">✕</button></div>
@@ -1668,13 +1678,44 @@ body.bl-hide .bl-std,body.bl-hide .bl-stdc{visibility:hidden}
       <h2>Giveaway list</h2>
       <p class="help">Simple giveaways: open entries, chat types <b id="sgCmdShow">!giveaway</b>, their name goes in this list (and on the dock's <b>Giveaway</b> tab). Copy the names, add or delete names, pick a random winner. The bot answers in chat with your words below. <b>!watchtime</b> tells anyone how long they've watched this stream.</p>
       <div class="ss-clock"><span id="sgCount">0 entered</span><small id="sgwState">Closed</small></div>
-      <div class="actions"><button class="primary" id="sgOpen" style="min-height:52px;min-width:150px;font-size:18px">OPEN ENTRIES</button><button id="sgPick" style="min-height:52px;min-width:150px;font-size:18px;border-color:#ffd23f;color:#ffd23f">PICK A WINNER</button><button id="sgClear" style="border-color:#ff6b7d;color:#ff8a98">Clear the list</button><span class="state" id="sgMsg"></span></div>
+      <div class="actions"><button class="primary" id="sgOpen" style="min-height:52px;min-width:150px;font-size:18px">OPEN ENTRIES</button><button id="sgPick" style="min-height:52px;font-size:15px;border-color:#ffd23f;color:#ffd23f" title="Picks at once, with no spin and no claim time">Quick pick (no spin)</button><button id="sgClear" style="border-color:#ff6b7d;color:#ff8a98">Clear the list</button><span class="state" id="sgMsg"></span></div>
       <div id="sgWin"></div>
       <div class="actions"><button id="sgCopy">Copy names</button><select id="sgSep" aria-label="How to copy"><option value="line">one per line</option><option value="comma">a, b, c</option><option value="space">a b c</option></select>
         <input id="sgAdd" placeholder="Add a name" style="width:200px" autocomplete="off"><select id="sgAddPf" aria-label="Platform"><option value="twitch">Twitch</option><option value="kick">Kick</option><option value="youtube">YouTube</option></select><button id="sgAddB">Add</button>
         <input id="sgFind" type="search" placeholder="Find a name" style="width:180px" autocomplete="off"></div>
       <textarea id="sgText" readonly rows="3" style="width:100%;box-sizing:border-box" aria-label="All the names (select and copy)"></textarea>
       <div class="tablewrap"><table class="mini"><thead><tr><th>Name</th><th>Platform</th><th>Watched this stream</th><th>Entered</th><th>Bot check</th><th></th></tr></thead><tbody id="sgRows"></tbody></table></div>
+    </section>
+    <!-- ===== v39: giveaway spin ===== -->
+    <section data-tab="sgw" class="card wide" id="spCard">
+      <h2>Spin for a winner</h2>
+      <p class="help">The names scroll on stream for <b id="spSecsShow">30</b> seconds and stop on a random winner. They then have <b id="spClaimShow">60</b> seconds to type <b id="spCmdShow">!claim</b> in chat <b>from the same account they entered with</b>. Anyone else typing it is ignored. Not claimed = out of the list, and you spin again. People waiting for a bot check and people who already won aren't in the spin.</p>
+      <div class="sp-now" id="spNow" role="status" aria-live="polite"><b id="spBig">Ready</b><span id="spSmall"></span></div>
+      <div class="actions"><button id="spGo" class="sp-go">SPIN</button><button id="spClaim" hidden style="border-color:#3dff9a;color:#3dff9a">They claimed it</button><button id="spSkip" hidden style="border-color:#ff6b7d;color:#ff8a98">Not claimed: take them out</button><button id="spStop" hidden>Stop the spin</button><button id="spHide" hidden>Hide it</button><button id="spTest">Test spin (made-up names)</button><span class="state" id="spMsg"></span></div>
+      <div id="spHist" class="help"></div>
+      <details class="bc-more" id="spSet"><summary>Spin settings, music &amp; applause</summary>
+        <div class="cc-grid">
+          <label>Spin length (seconds) <input type="number" id="spSecs" min="5" max="120"></label>
+          <label>Time to claim (seconds) <input type="number" id="spClaimS" min="10" max="600"></label>
+          <label>Claim command <input id="spCmd" maxlength="24" placeholder="!claim"></label>
+          <label>Title on screen <input id="spTitle" maxlength="40" placeholder="GIVEAWAY DRAW"></label>
+          <label>Prize <input id="spPrize" maxlength="60" placeholder="e.g. FC 27 POINTS"></label>
+          <label>Show it on <select id="spWhere"><option value="overlay">The BBR overlay (every scene with it)</option><option value="own">Its own Browser Source (/spin)</option></select></label>
+          <label>Hide it after (seconds, 0 = stay) <input type="number" id="spHideAfter" min="0" max="600"></label>
+        </div>
+        <div class="sp-snd">
+          <div><h3 class="sub">Music while it spins</h3><select id="spMusic" aria-label="Spin music"></select><label class="sp-up">Upload music<input type="file" id="spMusicUp" accept="audio/*,.mp3,.ogg,.m4a,.wav"></label><label>Volume <input type="range" id="spMusicVol" min="0" max="100"> <span id="spMusicVolV"></span>%</label></div>
+          <div><h3 class="sub">Applause when they claim</h3><select id="spApp" aria-label="Applause sound"></select><label class="sp-up">Upload a sound<input type="file" id="spAppUp" accept="audio/*,.mp3,.ogg,.m4a,.wav"></label><label>Volume <input type="range" id="spAppVol" min="0" max="100"> <span id="spAppVolV"></span>%</label></div>
+        </div>
+        <p class="help">No music picked = ticking sounds. No applause picked = the app's own fanfare and cheer. Uploads go into <b>Photos &amp; music</b> too.</p>
+        <label class="tog"><input type="checkbox" id="spSounds"> <span>Sounds on stream</span></label>
+        <label class="tog"><input type="checkbox" id="spSay"> <span>Tell chat: the winner's name and how to claim, claimed, not claimed</span></label>
+        <h3 class="sub">Chat messages</h3>
+        <p class="help">Empty = the default (shown faded). <code>{user}</code> the winner, <code>{cmd}</code> the claim command, <code>{secs}</code> the seconds to claim.</p>
+        <div class="cc-grid" id="spMsgs" style="grid-template-columns:1fr"></div>
+        <div class="actions"><button class="primary" id="spSave">Save</button><span class="state" id="spSaved"></span></div>
+        <p class="help">OBS: it shows on the BBR overlay, or add <code>http://localhost:3000/spin</code> as a Browser Source (1920 × 1080, top of your scenes, tick <b>Control audio via OBS</b> to hear the music in your mix). Stream Deck: <code>/control/spin-start</code>, <code>/control/spin-claim</code>, <code>/control/spin-skip</code>, <code>/control/spin-hide</code>.</p>
+      </details>
     </section>
     <!-- ===== v38: giveaway bot check ===== -->
     <section data-tab="sgw" class="card wide" id="botcCard">
@@ -1724,7 +1765,8 @@ body.bl-hide .bl-std,body.bl-hide .bl-stdc{visibility:hidden}
     <section data-tab="gmeter" class="card wide">
       <h2>Giveaway meter</h2>
       <div class="actions" style="margin:0 0 10px"><label class="tog" style="margin:0;font-size:18px;font-weight:700"><input type="checkbox" id="gmEnabled"> <span>Giveaway meter turned on</span></label>
-        <label style="margin:0">Type <select id="gmMode"></select></label><span class="state" id="gmModeMsg"></span></div>
+        <label style="margin:0">Type <select id="gmMode"></select></label><label class="tog" style="margin:0"><input type="checkbox" id="gmHideClock"> <span><b>Secret end time</b>: hide the clock on stream</span></label><span class="state" id="gmModeMsg"></span></div>
+      <p class="help" id="gmHideHelp" hidden>The clock still runs here and ends the giveaway on time, but stream shows <b>ENTRIES OPEN</b> with no time, and chat isn't told how long is left. Nobody watching can tell when it closes.</p>
       <p class="help"><b>Countdown only</b> = just a giveaway timer with no target (e.g. GIVEAWAY IN 4:00:00). Untick <b>turned on</b> and it never shows (the buttons and Stream Deck keys do nothing) until you tick it again.</p>
       <p class="help">A meter on stream that fills up from subs, gift subs, bits, follows or chat entries, with a countdown and your own words. Its look follows the game you're playing. It shows on the BBR overlay (or its own Browser Source: <code>http://localhost:3000/gmeter</code>, 1920 × 1080).</p>
       <div class="gm-live">
@@ -2171,6 +2213,42 @@ body.bl-hide .bl-std,body.bl-hide .bl-stdc{visibility:hidden}
 <script>
 const $ = (id) => document.getElementById(id);
 const esc = BBR.esc;
+// v39: ask(text) → Promise<true/false> instead of confirm(); ask(text, { ok, cancel: false }) for a message;
+// askForm(title, [{ k, label, v }]) → Promise<{ k: value } | null> instead of prompt(). They live in the page, so typing keeps working.
+const ASK = { q: [], open: null };
+function ask(text, o) {
+  o = o || {};
+  return new Promise((done) => { ASK.q.push({ text, o, done }); if (!ASK.open) askNext(); });
+}
+function askForm(title, fields, o) { return ask('', Object.assign({ title, fields, ok: 'Save' }, o || {})); }
+function askNext() {
+  const it = ASK.q.shift(); ASK.open = it || null; const box = document.getElementById('askDlg');
+  if (!it) { box.hidden = true; if (ASK.back && document.contains(ASK.back)) try { ASK.back.focus(); } catch (e) { /* gone */ } return; }
+  if (box.hidden) ASK.back = document.activeElement;
+  const o = it.o; document.getElementById('askT').hidden = !o.title; document.getElementById('askT').textContent = o.title || '';
+  document.getElementById('askP').textContent = it.text || ''; document.getElementById('askP').hidden = !it.text;
+  const F = document.getElementById('askF');
+  F.innerHTML = (o.fields || []).map((f, i) => '<label>' + esc(f.label) + '<input data-askk="' + esc(f.k) + '" maxlength="' + (f.max || 80) + '" value="' + esc(f.v == null ? '' : f.v) + '"' + (i ? '' : ' autofocus') + '></label>').join('');
+  const yes = document.getElementById('askYes'), no = document.getElementById('askNo');
+  yes.textContent = o.ok || 'OK'; no.textContent = o.cancel || 'Cancel'; no.hidden = o.cancel === false;
+  yes.className = o.danger ? 'danger primary' : 'primary';
+  box.hidden = false;
+  const first = F.querySelector('input'); (first || yes).focus(); if (first) first.select();
+}
+function askEnd(ok) {
+  const it = ASK.open; if (!it) return;
+  let v = !!ok;
+  if (it.o.fields) { v = null; if (ok) { v = {}; document.querySelectorAll('#askF [data-askk]').forEach((x) => { v[x.dataset.askk] = x.value; }); } }
+  else if (it.o.cancel === false) v = true;
+  askNext(); it.done(v);
+}
+document.getElementById('askYes').onclick = () => askEnd(true);
+document.getElementById('askNo').onclick = () => askEnd(false);
+document.getElementById('askDlg').addEventListener('keydown', (e) => {
+  if (e.key === 'Escape') { e.preventDefault(); e.stopPropagation(); askEnd(false); }
+  else if (e.key === 'Enter' && e.target.tagName === 'INPUT') { e.preventDefault(); askEnd(true); }
+  else if (e.key === 'Tab') { const f = [...document.querySelectorAll('#askDlg input, #askDlg button:not([hidden])')]; const i = f.indexOf(document.activeElement); if (e.shiftKey && i <= 0) { e.preventDefault(); f[f.length - 1].focus(); } else if (!e.shiftKey && i === f.length - 1) { e.preventDefault(); f[0].focus(); } }
+});
 const PCOL = { twitch: 'var(--tw)', kick: 'var(--kk)', youtube: 'var(--yt)' };
 const PNAME = { twitch: 'Twitch', kick: 'Kick', youtube: 'YouTube' };
 let status = null, accent = '#3dff9a', pf = '';
@@ -2268,7 +2346,7 @@ $('rows').addEventListener('click', (e) => {
   const tr = e.target.closest('tr[data-i]'); if (tr) show(viewers[+tr.dataset.i]);
 });
 $('linkSel').onclick = async () => {
-  if (!confirm('Merge these ' + selected.size + ' cards into one? Their stats are combined. You can unlink accounts later, but the combined stats stay on the main card.')) return;
+  if (!await ask('Merge these ' + selected.size + ' cards into one? Their stats are combined. You can unlink accounts later, but the combined stats stay on the main card.')) return;
   const r = await post('/api/link', { keys: Array.from(selected) });
   $('linkState').innerHTML = r.error ? err(r.error) : 'Linked. ' + esc(r.card.display) + ' is now ' + BBR.tier(r.card.tier, accent).label + ' ' + r.card.ovr + '.';
   selected.clear(); $('linkSel').disabled = true; $('linkSel').textContent = 'Link as one person';
@@ -2276,7 +2354,7 @@ $('linkSel').onclick = async () => {
 };
 $('prevLinks').addEventListener('click', async (e) => {
   const k = e.target.dataset.unlink; if (!k) return;
-  if (!confirm('Unlink this account? It starts a fresh card; activity so far stays on the main card.')) return;
+  if (!await ask('Unlink this account? It starts a fresh card; activity so far stays on the main card.')) return;
   await post('/api/unlink', { key: k });
   $('prev').innerHTML = ''; $('prevLinks').innerHTML = ''; loadViewers();
 });
@@ -2301,10 +2379,10 @@ $('avTw').onclick = async () => { $('impTwState').textContent = 'Fetching Twitch
 $('impTw').onclick = async () => { $('impTwState').textContent = 'Importing… this can take a minute for big channels.'; const r = await post('/api/import/twitch'); if (r.error) $('impTwState').innerHTML = err(r.error); else { loadStatus(); loadViewers(); } };
 $('lpGo').onclick = async () => { const r = await post('/api/import/list', { platform: $('lpPlat').value, kind: $('lpKind').value, text: $('lpText').value }); $('lpState').innerHTML = r.error ? err(r.error) : 'Added or updated ' + r.added + ' viewers.'; loadViewers(); };
 
-$('btMaster').onchange = async () => { const off = !$('btMaster').checked; if (off && !confirm('Switch battles off completely? Nothing can start and !join is ignored until you tick it again.')) { $('btMaster').checked = true; return; } await post('/api/config', { battlesOff: off }); $('btMasterMsg').textContent = off ? 'Battles are OFF' : 'Battles are back on'; };
+$('btMaster').onchange = async () => { const off = !$('btMaster').checked; if (off && !await ask('Switch battles off completely? Nothing can start and !join is ignored until you tick it again.')) { $('btMaster').checked = true; return; } await post('/api/config', { battlesOff: off }); $('btMasterMsg').textContent = off ? 'Battles are OFF' : 'Battles are back on'; };
 $('bSave').onclick = async () => { await post('/api/config', { battleIntervalMin: Number($('bInt').value), battlesEnabled: $('bEn').checked, liveMode: $('bLive').checked, battleMode: $('bMode').value, manualGame: $('bGame').value }); loadStatus(); };
-document.querySelectorAll('[data-start]').forEach((b) => { b.onclick = async () => { const r = await post('/api/battle', { action: 'start', mode: b.dataset.start }); if (!r.ok) alert('A battle is already running.'); loadStatus(); }; });
-document.querySelectorAll('[data-test]').forEach((b) => { b.onclick = async () => { const r = await post('/api/battle', { action: 'test', mode: b.dataset.test }); if (r.error) alert(r.error); loadStatus(); }; });
+document.querySelectorAll('[data-start]').forEach((b) => { b.onclick = async () => { const r = await post('/api/battle', { action: 'start', mode: b.dataset.start }); if (!r.ok) ask('A battle is already running.'); loadStatus(); }; });
+document.querySelectorAll('[data-test]').forEach((b) => { b.onclick = async () => { const r = await post('/api/battle', { action: 'test', mode: b.dataset.test }); if (r.error) ask(r.error); loadStatus(); }; });
 $('bCancel').onclick = async () => { await post('/api/battle', { action: 'cancel' }); loadStatus(); };
 
 $('tests').addEventListener('click', async (e) => {
@@ -2363,7 +2441,7 @@ const gaDo = async (body) => { const r = await post('/api/giveaway', body); if (
 $('gaOpen').onclick = () => gaDo({ action: 'create', tier: $('gaTier').value, prize: $('gaPrize').value, value: $('gaValue').value, winners: $('gaWin').value, sponsor: $('gaSponsor').checked });
 $('gaClose').onclick = () => gaDo({ action: 'close' });
 $('gaDraw').onclick = () => gaDo({ action: 'draw' });
-$('gaCancel').onclick = () => { if (confirm('Cancel this giveaway and give everyone their tickets back?')) gaDo({ action: 'cancel' }); };
+$('gaCancel').onclick = async () => { if (await ask('Cancel this giveaway and give everyone their tickets back?')) gaDo({ action: 'cancel' }); };
 $('scSave').onclick = () => { const prizes = {}; document.querySelectorAll('[data-sp]').forEach((el) => { const k = el.dataset.sp; prizes[k] = { prize: el.value, value: document.querySelector('[data-sv="' + k + '"]').value }; });
   gaDo({ action: 'schedule', on: $('scOn').checked, weekday: $('scDay').value, openMode: $('scOpen').value, skip: $('scSkip').value.split(',').map((x) => x.trim()).filter(Boolean), prizes }); };
 $('scShow').onclick = () => gaDo({ action: 'showSchedule' });
@@ -2468,7 +2546,7 @@ $('tuSave').onclick = async () => {
   if (!r.error) { await loadTuning(); }
 };
 $('tuReset').onclick = async () => {
-  if (!confirm('Put every ' + TU.schema[tuGame].label + ' setting back to the default?')) return;
+  if (!await ask('Put every ' + TU.schema[tuGame].label + ' setting back to the default?')) return;
   const r = await post('/api/tuning', { reset: tuGame });
   $('tuState').innerHTML = r.error ? err(r.error) : 'Back to defaults.';
   await loadTuning();
@@ -2541,7 +2619,7 @@ async function loadReplay(d) {
   $('rpClips').innerHTML = d.clips.length ? d.clips.map((c) => '<div class="rp-clip">' + (c.thumb ? '<img src="' + esc(c.thumb) + '" alt="" onerror="this.style.visibility=\'hidden\'" style="width:96px;height:54px;object-fit:cover;border-radius:6px;float:left;margin-right:10px">' : '') + '<b>#' + c.n + ' ' + esc(c.label || 'Replay') + (c.star ? ' <span style="color:#f6d77a">★ best</span>' : '') + '<small class="help" style="display:block;font-weight:400">' + new Date(c.at).toLocaleString([], { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' }) + ' · ' + c.secs + ' s · ' + (c.speed < 1 ? c.speed + '× · ' : '') + 'played ' + c.plays + '× · ' + (c.url ? '<a href="' + esc(c.url) + '" target="_blank" rel="noopener">on Twitch</a>' + (c.edit ? ' · <a href="' + esc(c.edit) + '" target="_blank" rel="noopener">trim / rename</a>' : '') + (c.by ? ' · by ' + esc(c.by) : c.auto ? ' · automatic' : '') : esc(c.file)) + (c.ok ? '' : ' · <b style="color:#ff8080">file missing</b>') + '</small></b><button data-rpp="' + c.id + '" style="border-color:#4dc3ff;color:#4dc3ff">Play</button><button data-rpst="' + c.id + '">' + (c.star ? 'Unstar' : 'Star') + '</button><button data-rpx="' + c.id + '">Remove</button></div>').join('') : '<p class="help">No clips yet.</p>';
   $('rpClips').querySelectorAll('[data-rpp]').forEach((b) => { b.onclick = async () => loadReplay(await post('/api/replay', { play: { id: b.dataset.rpp } })); });
   $('rpClips').querySelectorAll('[data-rpst]').forEach((b) => { b.onclick = async () => loadReplay(await post('/api/replay', { star: b.dataset.rpst })); });
-  $('rpClips').querySelectorAll('[data-rpx]').forEach((b) => { b.onclick = async () => { const del = confirm('Also delete the video file from your PC? (Cancel = just take it off the list)'); loadReplay(await post('/api/replay', { remove: b.dataset.rpx, deleteFile: del })); }; });
+  $('rpClips').querySelectorAll('[data-rpx]').forEach((b) => { b.onclick = async () => { const del = await ask('Also delete the video file from your PC?', { ok: 'Delete the file too', cancel: 'Just take it off the list' }); loadReplay(await post('/api/replay', { remove: b.dataset.rpx, deleteFile: del })); }; });
   if (!RP.formSet) {
     $('rpCamPic').value = S.camPic; $('rpWall').value = S.wallPic ? '1' : '0'; $('rpMusOn').checked = S.music.on; $('rpMusWhich').value = S.music.mine ? '1' : '0'; $('rpMusVol').value = S.music.vol; $('rpOutro').checked = S.music.outro;
     const N = { twitch: 'Twitch', kick: 'Kick', youtube: 'YouTube' };
@@ -2616,7 +2694,7 @@ function rtDraw(d) {
     ((S.checks || []).length ? '<h3 style="margin:14px 0 6px">Your OBS settings</h3>' + S.checks.map((a) => '<div style="border-left:4px solid ' + col[a.level] + ';padding:4px 10px;margin:6px 0"><b>' + esc(a.what) + '</b><br><span class="help">' + esc(a.fix) + '</span></div>').join('') : '<p class="help">OBS settings: nothing obvious to change (hardware encoder).</p>');
 }
 async function rtLoad() { const d = await fetch('/api/replay/test').then((x) => x.json()); rtDraw(d); if (!d.running && RT.poll) { clearInterval(RT.poll); RT.poll = null; } }
-async function rtStart(look) { if (!confirm('This plays a test replay on stream (if you are live, viewers will see it). Run it?')) return; const d = await post('/api/replay/test', { look }); rtDraw(d); if (!RT.poll) RT.poll = setInterval(rtLoad, 1000); }
+async function rtStart(look) { if (!await ask('This plays a test replay on stream (if you are live, viewers will see it). Run it?')) return; const d = await post('/api/replay/test', { look }); rtDraw(d); if (!RT.poll) RT.poll = setInterval(rtLoad, 1000); }
 $('rtRun').onclick = () => rtStart('quick'); $('rtRunS').onclick = () => rtStart('studio');
 rtLoad().catch(() => {});
 // ---------- system check ----------
@@ -2685,7 +2763,7 @@ async function loadSs(d) {
   $('ssPic').value = S.pic;
   $('ssPics').innerHTML = d.S.pics.map((u, i) => '<div class="ss-pic' + (d.S.picIds[i] === S.pic ? ' on' : '') + '"><img src="' + esc(u) + '" alt="Background picture ' + (i + 1) + '"><div><button data-ssuse="' + d.S.picIds[i] + '">Use</button><button data-ssdel="' + d.S.picIds[i] + '">Remove</button></div></div>').join('') || '<p class="help">No pictures yet: the Boss Sports News set shows.</p>';
   document.querySelectorAll('[data-ssuse]').forEach((b) => { b.onclick = () => ssPost({ settings: { pic: b.dataset.ssuse } }); });
-  document.querySelectorAll('[data-ssdel]').forEach((b) => { b.onclick = () => { if (confirm('Remove this picture?')) ssPost({ removePic: b.dataset.ssdel }); }; });
+  document.querySelectorAll('[data-ssdel]').forEach((b) => { b.onclick = async () => { if (await ask('Remove this picture?')) ssPost({ removePic: b.dataset.ssdel }); }; });
   $('ssGo').textContent = d.running ? 'RUNNING' : d.left < d.dur && d.left > 0 ? 'START (carry on)' : 'START';
   $('ssHere').textContent = d.on ? d.here + ' checked in' + (d.held ? ' · ' + d.held + ' alerts waiting for kick-off' : '') : '';
   ssTick();
@@ -2753,7 +2831,7 @@ async function loadMedia() {
   const P = MD.list.filter((m) => m.kind === 'photo'), M = MD.list.filter((m) => m.kind === 'music');
   $('mdPhotos').innerHTML = P.map((m) => '<div class="md-it" style="cursor:default"><img src="' + esc(m.url) + '" alt=""><span>' + esc(m.name) + (m.from ? ' (Starting Soon)' : '') + '</span>' + (m.from ? '' : '<button data-mddel="' + esc(m.id) + '" style="margin:4px 8px 8px">Remove</button>') + '</div>').join('') || '<p class="help">No photos yet.</p>';
   $('mdMusic').innerHTML = M.map((m) => '<div class="md-row"><b>' + esc(m.name) + '</b><audio controls preload="none" src="' + esc(m.url) + '" style="height:34px"></audio><button data-mddel="' + esc(m.id) + '">Remove</button></div>').join('') || '<p class="help">No music yet.</p>';
-  document.querySelectorAll('[data-mddel]').forEach((b) => { b.onclick = async () => { if (!confirm('Remove this file?')) return; await post('/api/media', { action: 'remove', id: b.dataset.mddel }); loadMedia(); }; });
+  document.querySelectorAll('[data-mddel]').forEach((b) => { b.onclick = async () => { if (!await ask('Remove this file?')) return; await post('/api/media', { action: 'remove', id: b.dataset.mddel }); loadMedia(); }; });
 }
 $('mdFile').onchange = async (e) => { await mdUpload(Array.from(e.target.files), $('mdMsg')); e.target.value = ''; loadMedia(); };
 // ---- BRB ----
@@ -2891,7 +2969,7 @@ async function loadCheck() {
   document.querySelectorAll('[data-ckedit]').forEach((b) => { b.onclick = () => ceOpen(b.dataset.ckedit); });
 }
 $('ckRe').onclick = loadCheck;
-$('ckFix').onclick = async () => { if (!confirm('Fix every streak that doesn\'t match the history? A backup is saved first.')) return; const x = await post('/api/safety', { action: 'fix' }); $('ckMsg').textContent = 'Fixed ' + x.fixed + ' card' + (x.fixed === 1 ? '' : 's') + '. Backup saved first.'; loadCheck(); };
+$('ckFix').onclick = async () => { if (!await ask('Fix every streak that doesn\'t match the history? A backup is saved first.')) return; const x = await post('/api/safety', { action: 'fix' }); $('ckMsg').textContent = 'Fixed ' + x.fixed + ' card' + (x.fixed === 1 ? '' : 's') + '. Backup saved first.'; loadCheck(); };
 let CE = { key: null, d: null };
 let ceT = null;
 $('ceQ').oninput = () => { clearTimeout(ceT); ceT = setTimeout(ceSearch, 200); };
@@ -3001,13 +3079,72 @@ async function bcInfo(q) {
 $('botcSave').onclick = async () => { const m = (document.querySelector('[name=bcMode]:checked') || {}).value; const q = await post('/api/sgw', { bot: { mode: m, review: $('botcRev').value, hold: $('botcHold').value } }); $('botcMsg').textContent = q.error || 'Saved'; BOTC.form = 0; sgLoad(q); };
 document.querySelectorAll('[name=bcMode]').forEach((x) => { x.onchange = () => $('botcSave').click(); });
 $('botcPtsSave').onclick = async () => { const pts = {}; document.querySelectorAll('[data-bcp]').forEach((i) => { pts[i.dataset.bcp] = i.value; }); const q = await post('/api/sgw', { bot: { points: pts } }); $('botcPtsMsg').textContent = q.error || 'Points saved'; sgLoad(q); };
-$('botcPtsReset').onclick = async () => { if (!confirm('Put every number back to the suggested points?')) return; await post('/api/sgw', { bot: { resetPoints: true } }); await bcInfo(); $('botcPtsMsg').textContent = 'Back to the suggested points'; sgLoad(); };
+$('botcPtsReset').onclick = async () => { if (!await ask('Put every number back to the suggested points?')) return; await post('/api/sgw', { bot: { resetPoints: true } }); await bcInfo(); $('botcPtsMsg').textContent = 'Back to the suggested points'; sgLoad(); };
 $('botcLogB').onclick = () => bcInfo($('botcLogQ').value.trim()); $('botcLogQ').onkeydown = (e) => { if (e.key === 'Enter') bcInfo($('botcLogQ').value.trim()); };
 document.querySelectorAll('.bc-more').forEach((d) => d.addEventListener('toggle', () => { if (d.open) bcInfo(d.querySelector('#botcLogQ') ? ($('botcLogQ').value.trim() || '') : undefined); }));
 setInterval(() => { if (document.querySelector('[data-tab="sgw"]:not(.hide)') && !/^sg/.test((document.activeElement || {}).id || '')) sgLoad(); }, 3000);
 $('sgOpen').onclick = async () => { const r = await post('/api/sgw', { action: SGW.d && SGW.d.open ? 'close' : 'open' }); $('sgMsg').textContent = r.msg || r.error || ''; sgLoad(r); };
+// ---------- v39: spin for a winner ----------
+const SP = { d: null, skew: 0, form: 0 };
+async function spLoad(r) {
+  r = r || await fetch('/api/spin').then((x) => x.json()).catch(() => null); if (!r) return; SP.d = r; SP.skew = (r.now || Date.now()) - Date.now();
+  const S = r.settings, busy = r.phase === 'spin' || r.phase === 'claim';
+  $('spSecsShow').textContent = S.spinSecs; $('spClaimShow').textContent = S.claimSecs; $('spCmdShow').textContent = S.cmd;
+  $('spGo').disabled = busy; $('spGo').textContent = r.phase === 'missed' ? 'SPIN AGAIN' : 'SPIN';
+  $('spTest').disabled = busy;
+  $('spClaim').hidden = $('spSkip').hidden = r.phase !== 'claim'; $('spStop').hidden = r.phase !== 'spin'; $('spHide').hidden = !(r.phase === 'claimed' || r.phase === 'missed');
+  $('spHist').innerHTML = r.history.length ? 'Before: ' + r.history.slice(0, 8).map((h) => '<b>' + esc(h.display) + '</b> ' + (h.result === 'claimed' ? '✓ claimed' : h.result === 'banned' ? '✗ banned' : '✗ not claimed') + (h.test ? ' (test)' : '')).join(' · ') : '';
+  if (!SP.form) {
+    SP.form = 1; await mdLoad();
+    $('spSecs').value = S.spinSecs; $('spClaimS').value = S.claimSecs; $('spCmd').value = S.cmd; $('spTitle').value = S.title; $('spPrize').value = S.prize; $('spWhere').value = S.where; $('spHideAfter').value = S.hideAfter;
+    $('spMusicVol').value = S.musicVol; $('spAppVol').value = S.applauseVol; $('spSounds').checked = S.sounds; $('spSay').checked = S.chatSay;
+    spSoundLists(S.music, S.applause);
+    $('spMsgs').innerHTML = [['won', 'When the spin stops'], ['claimed', 'When they claim'], ['missed', 'When they don\'t claim']].map(([k, l]) => '<label>' + l + ' <input data-spm="' + k + '" maxlength="300" placeholder="' + esc(r.defaults[k]) + '" value="' + esc(S.msg[k] === r.defaults[k] ? '' : S.msg[k]) + '"></label>').join('');
+  }
+  $('spMusicVolV').textContent = $('spMusicVol').value; $('spAppVolV').textContent = $('spAppVol').value;
+  spTick();
+}
+function spSoundLists(music, app) {
+  const M = MD.list.filter((m) => m.kind === 'music');
+  const o = (sel, none) => '<option value="">' + none + '</option>' + M.map((m) => '<option value="' + esc(m.id) + '"' + (m.id === sel ? ' selected' : '') + '>' + esc(m.name) + '</option>').join('');
+  $('spMusic').innerHTML = o(music, 'No music (ticking sounds)'); $('spApp').innerHTML = o(app, 'The app\'s own fanfare + cheer');
+}
+function spTick() {
+  const r = SP.d; if (!r) return; const t = Date.now() + SP.skew;
+  const B = $('spBig'), sm = $('spSmall'); $('spNow').className = 'sp-now sp-ph-' + r.phase;
+  if ((r.phase === 'spin' && t > r.spinEndsAt + 300) || (r.phase === 'claim' && t > r.claimEndsAt + 300)) { if (!SP.busyLoad) { SP.busyLoad = 1; spLoad().finally(() => { setTimeout(() => { SP.busyLoad = 0; }, 400); }); } }
+  if (r.phase === 'spin') { B.textContent = 'Spinning… ' + Math.max(0, Math.ceil((r.spinEndsAt - t) / 1000)) + 's'; sm.textContent = r.test ? 'Test: made-up names, chat isn\'t told' : ''; }
+  else if (r.phase === 'claim') { B.textContent = r.winner.display + ': ' + Math.max(0, Math.ceil((r.claimEndsAt - t) / 1000)) + 's to claim'; sm.textContent = (r.test ? 'Test: nobody can claim, it runs out by itself' : 'Waiting for them to type ' + r.cmd + ' on ' + (PNAME[r.winner.platform] || r.winner.platform)); }
+  else if (r.phase === 'claimed') { B.textContent = r.winner.display + ' claimed it ✓'; sm.textContent = r.test ? '(test)' : 'They\'re on the winners list'; }
+  else if (r.phase === 'missed') { B.textContent = r.winner.display + ' didn\'t claim'; sm.textContent = r.test ? '(test)' : 'Taken out of the list. Spin again when you\'re ready (' + r.ready + ' left).'; }
+  else { B.textContent = r.ready ? 'Ready: ' + r.ready + ' name' + (r.ready === 1 ? '' : 's') : 'Nobody to spin for yet'; sm.textContent = r.ready ? (r.from === 'gmeter' ? 'from the giveaway meter\'s entries' : 'from the giveaway list') : 'Open entries and people type the command'; }
+}
+setInterval(spTick, 250);
+setInterval(() => { if (document.querySelector('[data-tab="sgw"]:not(.hide)') && !(document.activeElement && document.activeElement.closest && document.activeElement.closest('#spSet'))) spLoad(); }, 2000);
+const spAct = async (action) => { const r = await post('/api/spin', { action }).catch(() => ({ error: 'The app is restarting. Try again.' })); $('spMsg').innerHTML = r.error ? err(r.error) : esc(r.msg || ''); if (r.phase) spLoad(r); sgLoad(); };
+$('spGo').onclick = () => spAct('start'); $('spTest').onclick = () => spAct('test'); $('spStop').onclick = () => spAct('skip'); $('spHide').onclick = () => spAct('hide');
+$('spClaim').onclick = async () => { if (await ask('Mark ' + SP.d.winner.display + ' as claimed? (Only if they really did claim, e.g. on another platform.)', { ok: 'Yes, they claimed it' })) spAct('claim'); };
+$('spSkip').onclick = async () => { if (await ask('Take ' + SP.d.winner.display + ' out of the list now (not claimed)?', { ok: 'Take them out' })) spAct('skip'); };
+$('spMusicVol').oninput = () => { $('spMusicVolV').textContent = $('spMusicVol').value; }; $('spAppVol').oninput = () => { $('spAppVolV').textContent = $('spAppVol').value; };
+async function spUp(input, which) {
+  const f = input.files[0]; if (!f) return;
+  await mdUpload([f], $('spSaved'));
+  const m = MD.list.filter((x) => x.kind === 'music').sort((a, b) => (b.at || 0) - (a.at || 0))[0];
+  input.value = ''; if (!m) return;
+  const cur = { music: $('spMusic').value, applause: $('spApp').value }; cur[which] = m.id;
+  spSoundLists(cur.music, cur.applause);
+  await post('/api/spin', { settings: { [which]: m.id } }); $('spSaved').textContent = 'Uploaded and picked: ' + m.name;
+}
+$('spMusicUp').onchange = () => spUp($('spMusicUp'), 'music'); $('spAppUp').onchange = () => spUp($('spAppUp'), 'applause');
+$('spSave').onclick = async () => {
+  const msg = {}; document.querySelectorAll('[data-spm]').forEach((i) => { msg[i.dataset.spm] = i.value; });
+  const r = await post('/api/spin', { settings: { spinSecs: +$('spSecs').value, claimSecs: +$('spClaimS').value, cmd: $('spCmd').value, title: $('spTitle').value, prize: $('spPrize').value, where: $('spWhere').value, hideAfter: +$('spHideAfter').value,
+    music: $('spMusic').value || null, applause: $('spApp').value || null, musicVol: +$('spMusicVol').value, applauseVol: +$('spAppVol').value, sounds: $('spSounds').checked, chatSay: $('spSay').checked, msg } });
+  $('spSaved').textContent = r.error ? r.error : 'Saved'; SP.form = 0; spLoad(r);
+};
+spLoad();
 $('sgPick').onclick = async () => { const r = await post('/api/sgw', { action: 'pick' }); $('sgMsg').textContent = r.error || r.msg; sgLoad(r); };
-$('sgClear').onclick = async () => { if (!confirm('Clear all names from the giveaway list?')) return; const r = await post('/api/sgw', { action: 'clear' }); $('sgMsg').textContent = r.msg; sgLoad(r); };
+$('sgClear').onclick = async () => { if (!await ask('Clear all names from the giveaway list?')) return; const r = await post('/api/sgw', { action: 'clear' }); $('sgMsg').textContent = r.msg; sgLoad(r); };
 $('sgCopy').onclick = () => sgCopy($('sgText').value);
 $('sgSep').onchange = () => sgLoad(SGW.d); $('sgFind').oninput = () => sgLoad(SGW.d);
 const sgAdd = async () => { const n = $('sgAdd').value.trim(); if (!n) return; const r = await post('/api/sgw', { add: { name: n, platform: $('sgAddPf').value } }); $('sgMsg').textContent = r.error || r.msg; if (!r.error) $('sgAdd').value = ''; sgLoad(r); };
@@ -3048,14 +3185,15 @@ async function gmLoad(r) {
     document.querySelectorAll('[data-gmw]').forEach((i) => { i.value = S.weights[i.dataset.gmw]; }); $('gmWeights').style.display = S.preset === 'mixed' ? '' : 'none';
     const D = Object.assign({}, r.defaults[r.look] || {}, r.mode === 'timer' ? (r.tdefaults[r.look] || {}) : {});
     [['gmTitle', 'title', D.title], ['gmPrize', 'prize'], ['gmSub', 'sub'], ['gmEnter', 'enter', r.words.enter], ['gmUnit', 'unit'], ['gmTL', 'timerLabel', D.timer], ['gmDone', 'done', D.done], ['gmUp', 'timeUp', D.timeUp]].forEach(([id, k, ph]) => { $(id).value = S[k] || ''; if (ph) $(id).placeholder = ph; });
-    $('gmOver').checked = S.overflow; $('gmStopUp').checked = S.stopAtTimeUp; $('gmSubsOnly').checked = S.subsOnlyEntries; $('gmShowEnt').checked = S.showEntries; $('gmSound').checked = S.sound; $('gmSay').checked = S.chatSay;
+    $('gmHideClock').checked = !!S.hideClock; $('gmHideHelp').hidden = !S.hideClock; $('gmOver').checked = S.overflow; $('gmStopUp').checked = S.stopAtTimeUp; $('gmSubsOnly').checked = S.subsOnlyEntries; $('gmShowEnt').checked = S.showEntries; $('gmSound').checked = S.sound; $('gmSay').checked = S.chatSay;
   }
 }
 setInterval(() => { const r = GM.d; if (!r || !$('gmClock') || document.querySelector('[data-tab="gmeter"].hide')) return; const l = r.running && r.endsAt ? Math.max(0, r.endsAt - (Date.now() + GM.skew)) : r.left; const s = Math.ceil(l / 1000), hh = Math.floor(s / 3600); $('gmClock').textContent = r.hasTimer ? (hh ? hh + ':' + String(Math.floor((s % 3600) / 60)).padStart(2, '0') : Math.floor(s / 60)) + ':' + String(s % 60).padStart(2, '0') : 'no clock'; $('gmClockSt').textContent = r.ended ? 'time up' : r.running ? 'running' : r.paused ? 'paused' : 'stopped'; }, 250);
 setInterval(() => { if (document.querySelector('[data-tab="gmeter"]:not(.hide)')) gmLoad(); }, 2500);
 window.addEventListener('resize', gmFit);
 $('gmStart').onclick = () => gmPost({ action: 'start' }); $('gmPause').onclick = () => gmPost({ action: GM.d && GM.d.paused ? 'resume' : 'pause' });
-$('gmStop').onclick = () => gmPost({ action: 'stop' }); $('gmRestart').onclick = () => { if (confirm('Start a new giveaway from 0? (Entries are cleared too.)')) gmPost({ action: 'restart' }); };
+$('gmHideClock').onchange = async () => { const on = $('gmHideClock').checked; $('gmHideHelp').hidden = !on; await gmPost({ settings: { hideClock: on } }); $('gmModeMsg').textContent = on ? 'Clock hidden on stream' : 'Clock shown on stream'; };
+$('gmStop').onclick = () => gmPost({ action: 'stop' }); $('gmRestart').onclick = async () => { if (await ask('Start a new giveaway from 0? (Entries are cleared too.)')) gmPost({ action: 'restart' }); };
 document.querySelectorAll('[data-gma]').forEach((b) => { b.onclick = () => gmPost({ add: +b.dataset.gma }); });
 document.querySelectorAll('[data-gmt]').forEach((b) => { b.onclick = () => gmPost({ addTime: +b.dataset.gmt }); });
 $('gmSetVB').onclick = () => { if ($('gmSetV').value !== '') gmPost({ value: +$('gmSetV').value }); };
@@ -3064,8 +3202,8 @@ $('gmTB').onclick = () => gmPost({ time: (+$('gmTh').value || 0) * 3600 + (+$('g
 $('gmAtB').onclick = () => { if ($('gmAt').value) gmPost({ at: $('gmAt').value }); };
 $('gmEnabled').onchange = () => gmPost({ enable: $('gmEnabled').checked });
 $('gmMode').onchange = async () => { const r = await post('/api/gmeter', { settings: { mode: $('gmMode').value } }); $('gmModeMsg').textContent = 'Now: ' + r.modes[$('gmMode').value]; GM.form = 0; gmLoad(r); };
-$('gmPick').onclick = () => { if (confirm('Pick a random winner from everyone who entered?')) gmPost({ action: 'pick' }); };
-$('gmClear').onclick = () => { if (confirm('Clear all entries?')) gmPost({ action: 'clear' }); };
+$('gmPick').onclick = async () => { if (await ask('Pick a random winner from everyone who entered?')) gmPost({ action: 'pick' }); };
+$('gmClear').onclick = async () => { if (await ask('Clear all entries?')) gmPost({ action: 'clear' }); };
 $('gmPreset').onchange = () => { $('gmWeights').style.display = $('gmPreset').value === 'mixed' ? '' : 'none'; };
 $('gmSave').onclick = async () => {
   const w = {}; document.querySelectorAll('[data-gmw]').forEach((i) => { w[i.dataset.gmw] = +i.value || 0; });
@@ -3099,7 +3237,7 @@ $('gfxMode').onchange = async () => loadGfx(await post('/api/gfx', { mode: $('gf
 async function loadUndo(d) {
   d = d || await fetch('/api/undo').then((r) => r.json()).catch(() => null); if (!d) return;
   $('unList').innerHTML = d.list.length ? d.list.map((u) => '<div class="actions" style="margin:4px 0;justify-content:space-between;flex-wrap:nowrap"><span style="' + (u.done ? 'text-decoration:line-through;color:var(--muted)' : '') + '">' + new Date(u.at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) + ' · ' + esc(u.label) + '</span>' + (u.done ? '<small class="help">undone</small>' : '<button data-un="' + u.id + '"' + (u.can ? '' : ' disabled title="Undo the newer one first"') + '>Undo</button>') + '</div>').join('') : '<p class="help">Nothing yet.</p>';
-  $('unList').querySelectorAll('[data-un]').forEach((b) => { b.onclick = async () => { const r = await post('/api/undo', { id: b.dataset.un }); if (r.error) alert(r.error); loadUndo(r); }; });
+  $('unList').querySelectorAll('[data-un]').forEach((b) => { b.onclick = async () => { const r = await post('/api/undo', { id: b.dataset.un }); if (r.error) ask(r.error); loadUndo(r); }; });
 }
 setInterval(() => { if (document.querySelector('#undoCard:not(.hide)') && !document.hidden) loadUndo(); }, 5000);
 // ---- ready to go live? ----
@@ -3173,7 +3311,7 @@ $('cmSave').onclick = async () => { await post('/api/camera', { settings: { chat
 $('cmLock').onchange = () => post('/api/camera', { settings: { lock: $('cmLock').checked } });
 $('cmSpotSave').onclick = async () => { const x = await post('/api/camera', { saveSpot: true }); $('cmSpotState').textContent = x.error || ('Saved your camera spot for the scene "' + x.saved + '" (' + x.name + ').'); loadCamera(); };
 $('cmResetAll').onclick = async () => { $('cmSpotState').textContent = 'Resetting…'; const x = await post('/api/camera', { resetAll: true }); $('cmSpotState').textContent = x.error || x.msg || 'Camera reset'; loadCamera(); };
-$('cmSpotForget').onclick = async () => { if (!confirm('Forget the saved camera spots?')) return; await post('/api/camera', { forgetSpot: true }); $('cmSpotState').textContent = 'Forgotten.'; loadCamera(); };
+$('cmSpotForget').onclick = async () => { if (!await ask('Forget the saved camera spots?')) return; await post('/api/camera', { forgetSpot: true }); $('cmSpotState').textContent = 'Forgotten.'; loadCamera(); };
 $('cmGuard').onchange = () => post('/api/camera', { settings: { guard: $('cmGuard').checked } });
 $('cmSize').oninput = () => { $('cmSizeV').textContent = $('cmSize').value + '%'; };
 $('cmSize').onchange = async () => { const x = await post('/api/camera', { size: +$('cmSize').value }); if (x.error) $('cmState').textContent = x.error; };
@@ -3196,7 +3334,7 @@ async function loadRaidNight(r) {
   $('rnSeason').checked = S.season; $('rnQuiet').checked = S.quiet; $('rnCmd').checked = S.commander; $('rnAutoCredits').checked = S.autoCredits;
   $('rnSeasonBox').innerHTML = '<p>Raiders <b>' + se.raidWins + '</b> - <b>' + se.queenWins + '</b> Queen · Queen strength <b>' + (se.mult > 1 ? '+' + Math.round((se.mult - 1) * 100) + '%' : 'normal') + '</b> · best run ' + (se.best || 0) + ' wins</p>' +
     (se.slayers.length ? '<p>Top Queen slayers: ' + se.slayers.map((x) => esc(x.name) + ' (' + x.n + ')').join(', ') + '</p>' : '') + '<button id="rnReset">Start a new season</button>';
-  $('rnReset').onclick = async () => { if (confirm('Reset the season (wins and Queen strength)?')) loadRaidNight(await post('/api/raidnight', { settings: {}, action: 'season-reset' })); };
+  $('rnReset').onclick = async () => { if (await ask('Reset the season (wins and Queen strength)?')) loadRaidNight(await post('/api/raidnight', { settings: {}, action: 'season-reset' })); };
   const L = r.last;
   $('rnCard').innerHTML = L ? '<div style="padding:14px;border-radius:12px;border:2px solid ' + (L.win ? '#3dff9a' : '#c58bff') + ';max-width:520px"><b style="font-size:20px">' + (L.win ? 'THE QUEEN IS DOWN' : 'THE QUEEN SURVIVED') + '</b><br>Stream #' + L.no + ' · ' + L.squad + ' raiders' + (L.mvp ? ' · MVP ' + esc(L.mvp) : '') + '<br>War Chest: ' + L.chest.armour + ' armour, ' + L.chest.fire + ' firepower, +' + L.chest.time + 's<br>Season: raiders ' + L.season.raidWins + ' - ' + L.season.queenWins + ' Queen</div><p class="help">Use End credits &gt; Picture to share for an image.</p>' : '<p class="help">No Raid Night played yet.</p>';
 }
@@ -3327,7 +3465,7 @@ async function loadRewards(d) {
     const t = tr.querySelector('[data-rwt]'); if (t) t.onclick = async () => { const x = await post('/api/rewards', { action: 'test', title: item.title, kind: item.kind }); $('rwdState').textContent = x.error || 'Sent to the overlay'; loadRewards(x); };
     const a = tr.querySelector('[data-rwr]'); if (a) a.onclick = async () => loadRewards(await post('/api/rewards', { action: 'reset', key }));
     const c = tr.querySelector('[data-rwc]'); if (c) c.onclick = async () => { const x = await post('/api/rewards', { action: 'clear', key }); $('rwdState').textContent = 'Taken off screen: ' + item.title; loadRewards(x); };
-    const d = tr.querySelector('[data-rwd]'); if (d) d.onclick = async () => { if (!confirm('Delete "' + item.title + '" from this list? (If someone buys it again it comes back.)')) return; loadRewards(await post('/api/rewards', { action: 'remove', key })); };
+    const d = tr.querySelector('[data-rwd]'); if (d) d.onclick = async () => { if (!await ask('Delete "' + item.title + '" from this list? (If someone buys it again it comes back.)')) return; loadRewards(await post('/api/rewards', { action: 'remove', key })); };
   });
 }
 $('rwRefresh').onclick = async () => { $('rwdState').textContent = 'Asking Twitch...'; const x = await post('/api/rewards', { action: 'refresh' }); $('rwdState').textContent = x.error ? x.error + ' (press Reconnect Twitch on the Platforms page if it mentions permission)' : 'Found ' + x.found + ' channel point rewards. Power-ups show here the first time someone buys one.'; loadRewards(x); };
@@ -3356,7 +3494,7 @@ function imShow(r, src, text) {
   imLast = { source: src, text };
   $('imOut').innerHTML = '<table class="mini"><thead><tr><th>Viewer</th><th>Their total</th><th>Already on card</th><th>Will add</th></tr></thead><tbody>' + r.rows.map((x) => '<tr><td><b>' + esc(x.name) + '</b></td><td>' + [x.bits != null ? x.bits + ' bits' : '', x.gifts != null ? x.gifts + ' gifts' : '', x.months != null ? x.months + ' months' : ''].filter(Boolean).join(' · ') + '</td><td>' + (x.have ? x.have.bits + ' bits · ' + x.have.gifts + ' gifts · ' + x.have.months + ' mo' : (x.newCard ? 'no card yet: one will be made' : '<span style="color:#ff9a7a">not found</span>')) + '</td><td style="color:#7dffb8">' + esc(x.add || 'nothing') + '</td></tr>').join('') + '</tbody></table>' +
     '<div class="actions"><button class="primary" id="imApply"' + (r.changes ? '' : ' disabled') + '>Apply to ' + r.changes + ' cards</button></div>';
-  $('imApply').onclick = async () => { if (!confirm('Add this to ' + r.changes + ' cards?')) return; const a = await post('/api/import', Object.assign({ apply: true }, imLast)); $('imState').innerHTML = a.error ? err(a.error) : 'Done: ' + a.applied + ' cards updated.'; $('imOut').innerHTML = ''; loadViewers(); };
+  $('imApply').onclick = async () => { if (!await ask('Add this to ' + r.changes + ' cards?')) return; const a = await post('/api/import', Object.assign({ apply: true }, imLast)); $('imState').innerHTML = a.error ? err(a.error) : 'Done: ' + a.applied + ' cards updated.'; $('imOut').innerHTML = ''; loadViewers(); };
 }
 $('imTw').onclick = async () => { $('imState').textContent = 'Asking Twitch...'; const r = await post('/api/import', { source: 'twitch' }); $('imState').textContent = ''; imShow(r, 'twitch'); };
 $('imCheck').onclick = async () => { const t = $('imText').value; const r = await post('/api/import', { source: 'text', text: t }); imShow(r, 'text', t); };
@@ -3437,7 +3575,7 @@ function selInfo() {
   $('lyBack').onclick = async () => { const r2 = await post('/api/layout', { group: LY.d.group, id, clear: true }); LY.d.pos = r2.pos; drawLayout(); };
 }
 $('lyGroup').onchange = () => loadLayout($('lyGroup').value);
-$('lyReset').onclick = async () => { if (!confirm('Put every box back where the app puts it, for this game type?')) return; await post('/api/layout', { group: LY.d.group, reset: true }); loadLayout(LY.d.group); };
+$('lyReset').onclick = async () => { if (!await ask('Put every box back where the app puts it, for this game type?')) return; await post('/api/layout', { group: LY.d.group, reset: true }); loadLayout(LY.d.group); };
 $('lyCopy').onchange = async () => { const f = $('lyCopy').value; $('lyCopy').value = ''; if (!f || f === LY.d.group) return; await post('/api/layout', { group: LY.d.group, copyFrom: f }); loadLayout(LY.d.group); };
 window.addEventListener('resize', () => { if (LY.d && document.querySelector('[data-tab="onscreen"]:not(.hide)')) drawLayout(); });
 
@@ -3474,7 +3612,7 @@ $('rsScope').onchange = async () => loadResults(await post('/api/results', { set
 $('rsActive').onchange = async () => loadResults(await post('/api/results', { settings: { active: $('rsActive').value, auto: false } }));
 $('rsScore').onclick = async () => { if ($('rsUs').value === '' || $('rsThem').value === '') { $('rsState').textContent = 'Type both scores'; return; } const r = await post('/api/results', { score: { us: +$('rsUs').value, them: +$('rsThem').value, opp: $('rsOpp').value } }); $('rsState').textContent = r.error || r.line; $('rsUs').value = $('rsThem').value = $('rsOpp').value = ''; loadResults(r.error ? null : r); };
 $('rsUndo').onclick = async () => { const r = await post('/api/results', { undo: true }); $('rsState').textContent = r.error || 'Undone'; loadResults(r.error ? null : r); };
-$('rsNew').onclick = async () => { if (!confirm('Start tonight\'s count again from zero? (The season total stays.)')) return; loadResults(await post('/api/results', { newSession: true })); };
+$('rsNew').onclick = async () => { if (!await ask('Start tonight\'s count again from zero? (The season total stays.)')) return; loadResults(await post('/api/results', { newSession: true })); };
 
 // ---- scenes, sub goal, Discord, pre-check ----
 async function loadExtras() {
@@ -3631,7 +3769,7 @@ async function loadDeck() {
 }
 $('dkAdd').onclick = () => { DK.list.push({ id: 'b' + Date.now().toString(36), action: DK.actions[0].id, label: 'NEW', icon: '+', color: DK.actions[0].color, group: 'Game' }); drawDeck(); };
 $('dkSave').onclick = async () => { const r = await post('/api/buttons', { list: DK.list }); DK.list = r.list; drawDeck(); $('dkState').textContent = 'Saved. The dock updates in a couple of seconds.'; };
-$('dkReset').onclick = async () => { if (!confirm('Go back to the starter set of buttons?')) return; const r = await post('/api/buttons', { reset: true }); DK.list = r.list; drawDeck(); };
+$('dkReset').onclick = async () => { if (!await ask('Go back to the starter set of buttons?')) return; const r = await post('/api/buttons', { reset: true }); DK.list = r.list; drawDeck(); };
 $('dkDockCopy').onclick = () => { navigator.clipboard.writeText($('dkDock').textContent); $('dkDockCopy').textContent = 'Copied'; };
 $('dkDockOpen').onclick = () => window.open('/dock', 'bbrdock', 'width=360,height=720');
 
@@ -3666,14 +3804,14 @@ function rcoEdit(name) {
   $('rcoEdit').innerHTML = '<h3 class="sub">' + esc(name) + '’s cards</h3>' + L.map((e) => '<div class="actions" style="margin:4px 0"><span style="min-width:150px">' + (e.at ? new Date(e.at).toLocaleString([], { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' }) : 'before v22') + '</span><select data-rck="' + e.id + '"><option value="red"' + (e.kind === 'red' ? ' selected' : '') + '>Straight red</option><option value="yellow2"' + (e.kind === 'yellow2' ? ' selected' : '') + '>Two yellows</option></select><input data-rcn="' + e.id + '" value="' + esc(e.name) + '" style="width:160px" aria-label="Player"><button data-rcs="' + e.id + '">Save</button><button data-rcx="' + e.id + '" style="color:#ff8080">Delete</button></div>').join('');
   const go = async (body) => { await post('/api/redcard', body); await loadOff(); rcoEdit(name); loadRed(); };
   $('rcoEdit').querySelectorAll('[data-rcs]').forEach((b) => { b.onclick = () => go({ logEdit: { id: b.dataset.rcs, kind: $('rcoEdit').querySelector('[data-rck="' + b.dataset.rcs + '"]').value, name: $('rcoEdit').querySelector('[data-rcn="' + b.dataset.rcs + '"]').value } }); });
-  $('rcoEdit').querySelectorAll('[data-rcx]').forEach((b) => { b.onclick = () => { if (confirm('Delete this card? Any ban from it is taken off too.')) go({ logDelete: b.dataset.rcx }); }; });
+  $('rcoEdit').querySelectorAll('[data-rcx]').forEach((b) => { b.onclick = async () => { if (await ask('Delete this card? Any ban from it is taken off too.')) go({ logDelete: b.dataset.rcx }); }; });
 }
 document.querySelectorAll('[data-rcp]').forEach((b) => { b.onclick = () => { rcoP = b.dataset.rcp; $('rcoEdit').innerHTML = ''; loadOff(); }; });
 $('rcoShow').onclick = async () => { const r = await post('/api/redcard', { shame: true, period: rcoP }); $('rcoState').textContent = r.error || 'On screen'; };
 $('rcoCsv').onclick = () => { if (!rcoD) return; const lines = ['player,straight_reds,two_yellows,matches_banned,worst_night,last_card'].concat(rcoD.offenders.map((r) => ['"' + r.name.replace(/"/g, '""') + '"', r.red, r.y2, r.banned, r.worst, r.last ? new Date(r.last).toISOString().slice(0, 10) : ''].join(','))); const a = document.createElement('a'); a.href = URL.createObjectURL(new Blob([lines.join('\n')], { type: 'text/csv' })); a.download = 'red-cards-' + rcoP + '.csv'; a.click(); };
 $('rcClear').onclick = async () => loadRed(Object.assign(await post('/api/redcard', { clear: true }), { players: null }));
 $('rcSave').onclick = async () => { const rules = $('rcRules').value.split('\n').map((l) => l.trim()).filter(Boolean).map((l, i) => { const k = l.indexOf('|'); return { id: 'r' + i, title: (k < 0 ? 'RED CARD RULE' : l.slice(0, k)).trim(), text: (k < 0 ? l : l.slice(k + 1)).trim() }; }); loadRed(Object.assign(await post('/api/redcard', { settings: { rules, flashSecs: +$('rcSecs').value, stay: $('rcStay').checked, ticker: $('rcTicker').checked, yellowBan: +$('rcYB').value, redBan: +$('rcRB').value, bans: $('rcBansOn').checked } }), { players: null })); $('rcState').textContent = 'Saved'; };
-$('rcReset').onclick = async () => { if (confirm('Reset every player\'s red card count?')) loadRed(Object.assign(await post('/api/redcard', { resetCounts: true }), { players: null })); };
+$('rcReset').onclick = async () => { if (await ask('Reset every player\'s red card count?')) loadRed(Object.assign(await post('/api/redcard', { resetCounts: true }), { players: null })); };
 $('rcNoImg').onclick = async () => loadRed(Object.assign(await post('/api/redcard', { image: null }), { players: null }));
 $('rcFile').onchange = () => { const f = $('rcFile').files[0]; if (!f) return; if (f.size > 6 * 1024 * 1024) { $('rcImgState').textContent = 'Too big (max 6 MB)'; return; } const rd = new FileReader(); rd.onload = async () => { const r = await post('/api/redcard', { image: rd.result }); $('rcImgState').textContent = r.error || 'Saved your picture'; }; rd.readAsDataURL(f); };
 
@@ -3691,7 +3829,7 @@ async function loadClub(c, sq) {
 $('clOpen').onclick = async () => { const r = await post('/api/club', { open: true }); $('clState').textContent = r.error || 'Vote open'; loadClub(r); };
 $('clClose').onclick = async () => { const r = await post('/api/club', { close: true }); $('clState').textContent = r.error || (r.winner ? 'Man of the match: ' + r.winner : 'No votes'); loadClub(r); };
 $('clSave').onclick = async () => { loadClub(await post('/api/club', { settings: { on: $('clOn').checked, auto: $('clAuto').checked, secs: +$('clSecs').value, points: +$('clPts').value } })); $('clState').textContent = 'Saved'; };
-$('clReset').onclick = async () => { if (confirm('Start a new, empty season table? (The old one is kept in the backup.)')) loadClub(await post('/api/club', { resetSeason: true })); };
+$('clReset').onclick = async () => { if (await ask('Start a new, empty season table? (The old one is kept in the backup.)')) loadClub(await post('/api/club', { resetSeason: true })); };
 
 // ---- matchday squad: team sheet editor ----
 const POS = ['', 'GK', 'LB', 'CB', 'RB', 'LWB', 'RWB', 'CDM', 'CM', 'CAM', 'LM', 'RM', 'LW', 'RW', 'CF', 'ST'];
@@ -3740,7 +3878,7 @@ async function loadSquad(d) {
 }
 $('sqdNext').onclick = async () => { const r = await post('/api/squad', { next: true }); $('sqdState').textContent = r.error || 'Team sheet for match ' + r.match + ' is on stream'; loadSquad(r.error ? null : r); };
 $('sqdShow').onclick = async () => { await post('/api/squad', { show: true }); $('sqdState').textContent = 'Showing it'; };
-$('sqdClear').onclick = async () => { if (confirm('Empty the squad list for tonight?')) loadSquad(await post('/api/squad', { clear: true })); };
+$('sqdClear').onclick = async () => { if (await ask('Empty the squad list for tonight?')) loadSquad(await post('/api/squad', { clear: true })); };
 $('sqdAddBtn').onclick = async () => { await viewerList(); const k = keyFor($('sqdAdd').value); if (!k) { $('sqdState').textContent = 'Viewer not found'; return; } $('sqdAdd').value = ''; loadSquad(await post('/api/squad', { add: k })); };
 $('sqdSave').onclick = async () => { loadSquad(await post('/api/squad', { settings: { size: +$('sqdSize').value, maxInRow: +$('sqdRow').value, benchPoints: +$('sqdBench').value, matchMins: +$('sqdMins').value, clubName: $('sqdClub').value, overflowName: $('sqdOver').value, open: $('sqdOpen').checked, kick: $('sqdKick').checked, youtube: $('sqdYt').checked, tierFirst: $('sqdTier').checked, bossIn: $('sqdBoss').checked, overflow: $('sqdOverOn').checked, predictions: $('sqdPred').checked, autoNext: $('sqdAuto').checked } })); $('sqdState').textContent = 'Saved'; };
 setInterval(() => { if (document.querySelector('[data-tab="squad"]:not(.hide)')) loadSquad(); }, 6000);
@@ -3756,7 +3894,7 @@ async function loadBoss(d) {
 $('bbStart').onclick = async () => { const r = await post('/api/boss', { start: true }); $('bbState').textContent = r.error || 'Open: chat types !join'; loadBoss(r); };
 document.querySelectorAll('[data-bb]').forEach((b) => { b.onclick = async () => { const r = await post('/api/boss', { pick: b.dataset.bb }); $('bbState').textContent = r.error || 'You shoot ' + r.dir; loadBoss(r); }; });
 $('bbSave').onclick = async () => { loadBoss(await post('/api/boss', { settings: { stakes: $('bbStakes').value, floor: +$('bbFloor').value, bountyStart: +$('bbB0').value, bountyStep: +$('bbStep').value, subsFirst: $('bbSubs').checked } })); $('bbState').textContent = 'Saved'; };
-$('bbReset').onclick = async () => { if (confirm('Start a new Boss season? Form, record and bounty go back to the start.')) loadBoss(await post('/api/boss', { resetSeason: true })); };
+$('bbReset').onclick = async () => { if (await ask('Start a new Boss season? Form, record and bounty go back to the start.')) loadBoss(await post('/api/boss', { resetSeason: true })); };
 setInterval(() => { if (document.querySelector('[data-tab="boss"]:not(.hide)')) loadBoss(); }, 1500);
 // ---- team shootout ----
 const TP = { set: 0 };
@@ -3785,7 +3923,7 @@ async function loadBot(d) {
   $('botState').textContent = d.muted ? 'MUTED: nothing is posted in chat' : 'On';
   $('botSaid').innerHTML = (d.said || []).slice().reverse().map((x) => '<div>' + new Date(x.at).toLocaleTimeString() + ' · ' + esc(x.platform) + ': ' + esc(x.msg) + '</div>').join('') || 'Nothing yet.';
   $('botFix').innerHTML = d.done ? '<b style="color:#3dff9a">Fixed: ' + d.viewers + ' cards put back.</b>' : d.ghosts ? '<div style="border-left:4px solid #ffb020;padding:4px 10px"><b>' + d.ghosts + ' extra "streams" found</b>: your stream dropped and came back, and before v28.3 each time counted as a new stream, so ' + d.viewers + ' viewers got extra check-in points, streak steps and tickets (' + (d.list || []).slice(0, 5).map((f) => esc(f.name) + ' streak ' + f.streak + ' → ' + f.after).join(', ') + '). <button id="botRepair" style="margin-left:6px">Take the extra points back</button></div>' : '';
-  const rp = $('botRepair'); if (rp) rp.onclick = async () => { if (!confirm('Take back the extra check-in points, streak steps and tickets from the duplicate streams? (A backup is saved first.)')) return; loadBot(await post('/api/bot', { repair: true })); };
+  const rp = $('botRepair'); if (rp) rp.onclick = async () => { if (!await ask('Take back the extra check-in points, streak steps and tickets from the duplicate streams? (A backup is saved first.)')) return; loadBot(await post('/api/bot', { repair: true })); };
 }
 async function loadCr() {
   const d = await fetch('/api/cardreset').then((r) => r.json()).catch(() => null); if (!d) return;
@@ -3797,7 +3935,7 @@ const crShow = (r) => { if (r.error) { $('crOut').innerHTML = '<b style="color:#
   $('crOut').innerHTML = (r.done ? '<b style="color:#3dff9a">Done: ' + r.viewers + ' cards reset to ' + esc(r.file) + '. Tonight is stream #' + r.streamNo + '.</b>' : '<b>Preview:</b> ' + r.viewers + ' cards would go back to ' + esc(r.file) + ' (' + r.newTonight + ' new tonight). Tonight becomes stream #' + r.streamNo + '.') +
     '<div style="margin-top:4px">' + r.sample.map((x) => esc(x.name) + ': ' + (r.done ? 'was ' + x.ovr + ' OVR, now ' + x.ovrAfter + ' OVR, streak ' + x.streak : x.ovr + ' OVR now, streak ' + x.streakNow + ' → ' + x.streak)).join(' · ') + '</div>'; };
 $('crPrev').onclick = async () => crShow(await post('/api/cardreset', { file: $('crFile').value }));
-$('crGo').onclick = async () => { if (!confirm('Reset everyone\'s card points to the backup from ' + $('crFile').selectedOptions[0].textContent + '?\n\nA backup of right now is saved first.')) return; crShow(await post('/api/cardreset', { file: $('crFile').value, apply: true })); loadCr(); };
+$('crGo').onclick = async () => { if (!await ask('Reset everyone\'s card points to the backup from ' + $('crFile').selectedOptions[0].textContent + '?\n\nA backup of right now is saved first.')) return; crShow(await post('/api/cardreset', { file: $('crFile').value, apply: true })); loadCr(); };
 loadCr();
 $('botMute').onclick = async () => { const d = await fetch('/api/bot').then((r) => r.json()); loadBot(await post('/api/bot', { muted: !d.muted })); };
 $('botSave').onclick = async () => loadBot(await post('/api/bot', { maxPerMin: +$('botMax').value }));
@@ -3816,7 +3954,7 @@ $('tpOpen').onclick = () => tpRun({ open: {} }, 'Open: chat types !join');
 $('tpTest').onclick = () => tpRun({ test: {} }, 'Test started: test viewers join and pick by themselves');
 $('tpSkip').onclick = () => tpRun({ skip: true }, 'The AI took the kick');
 $('tpPause').onclick = () => tpRun({ pause: true });
-$('tpEnd').onclick = () => { if (confirm('End the team shootout now? Nobody gets points.')) tpRun({ end: true }, 'Ended'); };
+$('tpEnd').onclick = async () => { if (await ask('End the team shootout now? Nobody gets points.')) tpRun({ end: true }, 'Ended'); };
 $('tpSave').onclick = async () => { TP.set = 0; const r = await post('/api/teampens', { settings: { size: +$('tpSize').value, make: $('tpMake').value, order: $('tpOrder').value, joinSecs: +$('tpJoin').value, clubs: [$('tpClub0').value, $('tpClub1').value], subsFirst: $('tpSubs').checked, boosts: $('tpBoosts').checked, ticker: $('tpTicker').checked, rotate: $('tpRotate').checked, winPts: $('tpWin').value, goalPts: $('tpGoal').value, losePts: $('tpLose').value, mvpDouble: $('tpMvp').checked } }); $('tpSaved').textContent = 'Saved'; loadTp(r); };
 setInterval(() => { if (document.querySelector('[data-tab="teampens"]:not(.hide)')) { loadTp(); loadP3(); } }, 1500);
 
@@ -3849,7 +3987,7 @@ async function tickerCheckRun(fix) {
 }
 $('tkCheck').onclick = () => tickerCheckRun(false);
 $('tkFix').onclick = () => tickerCheckRun(true);
-$('buRestore').onclick = () => { const f = $('buFile').files[0]; if (!f) { $('buState').textContent = 'Pick a backup file first'; return; } if (!confirm('Replace every card and result with the ones in this backup? (A safety copy of now is kept.)')) return; const rd = new FileReader(); rd.onload = async () => { let j; try { j = JSON.parse(rd.result); } catch (e) { $('buState').textContent = 'Not a backup file'; return; } j.restoreSettings = $('buSettings').checked; const r = await post('/api/backup', j); $('buState').textContent = r.error || 'Restored ' + r.viewers + ' cards. Restart the app to be safe.'; }; rd.readAsText(f); };
+$('buRestore').onclick = async () => { const f = $('buFile').files[0]; if (!f) { $('buState').textContent = 'Pick a backup file first'; return; } if (!await ask('Replace every card and result with the ones in this backup? (A safety copy of now is kept.)')) return; const rd = new FileReader(); rd.onload = async () => { let j; try { j = JSON.parse(rd.result); } catch (e) { $('buState').textContent = 'Not a backup file'; return; } j.restoreSettings = $('buSettings').checked; const r = await post('/api/backup', j); $('buState').textContent = r.error || 'Restored ' + r.viewers + ' cards. Restart the app to be safe.'; }; rd.readAsText(f); };
 
 // ---------- LIVE DESK ----------
 const TILES = {
@@ -4239,7 +4377,7 @@ async function saveScreen(extra) {
   return r;
 }
 $('seSave').onclick = async () => { await post('/api/held', { on: $('hdOn').checked, gapSecs: +$('hdGap').value }); saveScreen(); };
-$('seReset').onclick = () => { if (confirm('Put the battle screen back to the default layout?')) saveScreen({ reset: true }); };
+$('seReset').onclick = async () => { if (await ask('Put the battle screen back to the default layout?')) saveScreen({ reset: true }); };
 $('sePrev').onclick = async () => { await saveScreen(); await fetch('/api/screen/preview', { method: 'POST' }); $('seState').innerHTML = '<span style="color:#7dffb8">Showing on stream for 15 seconds.</span>'; };
 
 // ---------- viewers + streaks ----------
@@ -4310,7 +4448,7 @@ function renderChallenges(j) {
   }
   $('chList').querySelectorAll('[data-cht]').forEach((x) => { x.onchange = () => chPost({ action: 'edit', id: x.dataset.cht, total: +x.value, left: +x.value }); });
   $('chList').querySelectorAll('[data-chs]').forEach((b) => { b.onclick = () => chPost({ action: 'start', id: b.dataset.chs }); });
-  $('chList').querySelectorAll('[data-chr]').forEach((b) => { b.onclick = () => { if (confirm('Remove this challenge?')) chPost({ action: 'remove', id: b.dataset.chr }); }; });
+  $('chList').querySelectorAll('[data-chr]').forEach((b) => { b.onclick = async () => { if (await ask('Remove this challenge?')) chPost({ action: 'remove', id: b.dataset.chr }); }; });
   if (!$('chRules').dataset.dirty) $('chRules').innerHTML = (j.rules || []).map(chRuleRow).join('');
 }
 const chRuleRow = (r) => '<tr><td><input data-f="match" value="' + esc(r.match || '') + '"></td><td><input data-f="name" value="' + esc(r.name || '') + '"></td><td><input data-f="count" type="number" min="1" max="99" value="' + (r.count || 1) + '" style="width:80px"></td><td><select data-f="unit">' + ['games', 'matches', 'deliveries', 'raids', 'minutes'].map((u) => '<option' + (u === r.unit ? ' selected' : '') + '>' + u + '</option>').join('') + '</select></td><td><button class="chdel">Remove</button></td></tr>';
@@ -4318,7 +4456,7 @@ async function chPost(b) { const j = await post('/api/challenges', b); if (j.err
 async function loadChallenges() { renderChallenges(await fetch('/api/challenges').then((r) => r.json())); }
 $('chDone').onclick = () => chPost({ action: 'done' });
 $('chUndo').onclick = () => chPost({ action: 'undo' });
-$('chComplete').onclick = () => { if (confirm('Mark the running challenge as finished?')) chPost({ action: 'complete' }); };
+$('chComplete').onclick = async () => { if (await ask('Mark the running challenge as finished?')) chPost({ action: 'complete' }); };
 $('chShow').onchange = () => chPost({ action: 'settings', settings: { show: $('chShow').checked } });
 $('chAdd').onclick = () => { if (!$('chName').value.trim()) return; chPost({ action: 'add', name: $('chName').value, count: +$('chCount').value, unit: $('chUnit').value, by: $('chBy').value }); $('chName').value = ''; $('chBy').value = ''; };
 $('chRules').addEventListener('input', () => { $('chRules').dataset.dirty = '1'; });
@@ -4388,7 +4526,7 @@ const EL_K = { sub: 'Sub', gift: 'Gifted subs', bits: 'Bits', kicks: 'Kicks', sc
 async function loadElog(r) {
   r = r || await fetch('/api/earnings/log?days=' + $('elDays').value).then((x) => x.json()).catch(() => null); if (!r) return;
   $('elRows').innerHTML = r.list.map((e) => '<tr><td>' + new Date(e.at).toLocaleString([], { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' }) + '</td><td>' + esc(e.platform) + '</td><td>' + EL_K[e.kind] + (e.kind === 'sub' || e.kind === 'gift' ? ' (' + (e.tier === 'prime' ? 'Prime' : 'T' + e.tier) + ')' : '') + (e.manual ? ' <span class="help">added by you</span>' : '') + '</td><td>' + (e.kind === 'sc' ? '$' + (e.n / 100).toFixed(2) : e.n.toLocaleString()) + '</td><td>' + esc(r.currency) + e.value.toFixed(2) + '</td><td><button data-elx="' + esc(e.id) + '">Delete</button></td></tr>').join('') || '<tr><td colspan="6" class="help">Nothing in this time.</td></tr>';
-  document.querySelectorAll('[data-elx]').forEach((b) => { b.onclick = async () => { if (!confirm('Delete this line from the money log?')) return; const x = await post('/api/earnings/log', { remove: b.dataset.elx, days: +$('elDays').value }); $('elMsg').textContent = x.error || 'Deleted'; loadElog(x); loadEarn(); }; });
+  document.querySelectorAll('[data-elx]').forEach((b) => { b.onclick = async () => { if (!await ask('Delete this line from the money log?')) return; const x = await post('/api/earnings/log', { remove: b.dataset.elx, days: +$('elDays').value }); $('elMsg').textContent = x.error || 'Deleted'; loadElog(x); loadEarn(); }; });
 }
 $('erLogBox').ontoggle = () => { if ($('erLogBox').open) loadElog(); };
 $('elDays').onchange = () => loadElog();
@@ -4679,7 +4817,7 @@ async function apInstall(out) {
   const say = (h) => { out.innerHTML = h; };
   say('Saving, backing up…');
   let r = await apDo('install', {});
-  if (r.needConfirm) { if (!confirm(r.msg)) return say(''); r = await apDo('install', { confirmLive: true }); }
+  if (r.needConfirm) { if (!await ask(r.msg)) return say(''); r = await apDo('install', { confirmLive: true }); }
   if (r.waiting) return say(esc(r.msg));
   if (r.error) return say(err(r.error));
   say('Installing: the app closes and opens again by itself in about 20 seconds.');
@@ -4704,10 +4842,10 @@ $('apCheck').onclick = async () => { $('apStatus').textContent = 'Checking for u
 $('apBack').onclick = async () => {
   const p = AP.s.update.prev; if (!p || !p.url) return;
   const withData = $('apBackData').checked && p.dataBackup;
-  if (!confirm('Go back to version ' + p.version + '?\n\nIt downloads version ' + p.version + ', checks it, makes a backup, then installs it (about 30 seconds).' + (withData ? '\nYour cards and settings go back to the backup from ' + new Date(p.dataBackup.at).toLocaleString() + '.' : '\nYour cards and settings stay as they are now.'))) return;
+  if (!await ask('Go back to version ' + p.version + '?\n\nIt downloads version ' + p.version + ', checks it, makes a backup, then installs it (about 30 seconds).' + (withData ? '\nYour cards and settings go back to the backup from ' + new Date(p.dataBackup.at).toLocaleString() + '.' : '\nYour cards and settings stay as they are now.'))) return;
   $('apState').textContent = 'Going back…';
   let r = await apDo('goback', { restoreData: !!withData });
-  if (r.needConfirm) { if (!confirm(r.msg)) { $('apState').textContent = ''; return; } r = await apDo('goback', { restoreData: !!withData, confirmLive: true }); }
+  if (r.needConfirm) { if (!await ask(r.msg)) { $('apState').textContent = ''; return; } r = await apDo('goback', { restoreData: !!withData, confirmLive: true }); }
   $('apState').innerHTML = r.error ? err(r.error) : 'Installing version ' + esc(p.version) + ': the app closes and opens again by itself.';
 };
 $('apFile').onclick = async () => { $('apState').textContent = 'Pick the installer…'; const r = await apDo('install-file'); $('apState').innerHTML = r.canceled ? '' : r.error ? err(r.error) : r.needConfirm || r.waiting ? esc(r.msg || '') : 'Installing: the app closes and opens again by itself.'; };
@@ -4716,14 +4854,14 @@ $('apRestore').onclick = () => { const h = !$('apList').hidden; $('apList').hidd
 $('apFolder').onclick = () => apDo('open-folder');
 $('apPortSave').onclick = async () => {
   const p = Number($('apPort').value);
-  if (!confirm('Change the port to ' + p + '?\n\nEvery OBS Browser Source and dock link changes to http://localhost:' + p + '/… and you\'d have to update them in OBS.')) return;
+  if (!await ask('Change the port to ' + p + '?\n\nEvery OBS Browser Source and dock link changes to http://localhost:' + p + '/… and you\'d have to update them in OBS.')) return;
   const r = await apDo('set-port', { port: p });
   if (r.error) { $('apPortState').innerHTML = err(r.error); return; }
   $('apPortState').textContent = 'Changed. Opening it on the new port…'; setTimeout(() => { location.href = r.url + '#app'; }, 2500);
 };
 $('apSys').onclick = () => showTab('syscheck');
 $('apDock').onclick = () => apDo('open-dock');
-$('apRestart').onclick = async () => { if (!confirm('Restart the app? The overlay is gone for a few seconds.')) return; await apDo('restart'); $('apState').textContent = 'Restarting…'; };
+$('apRestart').onclick = async () => { if (!await ask('Restart the app? The overlay is gone for a few seconds.')) return; await apDo('restart'); $('apState').textContent = 'Restarting…'; };
 setTimeout(apLoad, 300);
 </script>
 <script>
@@ -4776,8 +4914,8 @@ setTimeout(apLoad, 300);
       return '<tr><td><span class="bl-num">' + (i + 1) + '</span></td><td><b>' + esc(n.name) + '</b></td><td class="help">' + esc([n.pos, n.club].filter(Boolean).join(' · ')) + '</td><td class="bl-stdc"><div class="bl-bar"><span class="bb"><i style="width:' + Math.round(r.votes * 100 / max) + '%"></i></span><span>' + fmtN(r.votes) + ' · ' + r.fanPct + '%' + (R.manager ? ' <span class="help">(result ' + r.pct + '%)</span>' : '') + '</span></div></td><td><span class="bl-ed"><button data-blm="' + esc(n.id) + '" data-d="-1" aria-label="Move ' + esc(n.name) + ' up"' + (open || !i ? ' disabled' : '') + '>↑</button><button data-blm="' + esc(n.id) + '" data-d="1" aria-label="Move ' + esc(n.name) + ' down"' + (open || i === s.noms.length - 1 ? ' disabled' : '') + '>↓</button><button data-ble="' + esc(n.id) + '">Edit</button><button data-blx="' + esc(n.id) + '">Remove</button></span></td></tr>'; }).join('')
       : '<tr><td colspan="5" class="help">No nominees yet: add them below (up to 30).</td></tr>';
     document.querySelectorAll('[data-blm]').forEach((b) => { b.onclick = () => act('move', { id: b.dataset.blm, dir: +b.dataset.d }); });
-    document.querySelectorAll('[data-blx]').forEach((b) => { b.onclick = () => { const n = s.noms.find((x) => x.id === b.dataset.blx); const v = (byId[n.id] || {}).votes || 0; if (!confirm('Remove ' + n.name + '?' + (v ? '\n\nTheir ' + v + ' vote' + (v === 1 ? '' : 's') + ' will be thrown away.' : '') + (open ? '\nThe numbers after them move up by one (chat sees the new numbers).' : ''))) return; act('remove', { id: n.id }); }; });
-    document.querySelectorAll('[data-ble]').forEach((b) => { b.onclick = () => { const n = s.noms.find((x) => x.id === b.dataset.ble); const name = prompt('Name', n.name); if (name == null) return; const pos = prompt('Position', n.pos || ''); if (pos == null) return; const club = prompt('Club', n.club || ''); if (club == null) return; act('edit', { id: n.id, nom: { name, pos, club } }); }; });
+    document.querySelectorAll('[data-blx]').forEach((b) => { b.onclick = async () => { const n = s.noms.find((x) => x.id === b.dataset.blx); const v = (byId[n.id] || {}).votes || 0; if (!await ask('Remove ' + n.name + '?' + (v ? '\n\nTheir ' + v + ' vote' + (v === 1 ? '' : 's') + ' will be thrown away.' : '') + (open ? '\nThe numbers after them move up by one (chat sees the new numbers).' : ''))) return; act('remove', { id: n.id }); }; });
+    document.querySelectorAll('[data-ble]').forEach((b) => { b.onclick = async () => { const n = s.noms.find((x) => x.id === b.dataset.ble); if (!n) return; const v = await askForm('Edit nominee', [{ k: 'name', label: 'Name', v: n.name, max: 40 }, { k: 'pos', label: 'Position (up to 8 letters, e.g. ST)', v: n.pos || '', max: 8 }, { k: 'club', label: 'Club', v: n.club || '', max: 40 }]); if (!v) return; act('edit', { id: n.id, nom: v }); }; });
     // your vote
     const B = s.boss;
     if (!BL.form) {
@@ -4809,23 +4947,23 @@ setTimeout(apLoad, 300);
   window.blLoad = load;
   setInterval(() => { if (document.querySelector('#tabs [data-go="ballon"].on') && !document.querySelector('section[data-tab="ballon"] input:focus, section[data-tab="ballon"] select:focus, section[data-tab="ballon"] textarea:focus')) load(); }, 4000);
   $('blOpen').onclick = () => act('open');
-  $('blClose').onclick = () => { if (confirm('Close voting now? Results stay hidden until you show them.')) act('close'); };
+  $('blClose').onclick = async () => { if (await ask('Close voting now? Results stay hidden until you show them.')) act('close'); };
   $('blAdd').onclick = async () => { const r = await act('add', { nom: { name: $('blName').value, pos: $('blPos').value, club: $('blClub').value } }); if (r && r.ok) { $('blName').value = ''; $('blPos').value = ''; $('blClub').value = ''; $('blName').focus(); BL.form = 0; load(); } };
   $('blName').onkeydown = (e) => { if (e.key === 'Enter') $('blAdd').click(); };
   $('blHide').onclick = () => { hide = !hide; try { localStorage.setItem('blHide', hide ? '1' : '0'); } catch (e) { /* no storage */ } render(BL.s); };
   document.querySelectorAll('[name=blBoss]').forEach((x) => { x.onchange = async () => {
-    if (x.value === 'none' && BL.s && BL.s.myVote && !confirm('Don\'t vote: your votes so far are removed. OK?')) { BL.form = 0; return load(); }
+    if (x.value === 'none' && BL.s && BL.s.myVote && !await ask('Don\'t vote: your votes so far are removed. OK?')) { BL.form = 0; return load(); }
     await act('boss', { boss: { mode: x.value } }); BL.form = 0; load(); }; });
   $('blMyVote').onclick = () => { if (!$('blMyPick').value) return msg({ error: 'Pick a nominee first' }); act('myvote', { id: $('blMyPick').value }); };
   $('blW').oninput = () => { $('blWv').textContent = $('blW').value; $('blFv').textContent = 100 - $('blW').value; };
   $('blMgrSave').onclick = async () => { const r = await act('boss', { boss: { rank: [$('blR1').value, $('blR2').value, $('blR3').value].filter(Boolean), weight: +$('blW').value } }); if (r && r.ok) msg({ msg: 'Your Manager\'s vote is saved (' + $('blW').value + '% of the result)' }); };
-  $('blUnvote').onclick = async () => { if (!confirm('Remove your vote?')) return; await act('unvote'); BL.form = 0; load(); };
+  $('blUnvote').onclick = async () => { if (!await ask('Remove your vote?')) return; await act('unvote'); BL.form = 0; load(); };
   $('blSave').onclick = async () => {
     const who = (document.querySelector('[name=blWho]:checked') || {}).value;
     const r = await act('settings', { settings: { opensAt: $('blOpensAt').value ? new Date($('blOpensAt').value).getTime() : null, closesAt: $('blClosesAt').value ? new Date($('blClosesAt').value).getTime() : null, who, botCheck: $('blBot').checked, ack: $('blAck').checked, platforms: { twitch: $('blPfT').checked, kick: $('blPfK').checked, youtube: $('blPfY').checked } } });
     if (r && r.ok) msg({ msg: 'Rules saved' });
   };
-  $('blReset').onclick = () => { if (confirm('Clear ALL votes and start again? The nominees stay. This can\'t be undone.')) { BL.form = 0; act('reset'); } };
+  $('blReset').onclick = async () => { if (await ask('Clear ALL votes and start again? The nominees stay. This can\'t be undone.')) { BL.form = 0; act('reset'); } };
   document.querySelectorAll('[data-bls]').forEach((b) => { b.onclick = () => act('show', { screen: b.dataset.bls }); });
   document.querySelectorAll('[data-blc]').forEach((b) => { b.onclick = () => act('show', { screen: 'ceremony', stage: +b.dataset.blc }); });
   if (document.querySelector('#tabs [data-go="ballon"].on')) load();   // opened straight on this page

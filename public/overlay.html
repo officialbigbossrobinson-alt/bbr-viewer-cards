@@ -193,6 +193,7 @@ html,body{margin:0;background:transparent;overflow:hidden}
 <script src="/race.js"></script>
 <script src="/links.js"></script>
 <script src="/gmeter.js"></script>
+<script src="/spin.js"></script>
 <script src="/stinger.js"></script>
 <script src="/kits.js"></script>
 <script src="/stadium3d.js"></script>
@@ -515,6 +516,7 @@ html,body{margin:0;background:transparent;overflow:hidden}
       if (a.type === 'theme') return setTheme(a.theme);
       if (a.type === 'stinger') { try { STINGER.play(a, { sound: true }); } catch (e) { /* ignore */ } return; }
       if (a.type === 'gmeter') { try { GMETER.init(stage); GMETER.event(a.where === 'own' ? Object.assign({}, a, { on: false }) : a); } catch (e) { /* ignore */ } return; }
+      if (a.type === 'spin') { try { SPIN.init(stage); SPIN.event(a.where === 'own' ? Object.assign({}, a, { phase: 'idle' }) : a); } catch (e) { /* ignore */ } return; }
       if (a.type === 'links') { try { if (!(window.EXTRAS && EXTRAS.panic && EXTRAS.panic())) { LINKS.init(stage); LINKS.show(a); } } catch (e) { /* ignore */ } return; }
       if (a.type === 'linkscfg' || a.type === 'brb' || a.type === 'bigcam' || a.type === 'music' || a.type === 'ballon') return;
       if (a.type === 'levelup' || a.type === 'pack') { try { etsNote(a); } catch (e) { /* ignore */ } }

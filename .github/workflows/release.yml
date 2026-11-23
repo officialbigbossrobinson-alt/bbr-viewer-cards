@@ -54,6 +54,16 @@ jobs:
           fi
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - name: Make the release live (the build leaves it as a draft)
+        if: github.ref_type == 'tag' || inputs.publish
+        shell: bash
+        run: |
+          V=v$(node -p "require('./package.json').version")
+          N=$(gh release view "$V" --json assets --jq '[.assets[].name] | map(select(. == "latest.yml" or endswith(".exe"))) | length')
+          if [[ "$N" -lt 2 ]]; then echo "The installer or latest.yml is missing from $V: left as a draft"; exit 1; fi
+          if [[ "${{ inputs.test_version }}" == "true" || "$GITHUB_REF_NAME" == *-* ]]; then gh release edit "$V" --draft=false --prerelease; else gh release edit "$V" --draft=false --latest; fi
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       - uses: actions/upload-artifact@v4
         with:
           name: installer
