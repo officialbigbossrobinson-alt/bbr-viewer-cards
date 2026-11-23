@@ -18,7 +18,7 @@ const TU = require('./lib/tuning');
 const { OBS } = require('./lib/obs');
 const { Diag } = require('./lib/diag');
 const { BSN, BSN_IMAGES, normTokens, fillStory, LEFTOVER_RE } = require('./lib/bsn');
-const APP_VERSION = '37';
+const APP_VERSION = '38';
 const ARCX = require('./lib/arc');
 const RLX = require('./lib/race');
 const BTX = require('./lib/battle');
@@ -121,6 +121,7 @@ function shutdown(code) {
   if (shuttingDown) return; shuttingDown = true;
   try { store.flush(); } catch (e) { console.error('Could not save the cards: ' + e.message); }
   try { saveCfg(); } catch (e) { console.error('Could not save the settings: ' + e.message); }
+  try { ballon.saveNow(); } catch (e) { /* not started */ }
   process.exit(code || 0);
 }
 if (DESK.on) {
@@ -894,7 +895,33 @@ function watchMinsThisStream(platform, login) { const v = store.get(platform, lo
 const sgw = new (require('./lib/sgiveaway').SimpleGiveaway)({ cfg: () => cfg, saveCfg: () => saveCfg(), push: (e) => push(e), file: path.join(DATA, 'sgiveaway.json'),
   say: (pf, m) => say(pf, m), watchMins: watchMinsThisStream, feed: (a, b) => feedAdd(a, b),
   onWinner: (w) => { try { if (gmeter.st.on) { gmeter.st.winner = { name: w.display, platform: w.platform, at: w.at }; gmeter.save(); push(gmeter.payload({ fx: 'winner' })); } } catch (e) { /* ignore */ } } });
+// v38: giveaway bot check (lib/botcheck.js): a suspicion score for each entrant, shown in Giveaways > Giveaway list
+const botcheck = new (require('./lib/botcheck').BotCheck)({ cfg: () => cfg, saveCfg: () => saveCfg(), file: path.join(DATA, 'botcheck.json'),
+  viewer: (pf, login) => { const v0 = store.get(pf, login); if (!v0) return null; const v = store.primary(v0) || v0; return Object.assign({}, v, { giftsAll: (() => { try { return S.giftsAllTime(v); } catch (e) { return 0; } })() }); },
+  watchMins: (pf, login) => watchMinsThisStream(pf, login), streamNo: () => streamNo(),
+  twitchUsers: async (logins) => { if (!twitch.user) return []; const j = await twitch.api('GET', '/users?' + logins.map((l) => 'login=' + encodeURIComponent(l)).join('&')); return (j && j.data) || []; },
+  changed: () => sgw.rescore() });
+sgw.botcheck = botcheck;
+setInterval(() => { try { if (sgw.st.open && sgw.count()) sgw.rescore(); } catch (e) { /* ignore */ } }, 20000).unref();
+// v38: banned or timed out on Twitch / Kick / YouTube: out of every giveaway (and can't enter again this round)
+function onBanned(platform, e) {
+  const how = (e.either ? 'banned or timed out' : e.timeout ? 'timed out' : 'banned') + ' on ' + ({ twitch: 'Twitch', kick: 'Kick', youtube: 'YouTube' }[platform] || platform);
+  let out = []; try { if (sgw.ban(platform, e.login, how)) out.push('the giveaway list'); } catch (x) { console.error('[ban]', x.message); }
+  try {
+    const v0 = store.get(platform, e.login), p0 = v0 && store.primary(v0);
+    const keys = [...new Set([v0 && v0.key, p0 && p0.key, platform + ':' + String(e.login).toLowerCase()].filter(Boolean))];
+    let hit = false; for (const k of keys) if (giveaways.ban(k, how)) hit = true;
+    if (hit) out.push('the ticket giveaway');
+  } catch (x) { console.error('[ban]', x.message); }
+  if (out.length) console.log('[ban] ' + (e.display || e.login) + ' ' + how + ': removed from ' + out.join(' and '));
+  return out;
+}
 gmeter.ext = () => (sgw.S().showOnTimer ? sgw.payload() : null);
+// v38: Ballon d'Or (lib/ballon.js): chat votes once per stream until the closing date; results hidden until you show them
+const ballon = new (require('./lib/ballon').Ballon)({ file: path.join(DATA, 'ballon.json'), push: (m) => push(m), say: (pf, m) => say(pf, m), sayAll: (m) => sayAll(m), streamNo: () => streamNo(), botcheck,
+  viewer: (pf, login) => { const v0 = store.get(pf, login); if (!v0) return null; const v = store.primary(v0) || v0; return { key: v.key, display: v.display, streams: v.streams || 0 }; },
+  feed: (m, c) => feedAdd(m, c) });
+setInterval(() => { try { ballon.tick(); } catch (e) { console.error('[ballon]', e.message); } }, 10000).unref();
 // the giveaway timer shows the count as people enter
 const _sgwPush = sgw.changed.bind(sgw); sgw.changed = () => { _sgwPush(); try { if (gmeter.st.on) push(gmeter.payload()); } catch (e) { /* ignore */ } };
 const screens = new SCR.Screens({ cfg: () => cfg, saveCfg: () => saveCfg(), push: (e) => push(e), obs, media, game: () => currentGame(), theme: () => themeName(), feed: (a, b) => feedAdd(a, b), socials: () => screenSettings().socials, live: () => isLive() });
@@ -1624,7 +1651,26 @@ function stS() {
     pics, pic: c.pic === 'rotate' || c.pic === 'bsn' || pics.some((p) => p.id === c.pic) ? c.pic : (pics.length ? pics[pics.length - 1].id : 'bsn'), rotateSecs: Math.max(5, Math.min(300, +c.rotateSecs || 20)), zoom: c.zoom !== false,
     chat: c.chat !== false, arrivals: c.arrivals !== false, spotlight: c.spotlight !== false, ticker: c.ticker !== false, socials: c.socials !== false, cardsStat: c.cardsStat !== false, musicRaw: c.music || {} };
 }
-const ST = { on: false, running: false, endsAt: null, left: null, arrivals: new Map(), spot: [], said: {}, kickT: null, ended: false };
+const ST = { on: false, running: false, endsAt: null, left: null, arrivals: new Map(), spot: [], said: {}, kickT: null, ended: false, srcActive: false, srcAt: 0 };
+// v38: which OBS scenes have the Starting Soon screen in them (found by its address, so the scene can be called anything)
+const ST_URL = /\/starting(\b|\?|#|$)/;
+let stScenes = { names: [], at: 0, busy: false };
+async function stFindScenes(force) {
+  if (!obs.ready || stScenes.busy || (!force && Date.now() - stScenes.at < 30000)) return stScenes.names;
+  stScenes.busy = true;
+  try { stScenes.names = await obs.scenesWithUrl(ST_URL); stScenes.at = Date.now(); } catch (e) { /* OBS busy */ } finally { stScenes.busy = false; }
+  return stScenes.names;
+}
+function isStartScene(x) {
+  if (!x) return false; const S = stS(), l = String(x).trim().toLowerCase();
+  return (!!S.startScene && l === S.startScene.trim().toLowerCase()) || stScenes.names.some((n) => n.toLowerCase() === l);
+}
+// you switched to the Starting Soon scene (or its screen went on air): start, or start again after an earlier kick-off
+function stEnter(why) {
+  if (ST.running) return false;
+  if (ST.ended || !ST.on) { clearTimeout(ST.kickT); ST.ended = false; ST.left = null; ST.said = {}; ST.on = false; }
+  stStart(); feedAdd('Starting Soon: countdown started (' + why + ')', '#4dc3ff'); return true;
+}
 const stDur = () => { const S = stS(); return (S.mins * 60 + S.secs) * 1000; };
 function stLeft() { return ST.running ? Math.max(0, ST.endsAt - Date.now()) : ST.left != null ? ST.left : stDur(); }
 function stSpotlight() {
@@ -1672,7 +1718,7 @@ function stLive(now) {
   push({ type: 'starting', action: 'kickoff' }); stSay('kickoff');
   const S = stS();
   const off = () => { ST.on = false; ST.left = null; stPush(); };
-  if (S.autoSwitch && S.scene && obs.ready) ST.kickT = setTimeout(async () => { try { if (!obs.onAirScene || !S.startScene || obs.onAirScene.toLowerCase() === S.startScene.toLowerCase() || obs.onAirScene === S.scene) await obs.req('SetCurrentProgramScene', { sceneName: S.scene }); } catch (e) { feedAdd('Starting soon: could not switch to "' + S.scene + '" (' + e.message + ')', '#ff6b7d'); } off(); }, (now ? 1.5 : S.switchDelay) * 1000);
+  if (S.autoSwitch && S.scene && obs.ready) ST.kickT = setTimeout(async () => { try { if (!obs.onAirScene || isStartScene(obs.onAirScene) || ST.srcActive || obs.onAirScene === S.scene) await obs.req('SetCurrentProgramScene', { sceneName: S.scene }); } catch (e) { feedAdd('Starting soon: could not switch to "' + S.scene + '" (' + e.message + ')', '#ff6b7d'); } off(); }, (now ? 1.5 : S.switchDelay) * 1000);
   else ST.kickT = setTimeout(off, 8000);
 }
 function stOff() { clearTimeout(ST.kickT); ST.on = false; ST.running = false; ST.endsAt = null; ST.left = null; ST.ended = false; stPush(); }
@@ -1690,18 +1736,33 @@ setInterval(() => {
 }, 500).unref();
 setInterval(() => { if (ST.on) { ST.spot = stSpotlight(); stPush(); } }, 60000).unref();
 setInterval(() => { if (ST.on && sceneHeld) stPush(); }, 6000).unref();   // the 'waiting for kick-off' count
-// open the Starting Soon scene in OBS = the countdown starts by itself
+// open the Starting Soon scene in OBS = the countdown starts by itself (v38: straight away, whatever the scene is called)
 let stLastScene = '';
-setInterval(() => {
+async function stSceneCheck() {
   const S = stS(), sc = obs.onAirScene || '';
-  if (sc !== stLastScene) {
-    const isStart = (x) => !!(x && S.startScene && x.toLowerCase() === S.startScene.toLowerCase());
-    if (S.autoStart && isStart(sc) && !ST.running && !ST.ended) stStart();
-    // you left the Starting Soon scene yourself (went live early): the countdown ends quietly and alerts play
-    else if (ST.on && !ST.ended && isStart(stLastScene) && !isStart(sc)) { clearTimeout(ST.kickT); ST.on = false; ST.running = false; ST.endsAt = null; ST.left = null; stPush(); feedAdd('Starting Soon ended (you switched to ' + sc + ')', '#4dc3ff'); }
-    stLastScene = sc;
-  }
-}, 1500).unref();
+  if (sc === stLastScene) return;
+  const prev = stLastScene; stLastScene = sc;
+  if (sc && !isStartScene(sc)) await stFindScenes(false);   // a scene we haven't looked inside yet
+  if (S.autoStart && isStartScene(sc)) stEnter('you switched OBS to ' + sc);
+  // you left the Starting Soon scene yourself (went live early): the countdown ends quietly and alerts play
+  else if (ST.on && !ST.ended && isStartScene(prev) && !isStartScene(sc)) { clearTimeout(ST.kickT); ST.on = false; ST.running = false; ST.endsAt = null; ST.left = null; stPush(); feedAdd('Starting Soon ended (you switched to ' + sc + ')', '#4dc3ff'); }
+}
+obs.onProgram = () => { stSceneCheck().catch(() => {}); };
+setInterval(async () => {
+  try { if (obs.ready) { const c = await obs.req('GetCurrentProgramScene'); const sc = c.sceneName || c.currentProgramSceneName; if (sc) obs.program(sc); } } catch (e) { /* OBS busy */ }
+  stSceneCheck().catch(() => {});
+}, 3000).unref();
+setInterval(() => { stFindScenes(false).catch(() => {}); }, 30000).unref();
+// the Starting Soon screen itself says when OBS puts it on air (works even without the OBS connection)
+function stSource(active) {
+  ST.srcActive = !!active; ST.srcAt = Date.now();
+  if (active) { if (stS().autoStart) stEnter('the Starting Soon screen went on air'); return; }
+  setTimeout(() => {
+    if (ST.srcActive || !ST.on || ST.ended) return;
+    if (obs.ready && isStartScene(obs.onAirScene)) return;
+    clearTimeout(ST.kickT); ST.on = false; ST.running = false; ST.endsAt = null; ST.left = null; stPush(); feedAdd('Starting Soon ended (its screen went off air)', '#4dc3ff');
+  }, 2500);
+}
 // chat on the Starting Soon screen (and the arrivals board)
 function startingChat(platform, e, v) {
   if (!ST.on && !screens.BRB.on && isLive()) return;
@@ -1859,6 +1920,19 @@ async function systemCheck(o) {
 
     // ===== 5. EVERYTHING ELSE =====
     const X = sec('Other features');
+    // v38: the Starting Soon scene (found by the screen inside it, so the scene can be called anything)
+    try {
+      if (!obs.ready) X('warn', 'Starting Soon scene', 'OBS isn\'t connected, so the app can\'t see which scene has the Starting Soon screen (it still starts when OBS shows the screen)');
+      else { const L = await stFindScenes(true); const S0 = stS(); X(L.length ? 'ok' : 'warn', 'Starting Soon scene', L.length ? 'the Starting Soon screen is in ' + L.join(', ') + ': switching to it starts the countdown' : 'no OBS scene has http://localhost:' + PORT + '/starting in it yet' + (S0.startScene ? ' (and none is called ' + S0.startScene + ')' : '')); }
+    } catch (e) { X('warn', 'Starting Soon scene', 'couldn\'t look: ' + e.message); }
+    // v38: the giveaway bot check works on a copy (nothing real changes)
+    try {
+      const BCX = require('./lib/botcheck'); const c0 = { botcheck: { mode: 'review' } };
+      const t = new BCX.BotCheck({ cfg: () => c0, saveCfg() {}, file: path.join(os.tmpdir(), 'bbr-bc-check.json'), viewer: () => ({ streams: 0, messages: 0 }), watchMins: () => 0, streamNo: () => 1 });
+      t.d.acc.xk7qpz93 = { created: Date.now() - 2 * 86400000, avatar: false, got: Date.now() };
+      const r = t.score({ key: 'twitch:xk7qpz93', login: 'xk7qpz93', display: 'xk7qpz93', platform: 'twitch', at: Date.now() }, [], Date.now() - 1000);
+      X(r.level === 'hold' ? 'ok' : 'bad', 'Giveaway bot check', r.level === 'hold' ? 'a test bot scores ' + r.score + ' (' + r.reasons.length + ' red flags): it works' : 'the test bot only scored ' + r.score);
+    } catch (e) { X('bad', 'Giveaway bot check', 'crashed: ' + e.message); }
     // the meter's bets, award and credits, worked through on a private copy (your real meter isn't touched)
     try {
       const BPX = require('./lib/bp'); const mem = { data: {}, save() {} }, c0 = { bp: Object.assign({}, cfg.bp || {}, { on: true, bets: true, calmAward: true }) };
@@ -2305,7 +2379,9 @@ async function onChat(platform, e, test) {
   const parts = text.split(/\s+/);
   const cmd = parts[0].toLowerCase();
   // v35: the simple giveaway's command (!giveaway) and !watchtime
-  try { if (sgw.chat(platform, e, { sub: b.some((x) => /sub|founder|member/i.test(x)) || !!v.subMonths && v.lastSubAt > Date.now() - 32 * 86400000, follower: !!v.followedAt || platform !== 'twitch' })) return; } catch (err) { console.error('[giveaway]', err.message); }
+  try { botcheck.noteChat(platform, e); } catch (err) { /* ignore */ }
+  try { if (ballon.chat(platform, e, { follower: !!v.followedAt || platform !== 'twitch', broadcaster: b.includes('broadcaster') || !!v.isBroadcaster, motmOpen: !!clubStats.vote })) return; } catch (err) { console.error('[ballon]', err.message); }
+  try { if (sgw.chat(platform, e, { mod: b.includes('moderator') || b.includes('broadcaster') || !!v.isBroadcaster, sub: b.some((x) => /sub|founder|member/i.test(x)) || !!v.subMonths && v.lastSubAt > Date.now() - 32 * 86400000, follower: !!v.followedAt || platform !== 'twitch' })) return; } catch (err) { console.error('[giveaway]', err.message); }
   if (battle.chatInput(platform, e.login, text)) return;
 
   // first appearance of an imported/known follower or sub gets their pack opening
@@ -2739,6 +2815,7 @@ function wire(src, platform) {
     streamLog.event('raid', e.viewers || 0, v.key, { who: e.display || e.login });
   }, { alert: true, kind: 'raid', amount: e.viewers, reason: (platform === 'kick' ? 'Hosted' : 'Raided') + ' with ' + e.viewers + ' viewers' }));
   src.on('chat', (e) => onChat(platform, e).catch((err) => console.error('[chat]', err)));
+  src.on('ban', (e) => onBanned(platform, e));
   // v33: the giveaway meter counts these too
   src.on('follow', (e) => { try { gmeter.event('follow', 1, e.display || e.login); } catch (x) { /* ignore */ } });
   src.on('sub', (e) => { try { if (!e.isGift) gmeter.event('sub', 1, e.display || e.login); } catch (x) { /* ignore */ } });
@@ -2916,7 +2993,7 @@ function importList(platform, text, kind) {
 // ---------- web server ----------
 const TYPES = { '.html': 'text/html; charset=utf-8', '.js': 'text/javascript; charset=utf-8', '.css': 'text/css; charset=utf-8' };
 const PAGES = { '/gmeter': 'gmeter.html', '/gmeter.js': 'gmeter.js', '/brb': 'brb.html', '/bigcam': 'bigcam.html', '/music.js': 'music.js', '/links.js': 'links.js', '/stinger.js': 'stinger.js', '/': 'dashboard.html', '/overlay': 'overlay.html', '/credits': 'credits.html', '/card.js': 'card.js', '/card.css': 'card.css', '/sfx.js': 'sfx.js',
-  '/race.js': 'race.js', '/scene3d.js': 'scene3d.js', '/penalty.js': 'penalty.js', '/teampens.js': 'teampens.js', '/bp.js': 'bp.js', '/starting': 'starting.html', '/arc.js': 'arc.js', '/alerts.js': 'alerts.js', '/textures.js': 'textures.js', '/giveaway.js': 'giveaway.js', '/hud.js': 'hud.js', '/challenges.js': 'challenges.js', '/camfx.js': 'camfx.js', '/boards.js': 'boards.js', '/raidnight.js': 'raidnight.js', '/landmarks.js': 'landmarks.js', '/screen.js': 'screen.js', '/extras.js': 'extras.js', '/broadcast.js': 'broadcast.js', '/scenes': 'scenes.html', '/teeth-tracker': 'teeth.html', '/dock': 'dock.html', '/analysis': 'analysis.html', '/draw.js': 'draw.js', '/stadium3d.js': 'stadium3d.js', '/kits.js': 'kits.js', '/pen3d.js': 'pen3d.js' };
+  '/race.js': 'race.js', '/scene3d.js': 'scene3d.js', '/penalty.js': 'penalty.js', '/teampens.js': 'teampens.js', '/bp.js': 'bp.js', '/starting': 'starting.html', '/ballon': 'ballon.html', '/arc.js': 'arc.js', '/alerts.js': 'alerts.js', '/textures.js': 'textures.js', '/giveaway.js': 'giveaway.js', '/hud.js': 'hud.js', '/challenges.js': 'challenges.js', '/camfx.js': 'camfx.js', '/boards.js': 'boards.js', '/raidnight.js': 'raidnight.js', '/landmarks.js': 'landmarks.js', '/screen.js': 'screen.js', '/extras.js': 'extras.js', '/broadcast.js': 'broadcast.js', '/scenes': 'scenes.html', '/teeth-tracker': 'teeth.html', '/dock': 'dock.html', '/analysis': 'analysis.html', '/draw.js': 'draw.js', '/stadium3d.js': 'stadium3d.js', '/kits.js': 'kits.js', '/pen3d.js': 'pen3d.js' };
 // your own textures / sounds: the user folder first, then the ones that come with the app
 const TEX_DIRS = [...new Set([path.join(HOME, 'textures'), path.join(ROOT, 'textures')])];
 const IMG = { '.jpg': 'image/jpeg', '.jpeg': 'image/jpeg', '.png': 'image/png', '.webp': 'image/webp' };
@@ -3469,6 +3546,31 @@ const server = http.createServer(async (req, res) => {
     // ----- Starting Soon screen -----
     // v32: Twitch clips on your channel: list, pull one in (and play it), try a stuck one again, check the whole chain
     if (p === '/api/sgw/text' && req.method === 'GET') { res.writeHead(200, { 'Content-Type': 'text/plain; charset=utf-8', 'Cache-Control': 'no-store' }); return res.end(sgw.text(url.searchParams.get('sep') === 'comma' ? ', ' : url.searchParams.get('sep') === 'space' ? ' ' : '\n')); }
+    if (p === '/api/ballon' && req.method === 'GET') return send(res, 200, ballon.state());
+    if (p === '/api/ballon/screen' && req.method === 'GET') return send(res, 200, ballon.screen());
+    if (p === '/api/ballon' && req.method === 'POST') {
+      const b = await readBody(req) || {}; const a = String(b.action || ''); let r;
+      if (a === 'add') r = ballon.add(b.nom || {});
+      else if (a === 'edit') r = ballon.edit(String(b.id), b.nom || {});
+      else if (a === 'remove') r = ballon.remove(String(b.id));
+      else if (a === 'move') r = ballon.move(String(b.id), Number(b.dir));
+      else if (a === 'settings') r = ballon.settings(b.settings || {});
+      else if (a === 'open') r = ballon.open('you');
+      else if (a === 'close') r = ballon.close('you');
+      else if (a === 'reset') r = ballon.reset();
+      else if (a === 'boss') r = ballon.setBoss(b.boss || {});
+      else if (a === 'myvote') r = ballon.bossVote(String(b.id || ''));
+      else if (a === 'unvote') r = ballon.removeMyVote();
+      else if (a === 'review') r = ballon.review(String(b.review || ''), String(b.key || ''));
+      else if (a === 'show') r = ballon.setShow(String(b.screen || 'off'), b.stage);
+      else r = { error: 'Unknown action' };
+      return send(res, 200, Object.assign({}, r, { state: ballon.state() }));
+    }
+    if (p === '/api/sgw/bot' && req.method === 'GET') {
+      const S0 = botcheck.S(); const q = String(url.searchParams.get('q') || '').toLowerCase();
+      return send(res, 200, { settings: S0, defaults: require('./lib/botcheck').DEF_POINTS, labels: require('./lib/botcheck').LABEL, trusted: S0.trusted.length,
+        log: botcheck.d.log.filter((x) => !q || String(x.display || '').toLowerCase().includes(q) || String(x.key).includes(q)).slice(0, 100) });
+    }
     if (p === '/api/sgw') {
       if (req.method === 'POST') {
         const b = await readBody(req); let r = {};
@@ -3478,6 +3580,9 @@ const server = http.createServer(async (req, res) => {
         if (b.action === 'pick') { const x = sgw.pick(); r = x.error ? { error: x.error } : { msg: x.msg, winner: x.winner }; }
         if (b.add) { const x = sgw.add(b.add.name || b.add, b.add.platform); r = x.error ? { error: x.error } : { msg: x.msg }; }
         if (b.remove) { const x = sgw.remove(b.remove); r = x.error ? { error: x.error } : { msg: x.msg }; }
+        if (b.review && typeof b.review === 'object') { const x = sgw.review(String(b.review.action || ''), String(b.review.key || ''), 'you'); r = x.error ? { error: x.error } : { msg: x.msg }; }
+        if (b.bot && typeof b.bot === 'object') { botcheck.set(b.bot); sgw.rescore(); r = { msg: 'Bot check saved' }; }
+        if (b.unblock) { delete sgw.st.blocked[String(b.unblock).toLowerCase()]; sgw.changed(); r = { msg: 'They can enter again' }; }
         if (b.check) r.check = { user: String(b.check), mins: watchMinsThisStream(b.platform || 'twitch', String(b.check)) };
         return send(res, 200, Object.assign(sgw.state(), r));
       }
@@ -3530,7 +3635,7 @@ const server = http.createServer(async (req, res) => {
       }
       return send(res, 200, { look: W.look || 'auto', now: stLook(), game: currentGame(), fields: SCR.START_FIELDS, defaults: SCR.START_WORDS, custom: W.custom || {}, looks: SCR.LOOKS, words: stWords() });
     }
-    if (p === '/api/starting' && req.method === 'GET') { const st = stState(); let scenes = []; try { if (obs.ready) scenes = ((await obs.req('GetSceneList')).scenes || []).map((x) => x.sceneName).reverse(); } catch (e) { /* ignore */ } return send(res, 200, Object.assign(st, { settings: stS(), scenes })); }
+    if (p === '/api/starting' && req.method === 'GET') { stFindScenes(false).catch(() => {}); const st = stState(); st.found = { scenes: stScenes.names, at: stScenes.at, onAir: obs.onAirScene || null, obs: !!obs.ready, srcActive: ST.srcActive, srcAt: ST.srcAt }; let scenes = []; try { if (obs.ready) scenes = ((await obs.req('GetSceneList')).scenes || []).map((x) => x.sceneName).reverse(); } catch (e) { /* ignore */ } return send(res, 200, Object.assign(st, { settings: stS(), scenes })); }
     if (p === '/api/starting' && req.method === 'POST') {
       const b = await readBody(req); let r = { ok: true };
       if (b.settings) {
@@ -3552,7 +3657,9 @@ const server = http.createServer(async (req, res) => {
       if (b.removePic) { const c = Object.assign({}, cfg.starting || {}); const x = (c.pics || []).find((q) => q.id === b.removePic); if (x) { try { fs.unlinkSync(path.join(ST_DIR, x.id + '.' + x.ext)); } catch (e) { /* gone */ } c.pics = c.pics.filter((q) => q !== x); if (c.pic === x.id) c.pic = c.pics.length ? c.pics[c.pics.length - 1].id : 'bsn'; cfg.starting = c; saveCfg(); } }
       const a = b.action;
       if (a === 'start') stStart(); else if (a === 'pause') stPause(); else if (a === 'stop') stStop(); else if (a === 'set') stSet(b.secs); else if (a === 'reset') stReset(); else if (a === 'add') stAdd(+b.secs || 30);
-      else if (a === 'live') stLive(true); else if (a === 'off') stOff(); else if (a === 'test') {
+      else if (a === 'live') stLive(true); else if (a === 'off') stOff(); else if (a === 'onair') stSource(b.active === true);
+      else if (a === 'find') { await stFindScenes(true); }
+      else if (a === 'test') {
         // preview: a few of your real cards say hello (nothing is saved)
         const ppl = store.all().filter((v) => !v.isBroadcaster && hasCard(v)).sort(() => Math.random() - 0.5).slice(0, 6);
         const lines = ['Hi Boss! Ready for kick-off', 'Lets gooo', 'Bosshausens tonight?', 'Eyepatch game when?', 'Evening all', 'GODFATHER better behave tonight'];

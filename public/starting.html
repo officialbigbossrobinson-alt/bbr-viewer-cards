@@ -379,5 +379,11 @@
   } catch (e) { /* no live updates */ }
 })();
 </script>
+<script>
+// v38: OBS tells this page when it goes on air (its scene is shown): the countdown starts at once, whatever the scene is called
+window.addEventListener('obsSourceActiveChanged', function (ev) {
+  try { fetch('/api/starting', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ action: 'onair', active: !!(ev && ev.detail && ev.detail.active) }) }).catch(function () {}); } catch (e) { /* not in OBS */ }
+});
+</script>
 </body>
 </html>

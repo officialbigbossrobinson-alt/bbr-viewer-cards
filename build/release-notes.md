@@ -1,9 +1,8 @@
-Version 37: a new look for the dashboard.
+Version 38: giveaway bot check, bans, and Starting Soon fixes.
 
-- Calm dark colours with one blue accent, and clearer text throughout.
-- One menu down the left. Eight groups instead of six crowded tabs: Live, Scenes, Viewers, Giveaways, Game night, Battles, Sports News, Setup. Nothing removed, only moved.
-- Live now has just the 4 pages you use while streaming. Starting Soon, BRB, Big Cam, End credits and the other full screens are together under Scenes. Giveaways has its own group.
-- Top bar: search, your Twitch / Kick / YouTube / overlay status, and a Panic button (hide everything on stream; press again to bring it back).
-- Each page shows where you are (group and page name).
-- Overlays look exactly the same as before.
-- Fixed: an empty purple bar on the Live desk (the hidden Raid Night box).
+- Banned or timed out on Twitch, Kick or YouTube = taken out of the giveaway straight away (the list and the ticket giveaway), and they can't enter again that round. "Let them enter again" if it was a mistake.
+- Giveaway bot check (Giveaways > Giveaway list): every entrant gets a suspicion score with the reasons in plain words (brand-new account, followed just now, only message was the command, look-alike names arriving together, copy-paste messages...), and points off for real regulars (card streak, chatted before, ever subbed or cheered).
+- Starts in "Review only": it flags names, never holds them. Approve (trusted from then on), Reject (out of this giveaway) or Ignore. Mods can type !approve name / !reject name. Every decision is logged, so you can answer "why didn't I get in?". Change the points, and switch to "Hold high scores" when you're happy with them.
+- Starting Soon now starts the countdown and the music the moment you switch to its scene in OBS, whatever the scene is called (the app finds the scene with the Starting Soon screen in it). It starts again every time, not just the first time, and at 0:00 it switches to your next scene.
+- The Starting Soon page says which OBS scene it found, and warns if the "switch to" scene doesn't exist in OBS. The System check checks it too.
+- NEW: Ballon d'Or vote (Game night > Ballon d'Or). Add your nominees, set the closing date, open voting. Chat types !vote 4 (or !ballon 4) once per stream; it's the fan vote, counted until the closing date. Your own vote: don't vote, one vote like a fan, or a Manager's vote (your top 3, worth up to 50%). If your vote changes the winner, the ceremony also shows the Fans' favourite. Results stay hidden on stream until you press Show all votes or run the ceremony (reveal 3rd, 2nd, the winner). Add http://localhost:3000/ballon as a Browser Source.

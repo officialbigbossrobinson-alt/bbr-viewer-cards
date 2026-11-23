@@ -431,6 +431,41 @@ body.pop .topbar,body.pop .sidenav,body.pop .page-head{display:none!important}
 .ld-next{background:#12161B;border-color:var(--line)}
 /* fix: the empty Raid Night box on the Live desk showed as a thin purple bar when it should be hidden */
 .ld-queen.hide,#ldPick.hide{display:none!important}
+
+/* v38 bot check */
+.bc-modes{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;margin:12px 0}
+.bc-modes label{display:flex!important;flex-direction:row!important;justify-content:flex-start!important;gap:10px;align-items:flex-start;padding:12px 14px;border:1px solid var(--line2);border-radius:10px;cursor:pointer;margin:0;background:#12161B}
+.bc-modes label:has(input:checked){border-color:var(--ui);background:rgba(108,140,255,.09)}
+.bc-modes label>span{flex:1;text-align:left}
+.bc-modes input[type=radio]{margin:3px 0 0!important;width:18px!important;height:18px;flex:0 0 auto}.bc-modes small{color:var(--muted);font-weight:400;font-size:12.5px}
+.bcp{display:inline-flex;align-items:center;gap:6px;height:24px;padding:0 9px;border-radius:999px;font-size:12px;font-weight:700;white-space:nowrap}
+.bcp.clear{background:#1E242C;color:#AEB7C2}.bcp.review{background:rgba(245,181,68,.16);color:#F7CF86}.bcp.hold{background:rgba(255,77,94,.16);color:#FFA3AC}.bcp.trusted,.bcp.ok{background:rgba(61,214,140,.13);color:#8EEBBF}.bcp.ignored{background:#1E242C;color:#7F8996}
+.bc-row{display:grid;grid-template-columns:minmax(160px,1.1fr) auto minmax(0,2.4fr) auto;gap:12px;align-items:center;padding:12px 0;border-top:1px solid var(--line)}
+.bc-row:first-child{border-top:0}
+.bc-why{margin:0;padding:0;list-style:none;display:flex;flex-wrap:wrap;gap:4px 12px;font-size:12.5px;color:#C9D1DB}.bc-why li span{color:var(--muted)}
+.bc-act{display:flex;gap:6px;flex-wrap:wrap}.bc-act button{min-height:34px;padding:0 12px}
+.bc-pts{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:6px 18px;margin:10px 0}
+.bc-pts label{display:flex;justify-content:space-between;align-items:center;gap:10px;margin:0;font-weight:500}.bc-pts input{width:70px}
+.bc-more{margin-top:14px;border-top:1px solid var(--line);padding-top:12px}.bc-more summary{cursor:pointer;font-weight:600}
+.bc-log{width:100%;border-collapse:collapse;margin-top:8px}.bc-log td{padding:7px 8px;border-bottom:1px solid var(--line);font-size:13px;vertical-align:top}
+.sg-flag{display:block;font-size:12px;color:#F7CF86;margin-top:4px}
+@media (max-width:900px){.bc-modes{grid-template-columns:1fr}.bc-row{grid-template-columns:1fr}}
+
+/* v38 Ballon d'Or */
+.bl-top{display:flex;justify-content:space-between;align-items:flex-start;gap:14px;flex-wrap:wrap}
+.bl-status{display:inline-flex;align-items:center;gap:8px;height:38px;padding:0 14px;border-radius:999px;background:#161A1F;border:1px solid #262C34;font-weight:600;font-size:13px}
+.bl-status::before{content:"";width:8px;height:8px;border-radius:50%;background:#5B6470}.bl-status.open::before{background:var(--ok)}.bl-status.closed::before{background:var(--warn)}
+.bl-tiles{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px;margin-top:16px}
+.bl-tiles .g{display:flex;flex-direction:column;gap:2px;padding:14px 16px;background:#0F1215;border:1px solid var(--line);border-radius:10px}
+.bl-tiles .gl{font-size:12px;color:var(--muted);font-weight:500}.bl-tiles .gv{font:700 26px Inter,system-ui,sans-serif;letter-spacing:-.4px}
+.bl-table td{vertical-align:middle}.bl-num{display:inline-grid;place-items:center;min-width:30px;height:26px;border-radius:6px;background:rgba(232,196,104,.16);color:#F3D88E;font-weight:700}
+.bl-bar{display:flex;align-items:center;gap:10px;min-width:200px}.bl-bar i{display:block;height:6px;border-radius:999px;background:var(--ui)}.bl-bar .bb{flex:1;height:6px;border-radius:999px;background:#232A33;overflow:hidden}
+body.bl-hide .bl-std,body.bl-hide .bl-stdc{visibility:hidden}
+.bl-add{display:flex;gap:10px;flex-wrap:wrap;align-items:flex-end;margin-top:12px}.bl-add label{margin:0;display:flex;flex-direction:column;gap:4px}
+.bl-2{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}.bl-2 label{display:flex;flex-direction:column;gap:6px}
+.bl-modes{margin-top:4px;grid-template-columns:1fr!important}
+.bl-ed{display:inline-flex;gap:4px}.bl-ed button{min-height:30px;padding:0 9px}
+@media (max-width:900px){.bl-tiles{grid-template-columns:repeat(2,minmax(0,1fr))}.bl-2{grid-template-columns:1fr}}
 </style>
 </head>
 <body>
@@ -484,6 +519,7 @@ body.pop .topbar,body.pop .sidenav,body.pop .page-head{display:none!important}
     <button data-go="squad" data-grp="game" type="button">Matchday squad</button>
     <button data-go="redcard" data-grp="game" type="button">Red card rule</button>
     <button data-go="challenges" data-grp="game" type="button">Challenges</button>
+    <button data-go="ballon" data-grp="game" type="button">Ballon d'Or</button>
     <button data-go="battles" data-grp="battles" type="button">Battles</button>
     <button data-go="boss" data-grp="battles" type="button">Beat the Boss</button>
     <button data-go="teampens" data-grp="battles" type="button">Team shootout</button>
@@ -1188,6 +1224,64 @@ body.pop .topbar,body.pop .sidenav,body.pop .page-head{display:none!important}
       <p class="help"><b>How auto-match reads a name:</b> a number and games / matches / minutes / deliveries / raids = a challenge for that many ("No HUD 10 minutes" = a 10-minute timer); "next match" = 1; words like only, wear, no, must = a 1-game challenge; camera words (spin, big head, night vision, shatter...) = that camera effect; Twitch's own Power-ups (Gigantify, message effects) = a normal alert. Bought again: adds more to the same challenge, or starts a separate one.</p>
     </section>
 
+    <!-- ===== v38: Ballon d'Or ===== -->
+    <section data-tab="ballon" class="card wide">
+      <div class="bl-top">
+        <div><p class="help" style="margin:0;max-width:760px">Chat votes for the player of the season: <b>!vote 4</b> (or <b>!ballon 4</b>), once per stream, until the closing date. It's the fan vote. Results stay hidden on stream until you show them.</p></div>
+        <div class="actions" style="margin:0"><span class="bl-status" id="blStatus">Not open</span><button class="primary" id="blOpen">Open voting</button><button id="blClose">Close voting</button></div>
+      </div>
+      <div class="bl-tiles"><div class="g"><span class="gl">Votes</span><span class="gv" id="blVotes">0</span><span class="help" id="blVotesS"></span></div><div class="g"><span class="gl">People who voted</span><span class="gv" id="blVoters">0</span><span class="help">Twitch, Kick and YouTube (linked accounts count once)</span></div><div class="g"><span class="gl">Streams with votes</span><span class="gv" id="blStreams">0</span><span class="help" id="blOpened"></span></div><div class="g"><span class="gl">Voting closes</span><span class="gv" id="blCloses" style="font-size:20px">Not set</span><span class="help" id="blLeft"></span></div></div>
+      <p class="state" id="blMsg" role="status"></p>
+    </section>
+    <section data-tab="ballon" class="card">
+      <div class="bl-top"><h2 style="margin:0">Nominees</h2><button id="blHide" aria-pressed="false">Hide standings</button></div>
+      <p class="help">The number is what chat types. Only you see the votes here (unless you show them on stream). Numbers can't be moved while voting is open.</p>
+      <div style="overflow-x:auto"><table class="mini bl-table"><thead><tr><th>No.</th><th>Nominee</th><th>Position · club</th><th class="bl-std">Votes</th><th></th></tr></thead><tbody id="blRows"></tbody></table></div>
+      <div class="bl-add"><label>Name <input id="blName" maxlength="40" placeholder="Player name"></label><label>Position <input id="blPos" maxlength="8" placeholder="ST" style="width:90px"></label><label>Club <input id="blClub" maxlength="40" placeholder="Bosshausens"></label><button id="blAdd">Add</button></div>
+    </section>
+    <section data-tab="ballon" class="card">
+      <h2>Your vote</h2>
+      <div class="bc-modes bl-modes" role="radiogroup" aria-label="Your vote">
+        <label><input type="radio" name="blBoss" value="none"> <span><b>Don't vote</b><br><small>Your chat votes don't count</small></span></label>
+        <label><input type="radio" name="blBoss" value="fan"> <span><b>One vote like a fan</b><br><small>Once per stream, in chat or here</small></span></label>
+        <label><input type="radio" name="blBoss" value="manager"> <span><b>Manager's vote</b><br><small>Your top 3, worth a share of the result</small></span></label>
+      </div>
+      <div id="blFan" class="actions"><label style="margin:0">This stream <select id="blMyPick"></select></label><button id="blMyVote" class="primary">Vote</button><span class="help" id="blMyNow"></span></div>
+      <div id="blMgr" hidden>
+        <div class="actions"><label style="margin:0">1st <select id="blR1"></select></label><label style="margin:0">2nd <select id="blR2"></select></label><label style="margin:0">3rd <select id="blR3"></select></label></div>
+        <label>Your vote counts for <b id="blWv">25</b>% of the result (fans <b id="blFv">75</b>%) <input type="range" id="blW" min="5" max="50" step="5"></label>
+        <p class="help">Your 1st gets 60% of your share, 2nd 30%, 3rd 10%. If your vote changes the winner, the ceremony also shows the <b>Fans' favourite</b>.</p>
+        <div class="actions"><button id="blMgrSave" class="primary">Save my vote</button></div>
+      </div>
+      <div class="actions"><button id="blUnvote">Remove my vote</button></div>
+    </section>
+    <section data-tab="ballon" class="card">
+      <h2>Rules</h2>
+      <div class="bl-2"><label>Voting opens <input type="datetime-local" id="blOpensAt"></label><label>Voting closes <input type="datetime-local" id="blClosesAt"></label></div>
+      <p class="help">It opens and closes by itself at these times (leave "opens" empty to open it by hand).</p>
+      <div class="ap-radio" role="radiogroup" aria-label="Who can vote"><span class="lbl">Who can vote</span>
+        <label><input type="radio" name="blWho" value="everyone"> Everyone</label>
+        <label><input type="radio" name="blWho" value="followers"> Followers (Twitch)</label>
+        <label><input type="radio" name="blWho" value="regulars"> Regulars (2+ streams)</label></div>
+      <label class="tog"><input type="checkbox" id="blBot"> Bot check: list votes from high-score accounts for you to check (they only wait when the bot check is on "Hold high scores")</label>
+      <label class="tog"><input type="checkbox" id="blAck"> Answer in chat ("@name your vote for #4 is in")</label>
+      <div class="actions"><label class="tog" style="margin:0"><input type="checkbox" id="blPfT"> Twitch</label><label class="tog" style="margin:0"><input type="checkbox" id="blPfK"> Kick</label><label class="tog" style="margin:0"><input type="checkbox" id="blPfY"> YouTube</label></div>
+      <div class="actions"><button id="blSave" class="primary">Save rules</button><button id="blReset">Clear all votes…</button></div>
+    </section>
+    <section data-tab="ballon" class="card">
+      <h2>On stream</h2>
+      <p class="help">Add <code id="blUrl">http://localhost:3000/ballon</code> as a Browser Source (1920 × 1080) at the top of your scenes. It's see-through until you show something.</p>
+      <div class="actions"><button data-bls="vote">Voting screen</button><button data-bls="corner">Corner reminder</button><button data-bls="all">Show all votes</button><button data-bls="off">Hide</button><button id="blCopy">Copy the link</button></div>
+      <p class="help" id="blShowing"></p>
+      <h3 class="sub">Ceremony</h3>
+      <p class="help">After voting closes: reveal one at a time.</p>
+      <div class="actions"><button data-blc="1">Reveal 3rd</button><button data-blc="2">Reveal 2nd</button><button data-blc="3" class="primary">Reveal the winner</button><button data-blc="4" id="blFansBtn">Show the fans' favourite</button></div>
+    </section>
+    <section data-tab="ballon" class="card" id="blHeldCard" hidden>
+      <h2>Votes to check</h2>
+      <p class="help">Bot check: these accounts scored high. With the bot check on <b>Review only</b> their votes count and are just listed here; on <b>Hold high scores</b> (Giveaways › Giveaway list) they wait until you count them.</p>
+      <div id="blHeld"></div>
+    </section>
     <section data-tab="challenges" class="card">
       <h2>Challenges</h2>
       <p class="help">Things viewers buy that last a while, like "wear an eyepatch for 5 games". They start by themselves from a matching custom Power-up or channel point reward, or add one here. The first one runs, the rest wait. On stream it shows in a top corner (hidden during battles).</p>
@@ -1580,7 +1674,31 @@ body.pop .topbar,body.pop .sidenav,body.pop .page-head{display:none!important}
         <input id="sgAdd" placeholder="Add a name" style="width:200px" autocomplete="off"><select id="sgAddPf" aria-label="Platform"><option value="twitch">Twitch</option><option value="kick">Kick</option><option value="youtube">YouTube</option></select><button id="sgAddB">Add</button>
         <input id="sgFind" type="search" placeholder="Find a name" style="width:180px" autocomplete="off"></div>
       <textarea id="sgText" readonly rows="3" style="width:100%;box-sizing:border-box" aria-label="All the names (select and copy)"></textarea>
-      <div class="tablewrap"><table class="mini"><thead><tr><th>Name</th><th>Platform</th><th>Watched this stream</th><th>Entered</th><th></th></tr></thead><tbody id="sgRows"></tbody></table></div>
+      <div class="tablewrap"><table class="mini"><thead><tr><th>Name</th><th>Platform</th><th>Watched this stream</th><th>Entered</th><th>Bot check</th><th></th></tr></thead><tbody id="sgRows"></tbody></table></div>
+    </section>
+    <!-- ===== v38: giveaway bot check ===== -->
+    <section data-tab="sgw" class="card wide" id="botcCard">
+      <h2>Bot check</h2>
+      <p class="help">Every entrant gets a suspicion score: points for red flags (brand-new account, followed just now, only message was the command…), points off for signs of a real person (card streak, chatted before, ever subbed or cheered). <b>Nobody is blocked by the score alone.</b> People banned or timed out on Twitch, Kick or YouTube are taken out of the giveaway by themselves and can't enter again this round.</p>
+      <div class="bc-modes" role="radiogroup" aria-label="Bot check mode">
+        <label><input type="radio" name="bcMode" value="off"> <span><b>Off</b><br><small>No scores</small></span></label>
+        <label><input type="radio" name="bcMode" value="review"> <span><b>Review only</b><br><small>Flags names, never holds them (start here)</small></span></label>
+        <label><input type="radio" name="bcMode" value="hold"> <span><b>Hold high scores</b><br><small>High scores stay out of the draw until approved</small></span></label>
+      </div>
+      <div class="actions"><label style="margin:0">Review from <input type="number" id="botcRev" min="1" max="30" style="width:70px"> points</label><label style="margin:0">Hold from <input type="number" id="botcHold" min="2" max="40" style="width:70px"> points</label><button id="botcSave">Save</button><span class="state" id="botcMsg" role="status"></span></div>
+      <h3 class="sub" id="botcRevH">To review</h3>
+      <div id="botcList"></div>
+      <p class="help">Mods can do it from chat: <code>!approve name</code> or <code>!reject name</code>. Approve = in, and trusted from then on (never flagged again). Reject = out of this giveaway. Ignore = stays in, marker goes.</p>
+      <div id="botcBlockedBox"><h3 class="sub">Taken out this round</h3><div id="botcBlocked"></div></div>
+      <details class="bc-more"><summary>Points for each sign</summary>
+        <p class="help">Suggested: run it in <b>Review only</b> for a couple of weeks, see who gets caught, then change the points before using Hold.</p>
+        <div class="bc-pts" id="botcPts"></div>
+        <div class="actions"><button id="botcPtsSave" class="primary">Save points</button><button id="botcPtsReset">Back to the suggested points</button><span class="state" id="botcPtsMsg"></span></div>
+      </details>
+      <details class="bc-more"><summary>Why didn't someone get in? (the log)</summary>
+        <div class="actions"><input type="search" id="botcLogQ" placeholder="Their name" style="width:220px" aria-label="Find in the log"><button id="botcLogB">Look</button></div>
+        <div id="botcLog"></div>
+      </details>
     </section>
     <section data-tab="sgw" class="card wide">
       <h2>Giveaway settings &amp; messages</h2>
@@ -1726,6 +1844,7 @@ body.pop .topbar,body.pop .sidenav,body.pop .page-head{display:none!important}
         <label>Wait before switching (seconds) <input type="number" id="ssDelay" min="0" max="30"></label>
         <label>Alerts while it's on <select id="ssAlerts"><option value="hold">Hold them for kick-off (they play once you're live)</option><option value="show">Show them on the Starting Soon screen</option></select></label>
       </div>
+      <p class="help ss-found" id="ssFound" role="status"></p>
       <label class="tog"><input type="checkbox" id="ssAutoStart"> <span>Start the countdown by itself when OBS switches to that scene</span></label>
       <label class="tog"><input type="checkbox" id="ssAuto"> <span>Switch OBS scene at 0:00 (after the KICK-OFF wipe)</span></label>
       <label class="tog"><input type="checkbox" id="ssChatCd"> <span>Tell chat: when it starts, at 1 minute, and at kick-off</span></label>
@@ -2554,6 +2673,14 @@ async function loadSs(d) {
     const opt = (cur) => { const L = (d.scenes || []).slice(); if (cur && !L.includes(cur)) L.unshift(cur); return L.map((n) => '<option' + (n === cur ? ' selected' : '') + '>' + esc(n) + '</option>').join('') || '<option>' + esc(cur) + '</option>'; };
     $('ssStartScene').innerHTML = opt(S.startScene); $('ssScene').innerHTML = opt(S.scene);
   }
+  // v38: OBS connected later / scenes renamed: refresh the scene lists (keeps what's picked)
+  const sk = (d.scenes || []).join('|');
+  if (SSN.sk !== sk && d.scenes && d.scenes.length) { SSN.sk = sk; for (const id of ['ssStartScene', 'ssScene']) { const el = $(id); if (document.activeElement === el) continue; const cur = el.value; const L = d.scenes.slice(); if (cur && !L.includes(cur)) L.unshift(cur); el.innerHTML = L.map((n) => '<option' + (n === cur ? ' selected' : '') + '>' + esc(n) + '</option>').join(''); } }
+  const F = d.found || {};
+  const inObs = (n) => (d.scenes || []).includes(n);
+  $('ssFound').innerHTML = !F.obs ? '<b>OBS isn\'t connected</b>, so the app can\'t see your scenes. The countdown still starts by itself when OBS shows the Starting Soon screen, or press START.'
+    : F.scenes && F.scenes.length ? '<span style="color:#8EEBBF">✓</span> Found the Starting Soon screen in OBS scene' + (F.scenes.length > 1 ? 's' : '') + ' <b>' + F.scenes.map(esc).join('</b>, <b>') + '</b>: switching to ' + (F.scenes.length > 1 ? 'any of them' : 'it') + ' starts the countdown and the music.' + (S.scene && !inObs(S.scene) ? ' <span style="color:#F7CF86">At 0:00 it should switch to <b>' + esc(S.scene) + '</b>, but OBS has no scene called that: pick one below.</span>' : '')
+    : '<span style="color:#F7CF86">No OBS scene has the Starting Soon screen yet.</span> Add a Browser Source with <code>http://localhost:' + location.port + '/starting</code> (1920 × 1080) to your Starting Soon scene' + (S.startScene && !inObs(S.startScene) ? ', or pick your scene below (OBS has no scene called <b>' + esc(S.startScene) + '</b>)' : '') + '.';
   $('ssPic').innerHTML = '<option value="bsn">Boss Sports News set (built in)</option>' + (S.pics.length > 1 ? '<option value="rotate">Rotate through all my pictures</option>' : '') + S.pics.map((p, i) => '<option value="' + p.id + '">My picture ' + (i + 1) + '</option>').join('');
   $('ssPic').value = S.pic;
   $('ssPics').innerHTML = d.S.pics.map((u, i) => '<div class="ss-pic' + (d.S.picIds[i] === S.pic ? ' on' : '') + '"><img src="' + esc(u) + '" alt="Background picture ' + (i + 1) + '"><div><button data-ssuse="' + d.S.picIds[i] + '">Use</button><button data-ssdel="' + d.S.picIds[i] + '">Remove</button></div></div>').join('') || '<p class="help">No pictures yet: the Boss Sports News set shows.</p>';
@@ -2821,9 +2948,11 @@ async function sgLoad(r) {
   $('sgCmdShow').textContent = S.cmd; $('sgCount').textContent = r.count + ' entered'; $('sgwState').textContent = !S.on ? 'Command switched off' : r.open ? 'OPEN: chat types ' + S.cmd : 'Closed';
   $('sgOpen').textContent = r.open ? 'CLOSE ENTRIES' : 'OPEN ENTRIES';
   $('sgWin').innerHTML = r.winners.length ? '<div class="state" style="font-size:18px">Winner: <b style="color:#ffd23f">' + esc(r.winners[0].display) + '</b> (' + (r.winners[0].mins || 0) + ' min watched) <button id="sgCopyWin">Copy name</button>' + (r.winners.length > 1 ? ' <span class="help">before: ' + r.winners.slice(1).map((w) => esc(w.display)).join(', ') + '</span>' : '') + '</div>' : '';
+  if (r.winners.length && r.winners[0].bot) $('sgWin').insertAdjacentHTML('beforeend', '<div class="note-warn" role="alert" style="margin:8px 0;padding:10px 14px;border-radius:10px;background:rgba(245,181,68,.1);border:1px solid rgba(245,181,68,.4);color:#F7CF86">Bot check: this winner scored <b>' + r.winners[0].bot.score + '</b> (' + esc(r.winners[0].bot.reasons.join(', ')) + '). Check them before you give the prize, or pick again.</div>');
   if ($('sgCopyWin')) $('sgCopyWin').onclick = () => sgCopy(r.winners[0].display);
+  bcRender(r);
   const f = $('sgFind').value.trim().toLowerCase();
-  $('sgRows').innerHTML = r.entries.filter((e) => !f || e.display.toLowerCase().includes(f)).map((e) => '<tr><td><b>' + esc(e.display) + '</b></td><td>' + esc(e.platform) + '</td><td>' + (e.byHand ? 'added by you' : (e.mins || 0) + ' min') + '</td><td>' + new Date(e.at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) + '</td><td><button data-sgx="' + esc(e.key) + '" style="border-color:#ff6b7d;color:#ff8a98">Delete</button></td></tr>').join('') || '<tr><td colspan="5" class="help">Nobody yet.</td></tr>';
+  $('sgRows').innerHTML = r.entries.filter((e) => !f || e.display.toLowerCase().includes(f)).map((e) => '<tr><td><b>' + esc(e.display) + '</b></td><td>' + esc(e.platform) + '</td><td>' + (e.byHand ? 'added by you' : (e.mins || 0) + ' min') + '</td><td>' + new Date(e.at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) + '</td><td>' + bcPill(e) + '</td><td><button data-sgx="' + esc(e.key) + '" style="border-color:#ff6b7d;color:#ff8a98">Delete</button></td></tr>').join('') || '<tr><td colspan="5" class="help">Nobody yet.</td></tr>';
   document.querySelectorAll('[data-sgx]').forEach((b) => { b.onclick = async () => sgLoad(await post('/api/sgw', { remove: b.dataset.sgx })); });
   const sep = $('sgSep').value; $('sgText').value = r.entries.slice().reverse().map((e) => e.display).join(sep === 'comma' ? ', ' : sep === 'space' ? ' ' : '\n');
   if (!SGW.form) {
@@ -2836,6 +2965,45 @@ async function sgLoad(r) {
   }
 }
 async function sgCopy(t) { try { await navigator.clipboard.writeText(t); $('sgMsg').textContent = 'Copied'; } catch (e) { $('sgText').select(); document.execCommand('copy'); $('sgMsg').textContent = 'Copied'; } }
+
+// ---------- v38: giveaway bot check ----------
+const BOTC = { form: 0, info: null };
+function bcPill(e) {
+  if (!e.bot) return '<span class="help">-</span>';
+  if (e.ignored) return '<span class="bcp ignored" title="You chose Ignore">ignored</span>';
+  if (e.approved && e.bot.level !== 'trusted') return '<span class="bcp ok">approved</span>';
+  const L = { clear: 'clear', review: 'review', hold: e.held ? 'held' : 'hold', trusted: 'trusted' }[e.bot.level] || e.bot.level;
+  return '<span class="bcp ' + esc(e.bot.level) + '" title="' + esc(e.bot.reasons.map((x) => x.text + ' (' + (x.pts > 0 ? '+' : '') + x.pts + ')').join('\n')) + '">' + esc(L) + (e.bot.level === 'trusted' ? '' : ' · ' + e.bot.score) + '</span>';
+}
+function bcProfile(e) {
+  const u = e.platform === 'twitch' ? 'https://www.twitch.tv/' + encodeURIComponent(e.login) : e.platform === 'kick' ? 'https://kick.com/' + encodeURIComponent(e.login) : 'https://www.youtube.com/channel/' + encodeURIComponent(e.login);
+  return '<a href="' + u + '" target="_blank" rel="noopener">' + esc(e.display) + '</a>';
+}
+function bcRender(r) {
+  const b = r.bot;
+  if (!BOTC.form && b) { BOTC.form = 1; document.querySelectorAll('[name=bcMode]').forEach((x) => { x.checked = x.value === b.mode; }); $('botcRev').value = b.review; $('botcHold').value = b.hold; }
+  const on = b && b.mode !== 'off';
+  const L = (r.entries || []).filter((e) => e.bot && (e.bot.level === 'review' || e.bot.level === 'hold') && !e.ignored && !e.approved).sort((a, c) => c.bot.score - a.bot.score);
+  $('botcRevH').textContent = !on ? 'To review (bot check is off)' : 'To review: ' + L.length + (b.held ? ' (' + b.held + ' held out of the draw)' : '');
+  $('botcList').innerHTML = !on ? '<p class="help">Switch on Review only to see scores.</p>' : !L.length ? '<p class="help">Nobody to look at' + ((r.entries || []).length ? ': everyone in the list looks real.' : ' yet.') + '</p>' : L.map((e) => '<div class="bc-row"><div><b>' + bcProfile(e) + '</b><br><span class="help">' + esc(e.platform) + ' · ' + (e.mins || 0) + ' min watched</span></div><div>' + bcPill(e) + '</div><ul class="bc-why">' + e.bot.reasons.map((x) => '<li>' + esc(x.text) + ' <span>' + (x.pts > 0 ? '+' : '') + x.pts + '</span></li>').join('') + '</ul><div class="bc-act"><button data-bca="approve" data-bck="' + esc(e.key) + '" class="primary">Approve</button><button data-bca="reject" data-bck="' + esc(e.key) + '">Reject</button><button data-bca="ignore" data-bck="' + esc(e.key) + '">Ignore</button></div></div>').join('');
+  document.querySelectorAll('[data-bca]').forEach((x) => { x.onclick = async () => { const q = await post('/api/sgw', { review: { action: x.dataset.bca, key: x.dataset.bck } }); $('botcMsg').textContent = q.error || q.msg; sgLoad(q); }; });
+  const bl = r.blocked || [];
+  $('botcBlockedBox').hidden = !bl.length;
+  $('botcBlocked').innerHTML = bl.map((x) => '<div class="bc-row" style="grid-template-columns:minmax(160px,1fr) minmax(0,2fr) auto"><b>' + esc(x.display || x.key) + '</b><span class="help">' + esc(x.why) + ' · ' + new Date(x.at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) + '</span><div class="bc-act"><button data-bcu="' + esc(x.key) + '">Let them enter again</button></div></div>').join('');
+  document.querySelectorAll('[data-bcu]').forEach((x) => { x.onclick = async () => { const q = await post('/api/sgw', { unblock: x.dataset.bcu }); $('botcMsg').textContent = q.error || q.msg; sgLoad(q); }; });
+}
+async function bcInfo(q) {
+  const d = await fetch('/api/sgw/bot' + (q ? '?q=' + encodeURIComponent(q) : '')).then((x) => x.json()).catch(() => null); if (!d) return; BOTC.info = d;
+  if (!$('botcPts').children.length || q === undefined) $('botcPts').innerHTML = Object.keys(d.defaults).map((k) => '<label>' + esc(d.labels[k]) + ' <input type="number" min="-20" max="20" data-bcp="' + k + '" value="' + d.settings.points[k] + '" aria-label="' + esc(d.labels[k]) + ' points"></label>').join('');
+  const W = { flagged: 'Flagged', approved: 'Approved', rejected: 'Rejected', ignored: 'Ignored', banned: 'Removed' };
+  $('botcLog').innerHTML = d.log.length ? '<table class="bc-log"><tbody>' + d.log.slice(0, 60).map((x) => '<tr><td style="white-space:nowrap">' + esc(new Date(x.at).toLocaleString([], { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' })) + '</td><td><b>' + esc(x.display || x.key) + '</b></td><td>' + esc(W[x.kind] || x.kind) + (x.by ? ' by ' + esc(x.by) : '') + (x.why ? ': ' + esc(x.why) : '') + (x.score != null ? ' · score ' + x.score : '') + '</td><td class="help">' + esc((x.reasons || []).join(', ')) + '</td></tr>').join('') + '</tbody></table>' : '<p class="help">' + (q ? 'Nothing in the log for "' + esc(q) + '".' : 'Nothing logged yet.') + '</p>';
+}
+$('botcSave').onclick = async () => { const m = (document.querySelector('[name=bcMode]:checked') || {}).value; const q = await post('/api/sgw', { bot: { mode: m, review: $('botcRev').value, hold: $('botcHold').value } }); $('botcMsg').textContent = q.error || 'Saved'; BOTC.form = 0; sgLoad(q); };
+document.querySelectorAll('[name=bcMode]').forEach((x) => { x.onchange = () => $('botcSave').click(); });
+$('botcPtsSave').onclick = async () => { const pts = {}; document.querySelectorAll('[data-bcp]').forEach((i) => { pts[i.dataset.bcp] = i.value; }); const q = await post('/api/sgw', { bot: { points: pts } }); $('botcPtsMsg').textContent = q.error || 'Points saved'; sgLoad(q); };
+$('botcPtsReset').onclick = async () => { if (!confirm('Put every number back to the suggested points?')) return; await post('/api/sgw', { bot: { resetPoints: true } }); await bcInfo(); $('botcPtsMsg').textContent = 'Back to the suggested points'; sgLoad(); };
+$('botcLogB').onclick = () => bcInfo($('botcLogQ').value.trim()); $('botcLogQ').onkeydown = (e) => { if (e.key === 'Enter') bcInfo($('botcLogQ').value.trim()); };
+document.querySelectorAll('.bc-more').forEach((d) => d.addEventListener('toggle', () => { if (d.open) bcInfo(d.querySelector('#botcLogQ') ? ($('botcLogQ').value.trim() || '') : undefined); }));
 setInterval(() => { if (document.querySelector('[data-tab="sgw"]:not(.hide)') && !/^sg/.test((document.activeElement || {}).id || '')) sgLoad(); }, 3000);
 $('sgOpen').onclick = async () => { const r = await post('/api/sgw', { action: SGW.d && SGW.d.open ? 'close' : 'open' }); $('sgMsg').textContent = r.msg || r.error || ''; sgLoad(r); };
 $('sgPick').onclick = async () => { const r = await post('/api/sgw', { action: 'pick' }); $('sgMsg').textContent = r.error || r.msg; sgLoad(r); };
@@ -4347,6 +4515,7 @@ function showTab(t) {
   if (t === 'settings') loadBots(); if (t === 'settings') loadGate();
   if (t === 'extras') loadExtras();
   if (t === 'move') loadMove();
+  if (t === 'ballon' && window.blLoad) window.blLoad();
   if (t === 'app' && window.apLoad) setTimeout(() => window.apLoad(), 50);
   if (t === 'tangia') loadTangia();
   if (t === 'calc') viewerList();
@@ -4577,6 +4746,90 @@ setTimeout(apLoad, 300);
   fetch('/api/app/status').then((r) => r.json()).then((s) => { $('sideFoot').innerHTML = '<span>Version ' + esc(String(s.version)) + '</span><span>localhost:' + esc(String(s.port)) + '</span>'; }).catch(() => {});
   navCounts();
   new MutationObserver(navCounts).observe(document.body, { attributes: true, attributeFilter: ['class'] });
+})();
+</script>
+<script>
+// ---------- v38: Ballon d'Or ----------
+(function () {
+  const BL = { s: null, form: 0, t: null };
+  let hide = false; try { hide = localStorage.getItem('blHide') === '1'; } catch (e) { /* no storage */ }
+  const fmtN = (n) => Number(n || 0).toLocaleString();
+  const dtIn = (t) => { if (!t) return ''; const d = new Date(t); const p = (n) => String(n).padStart(2, '0'); return d.getFullYear() + '-' + p(d.getMonth() + 1) + '-' + p(d.getDate()) + 'T' + p(d.getHours()) + ':' + p(d.getMinutes()); };
+  const nice = (t) => new Date(t).toLocaleString([], { weekday: 'short', day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' });
+  const msg = (r) => { $('blMsg').innerHTML = r && r.error ? err(r.error) : r && r.msg ? esc(r.msg) : ''; };
+  async function act(action, extra) { const r = await post('/api/ballon', Object.assign({ action }, extra || {})).catch(() => ({ error: 'The app is restarting. Try again.' })); msg(r); if (r && r.state) render(r.state); return r; }
+  function opts(sel, cur, blank) { return (blank ? '<option value="">' + blank + '</option>' : '') + BL.s.noms.map((n, i) => '<option value="' + esc(n.id) + '"' + (n.id === cur ? ' selected' : '') + '>' + (i + 1) + ' · ' + esc(n.name) + '</option>').join(''); }
+  function render(s) {
+    BL.s = s; const R = s.results, S = s.S, open = s.status === 'open';
+    document.body.classList.toggle('bl-hide', hide); $('blHide').textContent = hide ? 'Show standings' : 'Hide standings'; $('blHide').setAttribute('aria-pressed', String(hide));
+    $('blStatus').textContent = open ? 'Voting open' : s.status === 'closed' ? 'Voting closed' : S.opensAt ? 'Opens ' + nice(S.opensAt) : 'Not open';
+    $('blStatus').className = 'bl-status ' + s.status;
+    $('blOpen').disabled = open; $('blOpen').textContent = s.status === 'closed' ? 'Open voting again' : 'Open voting'; $('blClose').disabled = !open;
+    $('blVotes').textContent = fmtN(R.total); $('blVotesS').textContent = R.held ? R.held + ' waiting for a check' : '';
+    $('blVoters').textContent = fmtN(R.voters); $('blStreams').textContent = R.streams; $('blOpened').textContent = s.openedAt ? 'opened ' + nice(s.openedAt) : '';
+    $('blCloses').textContent = S.closesAt ? nice(S.closesAt) : 'Not set';
+    const ms = S.closesAt ? S.closesAt - Date.now() : 0; $('blLeft').textContent = !S.closesAt ? 'it stays open until you close it' : ms <= 0 ? 'closed' : 'in ' + (ms > 172800000 ? Math.floor(ms / 86400000) + ' days' : Math.max(1, Math.floor(ms / 3600000)) + ' hours');
+    // nominees (+ private standings)
+    const byId = {}; R.rows.forEach((r) => { byId[r.id] = r; });
+    const max = Math.max(1, ...R.rows.map((r) => r.votes));
+    $('blRows').innerHTML = s.noms.length ? s.noms.map((n, i) => { const r = byId[n.id] || { votes: 0, fanPct: 0, pct: 0 };
+      return '<tr><td><span class="bl-num">' + (i + 1) + '</span></td><td><b>' + esc(n.name) + '</b></td><td class="help">' + esc([n.pos, n.club].filter(Boolean).join(' · ')) + '</td><td class="bl-stdc"><div class="bl-bar"><span class="bb"><i style="width:' + Math.round(r.votes * 100 / max) + '%"></i></span><span>' + fmtN(r.votes) + ' · ' + r.fanPct + '%' + (R.manager ? ' <span class="help">(result ' + r.pct + '%)</span>' : '') + '</span></div></td><td><span class="bl-ed"><button data-blm="' + esc(n.id) + '" data-d="-1" aria-label="Move ' + esc(n.name) + ' up"' + (open || !i ? ' disabled' : '') + '>↑</button><button data-blm="' + esc(n.id) + '" data-d="1" aria-label="Move ' + esc(n.name) + ' down"' + (open || i === s.noms.length - 1 ? ' disabled' : '') + '>↓</button><button data-ble="' + esc(n.id) + '">Edit</button><button data-blx="' + esc(n.id) + '">Remove</button></span></td></tr>'; }).join('')
+      : '<tr><td colspan="5" class="help">No nominees yet: add them below (up to 30).</td></tr>';
+    document.querySelectorAll('[data-blm]').forEach((b) => { b.onclick = () => act('move', { id: b.dataset.blm, dir: +b.dataset.d }); });
+    document.querySelectorAll('[data-blx]').forEach((b) => { b.onclick = () => { const n = s.noms.find((x) => x.id === b.dataset.blx); const v = (byId[n.id] || {}).votes || 0; if (!confirm('Remove ' + n.name + '?' + (v ? '\n\nTheir ' + v + ' vote' + (v === 1 ? '' : 's') + ' will be thrown away.' : '') + (open ? '\nThe numbers after them move up by one (chat sees the new numbers).' : ''))) return; act('remove', { id: n.id }); }; });
+    document.querySelectorAll('[data-ble]').forEach((b) => { b.onclick = () => { const n = s.noms.find((x) => x.id === b.dataset.ble); const name = prompt('Name', n.name); if (name == null) return; const pos = prompt('Position', n.pos || ''); if (pos == null) return; const club = prompt('Club', n.club || ''); if (club == null) return; act('edit', { id: n.id, nom: { name, pos, club } }); }; });
+    // your vote
+    const B = s.boss;
+    if (!BL.form) {
+      BL.form = 1;
+      document.querySelectorAll('[name=blBoss]').forEach((x) => { x.checked = x.value === B.mode; });
+      $('blOpensAt').value = dtIn(S.opensAt); $('blClosesAt').value = dtIn(S.closesAt);
+      document.querySelectorAll('[name=blWho]').forEach((x) => { x.checked = x.value === S.who; });
+      $('blBot').checked = !!S.botCheck; $('blAck').checked = !!S.ack; $('blPfT').checked = !!S.platforms.twitch; $('blPfK').checked = !!S.platforms.kick; $('blPfY').checked = !!S.platforms.youtube;
+      $('blW').value = B.weight;
+      $('blR1').innerHTML = opts('r1', B.rank[0], '-'); $('blR2').innerHTML = opts('r2', B.rank[1], '-'); $('blR3').innerHTML = opts('r3', B.rank[2], '-');
+    }
+    if (document.activeElement !== $('blMyPick')) $('blMyPick').innerHTML = opts('my', '', 'Pick a nominee');
+    $('blWv').textContent = $('blW').value; $('blFv').textContent = 100 - $('blW').value;
+    $('blFan').hidden = B.mode !== 'fan'; $('blMgr').hidden = B.mode !== 'manager';
+    $('blMyVote').disabled = !open; $('blMyNow').textContent = s.myVote ? 'Your vote this stream: #' + s.myVote.num + ' ' + s.myVote.name : open ? 'You haven\'t voted this stream (or vote in chat)' : 'Voting isn\'t open';
+    // on stream
+    $('blUrl').textContent = location.origin + '/ballon';
+    const sh = s.show || {}; const nm = { off: 'nothing (see-through)', vote: 'the voting screen', corner: 'the corner reminder', all: 'all the votes', ceremony: 'the ceremony' }[sh.screen] || sh.screen;
+    $('blShowing').innerHTML = 'On stream now: <b>' + esc(nm) + (sh.screen === 'ceremony' ? ' (' + ['nothing revealed yet', '3rd', '3rd + 2nd', 'the winner', 'the winner + fans\' favourite'][sh.stage] + ')' : '') + '</b>';
+    document.querySelectorAll('[data-bls]').forEach((b) => b.classList.toggle('primary', b.dataset.bls === sh.screen));
+    document.querySelectorAll('[data-blc]').forEach((b) => { b.disabled = open || s.status === 'setup'; });
+    $('blFansBtn').hidden = !R.differs;
+    // held votes
+    $('blHeldCard').hidden = !s.held.length;
+    $('blHeld').innerHTML = s.held.map((h) => '<div class="bc-row"><div><b>' + esc(h.d) + '</b><br><span class="help">' + esc(h.pf) + ' · voted #' + h.num + ' ' + esc(h.name || '') + '</span></div><div><span class="bcp ' + (h.held ? 'hold">waiting' : 'review">counted') + '</span></div><ul class="bc-why">' + h.reasons.map((x) => '<li>' + esc(x) + '</li>').join('') + '</ul><div class="bc-act"><button class="primary" data-blh="approve" data-k="' + esc(h.key) + '">' + (h.held ? 'Count it' : 'Looks real') + '</button><button data-blh="reject" data-k="' + esc(h.key) + '">Throw it away</button></div></div>').join('');
+    document.querySelectorAll('[data-blh]').forEach((b) => { b.onclick = () => act('review', { review: b.dataset.blh, key: b.dataset.k }); });
+  }
+  async function load() { const s = await fetch('/api/ballon').then((r) => r.json()).catch(() => null); if (s) render(s); }
+  window.blLoad = load;
+  setInterval(() => { if (document.querySelector('#tabs [data-go="ballon"].on') && !document.querySelector('section[data-tab="ballon"] input:focus, section[data-tab="ballon"] select:focus, section[data-tab="ballon"] textarea:focus')) load(); }, 4000);
+  $('blOpen').onclick = () => act('open');
+  $('blClose').onclick = () => { if (confirm('Close voting now? Results stay hidden until you show them.')) act('close'); };
+  $('blAdd').onclick = async () => { const r = await act('add', { nom: { name: $('blName').value, pos: $('blPos').value, club: $('blClub').value } }); if (r && r.ok) { $('blName').value = ''; $('blPos').value = ''; $('blClub').value = ''; $('blName').focus(); BL.form = 0; load(); } };
+  $('blName').onkeydown = (e) => { if (e.key === 'Enter') $('blAdd').click(); };
+  $('blHide').onclick = () => { hide = !hide; try { localStorage.setItem('blHide', hide ? '1' : '0'); } catch (e) { /* no storage */ } render(BL.s); };
+  document.querySelectorAll('[name=blBoss]').forEach((x) => { x.onchange = async () => {
+    if (x.value === 'none' && BL.s && BL.s.myVote && !confirm('Don\'t vote: your votes so far are removed. OK?')) { BL.form = 0; return load(); }
+    await act('boss', { boss: { mode: x.value } }); BL.form = 0; load(); }; });
+  $('blMyVote').onclick = () => { if (!$('blMyPick').value) return msg({ error: 'Pick a nominee first' }); act('myvote', { id: $('blMyPick').value }); };
+  $('blW').oninput = () => { $('blWv').textContent = $('blW').value; $('blFv').textContent = 100 - $('blW').value; };
+  $('blMgrSave').onclick = async () => { const r = await act('boss', { boss: { rank: [$('blR1').value, $('blR2').value, $('blR3').value].filter(Boolean), weight: +$('blW').value } }); if (r && r.ok) msg({ msg: 'Your Manager\'s vote is saved (' + $('blW').value + '% of the result)' }); };
+  $('blUnvote').onclick = async () => { if (!confirm('Remove your vote?')) return; await act('unvote'); BL.form = 0; load(); };
+  $('blSave').onclick = async () => {
+    const who = (document.querySelector('[name=blWho]:checked') || {}).value;
+    const r = await act('settings', { settings: { opensAt: $('blOpensAt').value ? new Date($('blOpensAt').value).getTime() : null, closesAt: $('blClosesAt').value ? new Date($('blClosesAt').value).getTime() : null, who, botCheck: $('blBot').checked, ack: $('blAck').checked, platforms: { twitch: $('blPfT').checked, kick: $('blPfK').checked, youtube: $('blPfY').checked } } });
+    if (r && r.ok) msg({ msg: 'Rules saved' });
+  };
+  $('blReset').onclick = () => { if (confirm('Clear ALL votes and start again? The nominees stay. This can\'t be undone.')) { BL.form = 0; act('reset'); } };
+  document.querySelectorAll('[data-bls]').forEach((b) => { b.onclick = () => act('show', { screen: b.dataset.bls }); });
+  document.querySelectorAll('[data-blc]').forEach((b) => { b.onclick = () => act('show', { screen: 'ceremony', stage: +b.dataset.blc }); });
+  if (document.querySelector('#tabs [data-go="ballon"].on')) load();   // opened straight on this page
+  $('blCopy').onclick = async () => { try { await navigator.clipboard.writeText($('blUrl').textContent); msg({ msg: 'Copied ' + $('blUrl').textContent }); } catch (e) { msg({ msg: 'Copy this: ' + $('blUrl').textContent }); } };
 })();
 </script>
 </body>

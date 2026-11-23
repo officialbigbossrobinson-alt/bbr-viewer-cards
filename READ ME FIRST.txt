@@ -1,3 +1,55 @@
+WHAT'S NEW IN v38 (giveaway bot check, bans, Ballon d'Or vote, Starting Soon fixes)
+   BANS
+   - Ban or time someone out on Twitch, Kick or YouTube and they're taken out of the giveaway
+     straight away (the Giveaway list and the ticket giveaway) and can't enter again that round.
+     Giveaways > Giveaway list > Bot check > "Taken out this round" shows who and why, with
+     "Let them enter again" if it was a mistake. Adding a name by hand also lets them back in.
+   GIVEAWAY BOT CHECK (Giveaways > Giveaway list > Bot check)
+   - Every entrant gets a suspicion score. Points FOR red flags: account under 7 days (+4) or
+     7–30 days (+2) old, followed under 24 hours ago (+3), only message this stream was the command
+     (+3), first time in your chat (+2), name like word+4 digits or random letters (+1), no profile
+     picture (+1), entered within 2 seconds of opening (+2), a group of new look-alike accounts
+     entering together (+3), copy-paste message (+2), no watch time this stream (+2).
+     Points OFF for a real person: card streak of 3+ (-4), chatted in 2+ earlier streams (-3),
+     ever subbed / cheered / sent Kicks (-5). Approved people are trusted and never flagged again.
+     (Account age and picture come from Twitch; on Kick and YouTube the chat history, watch time
+     and card streak do the work.)
+   - 0–3 clear · 4–6 review (amber) · 7+ hold (red). Nobody is blocked by the score alone.
+   - Starts in REVIEW ONLY: flags names, never holds them. Run it like that for a couple of weeks,
+     then change the points ("Points for each sign") and switch to HOLD HIGH SCORES if you like:
+     then 7+ stays out of the draw until someone presses Approve.
+   - Approve (in, trusted from now on) · Reject (out of this giveaway) · Ignore (stays in).
+     Mods in chat: !approve name   !reject name
+   - A flagged winner shows a warning with the reasons before you hand over the prize.
+   - "Why didn't someone get in?" = the log: type their name.
+   BALLON D'OR VOTE (Game night > Ballon d'Or)
+   - Add your nominees (name, position, club). The number is what chat types.
+   - Set when voting closes (and opens, if you want it to open by itself), then Open voting.
+   - Chat: !vote 4 (or !ballon 4 / !bdo 4) · !nominees (the list) · !myvote (what they voted).
+     ONE VOTE PER STREAM: they can change it during the stream; next stream they vote again.
+     The same person on Twitch + Kick (linked) counts once. During a Man of the Match vote,
+     !vote is for Man of the Match: !ballon still works for the Ballon d'Or.
+   - This is the FAN VOTE. YOUR VOTE: "Don't vote" (your chat votes don't count; any you made are
+     taken out), "One vote like a fan" (once per stream, in chat or with the Vote button), or
+     "Manager's vote" (your 1st, 2nd and 3rd, worth 5–50% of the result). "Remove my vote" any time.
+     If your Manager's vote changes the winner, the ceremony also shows the FANS' FAVOURITE.
+   - Who can vote: everyone (default), Twitch followers, or regulars (2+ streams).
+     The giveaway bot check lists suspicious votes; on "Hold high scores" they wait until you count them.
+   - RESULTS STAY HIDDEN: only you see them (Hide standings if the dashboard is on stream).
+     On stream (add http://localhost:3000/ballon as a Browser Source, 1920 × 1080, top of your
+     scenes): Voting screen · Corner reminder (with "name voted for #4" pop-ups) · Show all votes
+     (every nominee's votes, any time) · Hide.
+   - CEREMONY (after it closes): Reveal 3rd, Reveal 2nd, Reveal the winner (gold card),
+     Show the fans' favourite.
+   - It closes by itself at the closing time and tells chat. Clear all votes starts again.
+   STARTING SOON
+   - Switch to your Starting Soon scene in OBS and the countdown + music start straight away,
+     whatever the scene is called: the app finds the scene that has the Starting Soon screen
+     (http://localhost:3000/starting) in it. It starts again every time you go back to that scene.
+   - At 0:00 it switches OBS to your next scene again (Scenes > Starting Soon > "At 0:00 switch OBS to").
+   - That page now says which OBS scene it found, and warns if the "switch to" scene isn't in OBS.
+   - In OBS Studio Mode, the countdown starts when the scene goes to Program (after the transition).
+
 WHAT'S NEW IN v37 (a new look for the dashboard)
    - Calm dark colours with one blue accent. Your overlays look exactly the same as before.
    - ONE MENU DOWN THE LEFT, eight groups. Click a group to see its pages:
@@ -8,7 +60,7 @@ WHAT'S NEW IN v37 (a new look for the dashboard)
                     Viewer of the Stream, Rewards, Tangia bits, Card calculator, Stream stats
        Giveaways    Giveaway list, Giveaway meter (+ Giveaways, tickets & prize pot when it's on)
        Game night   Team results, GODFATHER meter, Blood pressure, Matchday squad,
-                    Red card rule, Challenges
+                    Red card rule, Challenges, Ballon d'Or (v38)
        Battles      Battles, Beat the Boss, Team shootout, Raid Night, Game tuning,
                     Truck race, Battle screen
        Sports News  News desk, Squad & stories, Leagues & alerts

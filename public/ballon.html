@@ -1,0 +1,153 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>BBR Ballon d'Or</title>
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700;800&family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+<style>
+  /* OBS Browser Source 1920 × 1080. Transparent unless a full screen (voting, all votes, ceremony) is showing. */
+  html, body { margin: 0; width: 1920px; height: 1080px; overflow: hidden; background: transparent; color: #F2F5F9; font-family: Inter, system-ui, sans-serif; }
+  .bc { font-family: 'Barlow Condensed', 'Arial Narrow', sans-serif; }
+  .gold { color: #E8C468; }
+  .lbl { font: 700 22px 'Barlow Condensed', sans-serif; letter-spacing: 2.5px; text-transform: uppercase; }
+  .panel { background: rgba(13,15,18,.9); border: 1px solid rgba(255,255,255,.09); border-radius: 14px; }
+  .view { position: absolute; inset: 0; opacity: 0; transition: opacity .5s; pointer-events: none; }
+  .view.on { opacity: 1; }
+  .full { background: #0D0F12; }
+  /* voting screen */
+  .vhead { position: absolute; left: 90px; right: 90px; top: 64px; display: flex; justify-content: space-between; align-items: flex-end; gap: 40px; }
+  .vhead h1 { margin: 4px 0 0; font: 800 104px/.9 'Barlow Condensed', sans-serif; letter-spacing: 2px; text-transform: uppercase; }
+  .count { text-align: right; } .count b { display: block; font: 800 64px 'Barlow Condensed', sans-serif; } .count span { font-size: 20px; color: #9AA4B1; }
+  .grid { position: absolute; left: 90px; right: 90px; top: 290px; bottom: 190px; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); grid-auto-rows: minmax(0, 1fr); gap: 16px; }
+  .grid.c4 { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+  .nom { display: flex; align-items: center; gap: 16px; padding: 10px 18px; min-height: 0; }
+  .num { width: 58px; height: 58px; border-radius: 12px; background: #E8C468; color: #14110A; display: grid; place-items: center; font: 800 34px 'Barlow Condensed', sans-serif; flex: 0 0 auto; }
+  .nn { display: flex; flex-direction: column; min-width: 0; } .nn b { font: 800 30px/1.05 'Barlow Condensed', sans-serif; letter-spacing: 1px; text-transform: uppercase; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; } .nn span { font-size: 17px; color: #9AA4B1; }
+  .vfoot { position: absolute; left: 90px; right: 90px; bottom: 64px; display: flex; justify-content: space-between; align-items: center; gap: 30px; padding: 22px 30px; border-radius: 16px; background: rgba(232,196,104,.12); border: 1px solid rgba(232,196,104,.45); }
+  .vfoot .cmd { font: 800 44px 'Barlow Condensed', sans-serif; letter-spacing: 1px; text-transform: uppercase; white-space: nowrap; } .vfoot .cmd span { font: inherit; text-transform: none; }
+  .vfoot .when { font-size: 22px; color: #E2E7EE; text-align: right; } .vfoot .when b { font-weight: 700; color: #F2F5F9; }
+  /* corner */
+  .corner { position: absolute; right: 40px; bottom: 104px; width: 420px; padding: 18px 22px; display: flex; flex-direction: column; gap: 8px; border-color: rgba(232,196,104,.45); }
+  .corner .row { display: flex; justify-content: space-between; align-items: center; font-size: 18px; color: #C9D1DB; } .corner .big { font: 800 38px/1 'Barlow Condensed', sans-serif; letter-spacing: 1px; }
+  .toasts { position: absolute; right: 40px; bottom: 330px; width: 420px; display: flex; flex-direction: column-reverse; gap: 8px; align-items: flex-end; }
+  .toast { display: flex; align-items: center; gap: 12px; padding: 10px 16px; font-size: 20px; animation: tin .35s ease-out; }
+  .toast i { width: 10px; height: 10px; border-radius: 50%; background: #E8C468; }
+  @keyframes tin { from { transform: translateX(40px); opacity: 0; } to { transform: none; opacity: 1; } }
+  /* all votes */
+  .tbl { position: absolute; left: 160px; right: 160px; top: 232px; display: flex; flex-direction: column; gap: 8px; }
+  .tr { display: grid; grid-template-columns: 50px minmax(0, 1.4fr) minmax(0, 2fr) 170px; gap: 18px; align-items: center; padding: 5px 18px; }
+  .tr .num { width: 44px; height: 44px; font-size: 26px; border-radius: 10px; }
+  .more { text-align: center; font-size: 20px; color: #9AA4B1; margin-top: 4px; }
+  .tr .nm { font: 800 30px 'Barlow Condensed', sans-serif; letter-spacing: 1px; text-transform: uppercase; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .bar { height: 16px; border-radius: 999px; background: rgba(255,255,255,.1); overflow: hidden; } .bar i { display: block; height: 100%; background: #E8C468; border-radius: 999px; transition: width 1s; }
+  .tr .v { font: 700 28px 'Barlow Condensed', sans-serif; text-align: right; }
+  /* ceremony */
+  .cer { background: #0B0C0F; }
+  .cer .top { position: absolute; left: 0; right: 0; top: 64px; text-align: center; }
+  .wcard { position: absolute; left: 50%; top: 120px; transform: translateX(-50%) scale(.6); opacity: 0; transition: transform .8s cubic-bezier(.2,1.4,.4,1), opacity .6s; width: 330px; height: 462px; border-radius: 20px; background: #1E1A10; border: 3px solid #E8C468; display: flex; flex-direction: column; align-items: center; justify-content: space-between; padding: 26px 22px; box-sizing: border-box; font-family: 'Barlow Condensed', sans-serif; }
+  .wcard.in { transform: translateX(-50%) scale(1); opacity: 1; }
+  .wcard .r { display: flex; justify-content: space-between; width: 100%; } .wcard .pos { font-size: 34px; font-weight: 800; color: #F3D88E; } .wcard .club { font-size: 18px; font-weight: 700; letter-spacing: 2px; color: #D9BE76; text-transform: uppercase; }
+  .wcard .mono { width: 170px; height: 170px; border-radius: 50%; background: #3A3220; display: grid; place-items: center; font-size: 58px; font-weight: 700; color: #F3D88E; }
+  .wcard .name { font-size: 44px; font-weight: 800; letter-spacing: 1.5px; color: #FFF6DC; text-align: center; line-height: 1; text-transform: uppercase; } .wcard .pct { font-size: 22px; color: #E9D9AE; letter-spacing: 1px; }
+  .wtitle { position: absolute; left: 0; right: 0; top: 600px; text-align: center; font: 700 30px 'Barlow Condensed', sans-serif; letter-spacing: 2px; color: #E8C468; opacity: 0; transition: opacity .6s .4s; } .wtitle.in { opacity: 1; }
+  .pod { position: absolute; bottom: 0; width: 320px; display: flex; flex-direction: column; align-items: center; gap: 10px; opacity: 0; transform: translateY(60px); transition: all .7s; }
+  .pod.in { opacity: 1; transform: none; } .pod.p2 { left: 120px; } .pod.p3 { right: 120px; }
+  .pod .mono { width: 96px; height: 96px; border-radius: 50%; background: #263149; display: grid; place-items: center; font: 700 30px 'Barlow Condensed', sans-serif; color: #C9D6EE; }
+  .pod b { font: 800 34px 'Barlow Condensed', sans-serif; letter-spacing: 1px; text-transform: uppercase; text-align: center; } .pod span { font-size: 18px; color: #9AA4B1; }
+  .pod .step { width: 100%; border-radius: 12px 12px 0 0; display: grid; place-items: start center; padding-top: 14px; font: 800 64px 'Barlow Condensed', sans-serif; color: #0B1020; }
+  .fans { position: absolute; left: 50%; bottom: 40px; transform: translateX(-50%); padding: 14px 28px; font-size: 24px; opacity: 0; transition: opacity .6s; white-space: nowrap; } .fans.in { opacity: 1; }
+  .help { position: absolute; left: 40px; top: 40px; max-width: 760px; padding: 18px 22px; font-size: 20px; line-height: 1.4; }
+</style>
+</head>
+<body>
+<div class="view full" id="vVote">
+  <div class="vhead"><div><span class="lbl gold" id="vSub">Voting is open</span><h1><span id="vTitle">Ballon d'Or</span> <span class="gold">vote</span></h1></div><div class="count"><b id="vCount">0</b><span>votes so far · results hidden until the ceremony</span></div></div>
+  <div class="grid" id="vGrid"></div>
+  <div class="vfoot"><span class="cmd">Type <span class="gold" id="vCmd">!vote 1–12</span> in chat</span><span class="when" id="vWhen">1 vote per stream</span></div>
+</div>
+<div class="view" id="vCorner">
+  <div class="toasts" id="toasts"></div>
+  <div class="panel corner"><div class="row"><span class="lbl gold" id="cTitle">Ballon d'Or vote</span><span id="cLeft"></span></div><div class="big">Type <span class="gold" id="cCmd">!vote 1–12</span></div><div class="row"><span><b id="cCount" style="color:#F2F5F9">0</b> votes</span><span>!nominees for the list</span></div></div>
+</div>
+<div class="view full" id="vAll">
+  <div class="vhead"><div><span class="lbl gold" id="aSub">Every vote so far</span><h1><span id="aTitle">Ballon d'Or</span> <span class="gold">votes</span></h1></div><div class="count"><b id="aCount">0</b><span id="aVoters">votes</span></div></div>
+  <div class="tbl" id="aRows"></div>
+</div>
+<div class="view full cer" id="vCer">
+  <div class="top"><span class="lbl gold" id="cerSub" style="font-size:26px">The Ballon d'Or goes to</span></div>
+  <div class="wcard" id="wCard"><div class="r"><span class="pos" id="wPos"></span><span class="club" id="wClub"></span></div><div class="mono" id="wMono"></div><div class="name" id="wName"></div><div class="pct" id="wPct"></div></div>
+  <div class="wtitle" id="wTitle">BALLON D'OR WINNER</div>
+  <div class="pod p2" id="p2"><div class="mono"></div><b></b><span></span><div class="step" style="height:200px;background:#C9D1DB">2</div></div>
+  <div class="pod p3" id="p3"><div class="mono"></div><b></b><span></span><div class="step" style="height:140px;background:#C89361">3</div></div>
+  <div class="panel fans" id="fans"></div>
+</div>
+<div class="panel help" id="help" hidden>BBR Ballon d'Or: add this page as a Browser Source (1920 × 1080) at the top of your scenes. It stays see-through until you show something from Game night › Ballon d'Or.</div>
+<script>
+(function () {
+  const $ = (id) => document.getElementById(id);
+  const esc = (s) => String(s == null ? '' : s).replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+  const mono = (n) => String(n || '').split(/\s+/).filter(Boolean).map((w) => w[0]).join('').slice(0, 2).toUpperCase() || '?';
+  const fmt = (n) => Number(n || 0).toLocaleString('en-GB');
+  let st = null, lastShow = '';
+  function when(t) {
+    if (!t) return '1 vote per stream';
+    const d = new Date(t);
+    return '1 vote per stream · change it any time this stream · voting closes <b>' + esc(d.toLocaleDateString('en-GB', { weekday: 'short', day: 'numeric', month: 'short' })) + ', ' + esc(d.toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' })) + '</b>';
+  }
+  function left(t) { if (!t) return ''; const ms = t - Date.now(); if (ms <= 0) return 'closed'; const d = Math.floor(ms / 86400000), h = Math.floor(ms / 3600000); return d >= 2 ? 'closes in ' + d + ' days' : h >= 2 ? 'closes in ' + h + ' hours' : 'closes soon'; }
+  function apply(a) {
+    st = a; const sh = a.show || { screen: 'off' }, n = (a.noms || []).length, cmd = '!vote 1–' + n;
+    ['vVote', 'vCorner', 'vAll', 'vCer'].forEach((id) => $(id).classList.remove('on'));
+    $('help').hidden = !(sh.screen === 'off' && !window.obsstudio && !/[?&]clean/.test(location.search));
+    // voting screen
+    $('vTitle').textContent = a.title; $('vCount').textContent = fmt(a.total); $('vCmd').textContent = cmd; $('vWhen').innerHTML = when(a.closesAt);
+    $('vSub').textContent = a.status === 'open' ? 'Voting is open' : a.status === 'closed' ? 'Voting is closed' : 'Voting opens soon';
+    $('vGrid').className = 'grid' + (n > 12 ? ' c4' : '');
+    $('vGrid').innerHTML = (a.noms || []).map((x) => '<div class="panel nom"><span class="num">' + x.num + '</span><div class="nn"><b>' + esc(x.name) + '</b><span>' + esc([x.pos, x.club].filter(Boolean).join(' · ')) + '</span></div></div>').join('');
+    // corner
+    $('cTitle').textContent = a.title + ' vote'; $('cCmd').textContent = cmd; $('cCount').textContent = fmt(a.total); $('cLeft').textContent = left(a.closesAt);
+    // all votes
+    if (a.all) {
+      const max = Math.max(1, ...a.all.map((x) => x.votes));
+      $('aTitle').textContent = a.title; $('aCount').textContent = fmt(a.total); $('aVoters').textContent = 'votes from ' + fmt(a.voters) + ' viewers over ' + a.streams + ' stream' + (a.streams === 1 ? '' : 's');
+      $('aRows').innerHTML = a.all.slice(0, 12).map((x) => '<div class="panel tr"><span class="num">' + x.num + '</span><span class="nm">' + esc(x.name) + '</span><div class="bar"><i style="width:' + Math.round(x.votes * 100 / max) + '%"></i></div><span class="v">' + fmt(x.votes) + ' · ' + x.fanPct + '%</span></div>').join('') + (a.all.length > 12 ? '<div class="more">+ ' + (a.all.length - 12) + ' more nominees</div>' : '');
+    }
+    // ceremony
+    if (sh.screen === 'ceremony' && a.reveal) {
+      const R = a.reveal;
+      $('cerSub').textContent = 'The ' + a.title + ' goes to';
+      const pod = (id, x) => { const el = $(id); el.classList.toggle('in', !!x); if (!x) return; el.querySelector('.mono').textContent = mono(x.name); el.querySelector('b').textContent = x.name; el.querySelector('span').textContent = [x.club, x.pct + '%'].filter(Boolean).join(' · '); };
+      pod('p3', R.third); pod('p2', R.second);
+      const w = R.winner; $('wCard').classList.toggle('in', !!w); $('wTitle').classList.toggle('in', !!w);
+      if (w) { $('wPos').textContent = w.pos || ''; $('wClub').textContent = w.club || ''; $('wMono').textContent = mono(w.name); $('wName').textContent = w.name; $('wPct').textContent = w.pct + '% OF ' + fmt(a.total) + ' VOTES' + (R.manager ? ' (+ MANAGER\'S VOTE)' : ''); $('wTitle').textContent = a.title.toUpperCase() + ' WINNER'; }
+      $('fans').classList.toggle('in', !!R.fansFav);
+      $('fans').innerHTML = R.fansFav ? '<span class="gold"><b>FANS\' FAVOURITE:</b></span> <b>' + esc(R.fansFav.name) + '</b> · ' + fmt(R.fansFav.votes) + ' fan votes (' + R.fansFav.fanPct + '%)' : '';
+    }
+    const on = { vote: 'vVote', corner: 'vCorner', all: 'vAll', ceremony: 'vCer' }[sh.screen];
+    if (on) $(on).classList.add('on');
+    document.body.dataset.screen = sh.screen;
+    lastShow = sh.screen;
+  }
+  function toast(t) {
+    if (!st || st.show.screen !== 'corner') return;
+    const el = document.createElement('div'); el.className = 'panel toast';
+    el.innerHTML = '<i></i><b>' + esc(t.d) + '</b><span style="color:#C9D1DB">' + (t.changed ? 'changed vote to' : 'voted for') + ' #' + t.num + '</span>';
+    const box = $('toasts'); box.appendChild(el); while (box.children.length > 3) box.removeChild(box.firstChild);
+    setTimeout(() => { el.style.transition = 'opacity .6s'; el.style.opacity = '0'; setTimeout(() => el.remove(), 700); }, 6000);
+  }
+  function load() { fetch('/api/ballon/screen').then((r) => r.json()).then(apply).catch(() => setTimeout(load, 3000)); }
+  load(); setInterval(() => { if (st && st.show && st.show.screen === 'corner') $('cLeft').textContent = left(st.closesAt); }, 60000);
+  try {
+    const es = new EventSource('/events');
+    es.onmessage = (m) => {
+      let a; try { a = JSON.parse(m.data); } catch (e) { return; }
+      if (a.type === 'reload') return location.reload();
+      if (a.type !== 'ballon') return;
+      if (a.action === 'toast') return toast(a);
+      apply(a);
+    };
+  } catch (e) { /* no live updates */ }
+})();
+</script>
+</body>
+</html>

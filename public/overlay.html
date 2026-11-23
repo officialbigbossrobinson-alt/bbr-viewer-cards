@@ -516,7 +516,7 @@ html,body{margin:0;background:transparent;overflow:hidden}
       if (a.type === 'stinger') { try { STINGER.play(a, { sound: true }); } catch (e) { /* ignore */ } return; }
       if (a.type === 'gmeter') { try { GMETER.init(stage); GMETER.event(a.where === 'own' ? Object.assign({}, a, { on: false }) : a); } catch (e) { /* ignore */ } return; }
       if (a.type === 'links') { try { if (!(window.EXTRAS && EXTRAS.panic && EXTRAS.panic())) { LINKS.init(stage); LINKS.show(a); } } catch (e) { /* ignore */ } return; }
-      if (a.type === 'linkscfg' || a.type === 'brb' || a.type === 'bigcam' || a.type === 'music') return;
+      if (a.type === 'linkscfg' || a.type === 'brb' || a.type === 'bigcam' || a.type === 'music' || a.type === 'ballon') return;
       if (a.type === 'levelup' || a.type === 'pack') { try { etsNote(a); } catch (e) { /* ignore */ } }
       if (a.type === 'bp') return BPM.event(a);
       if (a.type === 'battle') { try { BC.ev(a); } catch (e) { /* ignore */ } return onBattle(a); }
