@@ -18,7 +18,7 @@ const TU = require('./lib/tuning');
 const { OBS } = require('./lib/obs');
 const { Diag } = require('./lib/diag');
 const { BSN, BSN_IMAGES, normTokens, fillStory, LEFTOVER_RE } = require('./lib/bsn');
-const APP_VERSION = '39';
+const APP_VERSION = '40';
 const ARCX = require('./lib/arc');
 const RLX = require('./lib/race');
 const BTX = require('./lib/battle');
@@ -921,7 +921,7 @@ function onBanned(platform, e) {
 }
 gmeter.ext = () => (sgw.S().showOnTimer ? sgw.payload() : null);
 // v38: Ballon d'Or (lib/ballon.js): chat votes once per stream until the closing date; results hidden until you show them
-const ballon = new (require('./lib/ballon').Ballon)({ file: path.join(DATA, 'ballon.json'), push: (m) => push(m), say: (pf, m) => say(pf, m), sayAll: (m) => sayAll(m), streamNo: () => streamNo(), botcheck,
+const ballon = new (require('./lib/ballon').Ballon)({ file: path.join(DATA, 'ballon.json'), push: (m) => push(m), say: (pf, m) => say(pf, m), sayAll: (m) => sayAll(m), streamNo: () => streamNo(), botcheck, live: () => isLive(),
   viewer: (pf, login) => { const v0 = store.get(pf, login); if (!v0) return null; const v = store.primary(v0) || v0; return { key: v.key, display: v.display, streams: v.streams || 0 }; },
   feed: (m, c) => feedAdd(m, c) });
 setInterval(() => { try { ballon.tick(); } catch (e) { console.error('[ballon]', e.message); } }, 10000).unref();

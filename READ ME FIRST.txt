@@ -1,4 +1,19 @@
-WHAT'S NEW IN v39 (giveaway spin, secret end time, Ballon d'Or fixes)
+WHAT'S NEW IN v40 (Ballon d'Or chat)
+   - One vote per stream, and they can change it ONCE that stream. A second change is refused
+     ("you've already changed your vote this stream, so it stays on #4").
+   - Every vote gets an answer in chat ("✅ Vote counted: @name #4 Rossi"). Votes in the same few
+     seconds share one message (10 seconds when chat is busy), so the bot never floods chat.
+   - !vote on its own / !myvote: "you've already voted for #4" or "you haven't voted yet".
+     Before it opens: "isn't open yet (opens in 3 hours)". After: "voting has closed".
+   - Chat is told when voting OPENS and CLOSES, gets a reminder every 20 minutes while you're
+     live, and "Last chance" 24 hours, 1 hour and 10 minutes before it closes.
+   - The reveal goes to chat as you show it: 3rd, 2nd, "And the Ballon d'Or goes to...", the
+     Fans' favourite, Show all votes. Only while you're live (a rehearsal won't spoil it).
+   - Nominees: "Their Twitch" box when you add them (Edit has Twitch, Kick and YouTube). A
+     linked nominee can't vote for themselves.
+   - All of it can be switched in Game night > Ballon d'Or > Rules > Chat.
+
+WHAT WAS NEW IN v39 (giveaway spin, secret end time, Ballon d'Or fixes)
    SPIN FOR A WINNER (Giveaways > Giveaway list > Spin for a winner)
    - Press SPIN: the names scroll on stream for 30 seconds and stop on a random winner in the
      gold band. The winner then has 60 seconds to type !claim in chat FROM THE SAME ACCOUNT they

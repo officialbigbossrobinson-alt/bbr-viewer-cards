@@ -1,9 +1,8 @@
-Version 39: giveaway spin, secret end time, Ballon d'Or fixes.
+Version 40: Ballon d'Or chat.
 
-- NEW: Spin for a winner (Giveaways > Giveaway list). The names scroll on stream for 30 seconds and stop on a random winner. They then have 60 seconds to type !claim in chat from the same account they entered with: anyone else typing it is ignored. Claimed = applause and confetti. Not claimed = they're out of the list and you press SPIN AGAIN, as many times as you need.
-- Upload your own music for the spin and your own applause sound (no music = ticking sounds; no applause = the app's fanfare). Change the spin length, the claim time, the command, the title, the prize and the chat messages.
-- The spin shows on the BBR overlay (or its own Browser Source: http://localhost:3000/spin). SPIN buttons on the dock and the Stream Deck (/control/spin-start). "Test spin" uses made-up names and tells nobody.
-- Secret end time (Giveaways > Giveaway meter): the clock keeps running for you, but the stream shows ENTRIES OPEN with no time, and chat isn't told how long is left.
-- Bans: someone banned or timed out is now also taken out of the giveaway meter's own entries, and out of the spin if they were picked.
-- Fixed: the Ballon d'Or Edit button did nothing.
-- Fixed: after Remove, the Ballon d'Or page wouldn't take typing. This was the app window's own yes/no box, which on Windows can stop text boxes taking typing. Every yes/no question in the dashboard and the dock is now asked inside the page.
+- One vote per stream, and viewers can change it ONCE that stream. A second change is refused and they're told their vote stays.
+- Every vote is answered in chat ("✅ Vote counted: @name #4 Rossi"). Votes in the same few seconds share one message, so a busy chat doesn't flood (and the bot stays under its message limit).
+- Chat answers: "you've already voted for #4", "you haven't voted this stream yet", "you've used your one change", "voting isn't open yet (opens in 3 hours)", "voting has closed".
+- Chat is told when voting opens and closes, gets a reminder every 20 minutes while you're live (you choose, 0 = never), and "Last chance" messages 24 hours, 1 hour and 10 minutes before it closes.
+- The reveal goes to chat too: 3rd, 2nd, then "And the Ballon d'Or goes to...", plus the Fans' favourite and Show all votes. Only while you're live, so a rehearsal before the stream doesn't spoil it.
+- Nominees can be linked to their Twitch account (Edit also has Kick and YouTube): they can't vote for themselves. Accounts linked in the app as the same person count too.

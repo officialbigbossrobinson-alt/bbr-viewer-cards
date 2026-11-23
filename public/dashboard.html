@@ -1247,7 +1247,8 @@ body.bl-hide .bl-std,body.bl-hide .bl-stdc{visibility:hidden}
       <div class="bl-top"><h2 style="margin:0">Nominees</h2><button id="blHide" aria-pressed="false">Hide standings</button></div>
       <p class="help">The number is what chat types. Only you see the votes here (unless you show them on stream). Numbers can't be moved while voting is open.</p>
       <div style="overflow-x:auto"><table class="mini bl-table"><thead><tr><th>No.</th><th>Nominee</th><th>Position · club</th><th class="bl-std">Votes</th><th></th></tr></thead><tbody id="blRows"></tbody></table></div>
-      <div class="bl-add"><label>Name <input id="blName" maxlength="40" placeholder="Player name"></label><label>Position <input id="blPos" maxlength="8" placeholder="ST" style="width:90px"></label><label>Club <input id="blClub" maxlength="40" placeholder="Bosshausens"></label><button id="blAdd">Add</button></div>
+      <div class="bl-add"><label>Name <input id="blName" maxlength="40" placeholder="Player name"></label><label>Position <input id="blPos" maxlength="8" placeholder="ST" style="width:90px"></label><label>Club <input id="blClub" maxlength="40" placeholder="Bosshausens"></label><label>Their Twitch <input id="blTw" maxlength="40" placeholder="twitch name (optional)"></label><button id="blAdd">Add</button></div>
+      <p class="help">Link a nominee's Twitch account and they can't vote for themselves (Edit also has Kick and YouTube). Accounts you've linked as the same person count too.</p>
     </section>
     <section data-tab="ballon" class="card">
       <h2>Your vote</h2>
@@ -1274,7 +1275,13 @@ body.bl-hide .bl-std,body.bl-hide .bl-stdc{visibility:hidden}
         <label><input type="radio" name="blWho" value="followers"> Followers (Twitch)</label>
         <label><input type="radio" name="blWho" value="regulars"> Regulars (2+ streams)</label></div>
       <label class="tog"><input type="checkbox" id="blBot"> Bot check: list votes from high-score accounts for you to check (they only wait when the bot check is on "Hold high scores")</label>
-      <label class="tog"><input type="checkbox" id="blAck"> Answer in chat ("@name your vote for #4 is in")</label>
+      <h3 class="sub">Chat</h3>
+      <label class="tog"><input type="checkbox" id="blAck"> Answer every vote ("✅ Vote counted: @name #4 Rossi"). Votes in the same few seconds share one message, so chat isn't flooded.</label>
+      <label class="tog"><input type="checkbox" id="blAnn"> Tell chat when voting opens and closes</label>
+      <label class="tog"><input type="checkbox" id="blSoon"> "Last chance" messages 24 hours, 1 hour and 10 minutes before it closes (while you're live)</label>
+      <label class="tog"><input type="checkbox" id="blRev"> Reveal in chat too: 3rd, 2nd, the winner (and Show all votes) as you show them on stream</label>
+      <label style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;flex-direction:row">Remind chat every <input type="number" id="blRemind" min="0" max="240" style="width:80px" aria-describedby="blRemindH"> minutes that voting is open <span class="help" id="blRemindH" style="margin:0">(while you're live, 0 = never)</span></label>
+      <p class="help">Everyone gets one vote per stream and can change it once. Chat answers <code>!vote</code> (already voted or not), <code>!myvote</code>, and says when voting isn't open or has closed.</p>
       <div class="actions"><label class="tog" style="margin:0"><input type="checkbox" id="blPfT"> Twitch</label><label class="tog" style="margin:0"><input type="checkbox" id="blPfK"> Kick</label><label class="tog" style="margin:0"><input type="checkbox" id="blPfY"> YouTube</label></div>
       <div class="actions"><button id="blSave" class="primary">Save rules</button><button id="blReset">Clear all votes…</button></div>
     </section>
@@ -4911,11 +4918,11 @@ setTimeout(apLoad, 300);
     const byId = {}; R.rows.forEach((r) => { byId[r.id] = r; });
     const max = Math.max(1, ...R.rows.map((r) => r.votes));
     $('blRows').innerHTML = s.noms.length ? s.noms.map((n, i) => { const r = byId[n.id] || { votes: 0, fanPct: 0, pct: 0 };
-      return '<tr><td><span class="bl-num">' + (i + 1) + '</span></td><td><b>' + esc(n.name) + '</b></td><td class="help">' + esc([n.pos, n.club].filter(Boolean).join(' · ')) + '</td><td class="bl-stdc"><div class="bl-bar"><span class="bb"><i style="width:' + Math.round(r.votes * 100 / max) + '%"></i></span><span>' + fmtN(r.votes) + ' · ' + r.fanPct + '%' + (R.manager ? ' <span class="help">(result ' + r.pct + '%)</span>' : '') + '</span></div></td><td><span class="bl-ed"><button data-blm="' + esc(n.id) + '" data-d="-1" aria-label="Move ' + esc(n.name) + ' up"' + (open || !i ? ' disabled' : '') + '>↑</button><button data-blm="' + esc(n.id) + '" data-d="1" aria-label="Move ' + esc(n.name) + ' down"' + (open || i === s.noms.length - 1 ? ' disabled' : '') + '>↓</button><button data-ble="' + esc(n.id) + '">Edit</button><button data-blx="' + esc(n.id) + '">Remove</button></span></td></tr>'; }).join('')
+      return '<tr><td><span class="bl-num">' + (i + 1) + '</span></td><td><b>' + esc(n.name) + '</b>' + (n.acc && Object.keys(n.acc).length ? '<div class="help bl-acc">' + Object.entries(n.acc).map(([k, l]) => esc((PNAME[k] || k) + ' ' + l)).join(' · ') + '</div>' : '') + '</td><td class="help">' + esc([n.pos, n.club].filter(Boolean).join(' · ')) + '</td><td class="bl-stdc"><div class="bl-bar"><span class="bb"><i style="width:' + Math.round(r.votes * 100 / max) + '%"></i></span><span>' + fmtN(r.votes) + ' · ' + r.fanPct + '%' + (R.manager ? ' <span class="help">(result ' + r.pct + '%)</span>' : '') + '</span></div></td><td><span class="bl-ed"><button data-blm="' + esc(n.id) + '" data-d="-1" aria-label="Move ' + esc(n.name) + ' up"' + (open || !i ? ' disabled' : '') + '>↑</button><button data-blm="' + esc(n.id) + '" data-d="1" aria-label="Move ' + esc(n.name) + ' down"' + (open || i === s.noms.length - 1 ? ' disabled' : '') + '>↓</button><button data-ble="' + esc(n.id) + '">Edit</button><button data-blx="' + esc(n.id) + '">Remove</button></span></td></tr>'; }).join('')
       : '<tr><td colspan="5" class="help">No nominees yet: add them below (up to 30).</td></tr>';
     document.querySelectorAll('[data-blm]').forEach((b) => { b.onclick = () => act('move', { id: b.dataset.blm, dir: +b.dataset.d }); });
     document.querySelectorAll('[data-blx]').forEach((b) => { b.onclick = async () => { const n = s.noms.find((x) => x.id === b.dataset.blx); const v = (byId[n.id] || {}).votes || 0; if (!await ask('Remove ' + n.name + '?' + (v ? '\n\nTheir ' + v + ' vote' + (v === 1 ? '' : 's') + ' will be thrown away.' : '') + (open ? '\nThe numbers after them move up by one (chat sees the new numbers).' : ''))) return; act('remove', { id: n.id }); }; });
-    document.querySelectorAll('[data-ble]').forEach((b) => { b.onclick = async () => { const n = s.noms.find((x) => x.id === b.dataset.ble); if (!n) return; const v = await askForm('Edit nominee', [{ k: 'name', label: 'Name', v: n.name, max: 40 }, { k: 'pos', label: 'Position (up to 8 letters, e.g. ST)', v: n.pos || '', max: 8 }, { k: 'club', label: 'Club', v: n.club || '', max: 40 }]); if (!v) return; act('edit', { id: n.id, nom: v }); }; });
+    document.querySelectorAll('[data-ble]').forEach((b) => { b.onclick = async () => { const n = s.noms.find((x) => x.id === b.dataset.ble); if (!n) return; const v = await askForm('Edit nominee', [{ k: 'name', label: 'Name', v: n.name, max: 40 }, { k: 'pos', label: 'Position (up to 8 letters, e.g. ST)', v: n.pos || '', max: 8 }, { k: 'club', label: 'Club', v: n.club || '', max: 40 }, { k: 'twitch', label: 'Their Twitch name (they can\'t vote for themselves)', v: (n.acc || {}).twitch || '', max: 40 }, { k: 'kick', label: 'Their Kick name', v: (n.acc || {}).kick || '', max: 40 }, { k: 'youtube', label: 'Their YouTube name', v: (n.acc || {}).youtube || '', max: 40 }]); if (!v) return; act('edit', { id: n.id, nom: { name: v.name, pos: v.pos, club: v.club, acc: { twitch: v.twitch, kick: v.kick, youtube: v.youtube } } }); }; });
     // your vote
     const B = s.boss;
     if (!BL.form) {
@@ -4923,7 +4930,7 @@ setTimeout(apLoad, 300);
       document.querySelectorAll('[name=blBoss]').forEach((x) => { x.checked = x.value === B.mode; });
       $('blOpensAt').value = dtIn(S.opensAt); $('blClosesAt').value = dtIn(S.closesAt);
       document.querySelectorAll('[name=blWho]').forEach((x) => { x.checked = x.value === S.who; });
-      $('blBot').checked = !!S.botCheck; $('blAck').checked = !!S.ack; $('blPfT').checked = !!S.platforms.twitch; $('blPfK').checked = !!S.platforms.kick; $('blPfY').checked = !!S.platforms.youtube;
+      $('blBot').checked = !!S.botCheck; $('blAck').checked = S.confirm !== false; $('blAnn').checked = S.announce !== false; $('blSoon').checked = S.closingSoon !== false; $('blRev').checked = S.chatReveal !== false; $('blRemind').value = S.remindMins == null ? 20 : S.remindMins; $('blPfT').checked = !!S.platforms.twitch; $('blPfK').checked = !!S.platforms.kick; $('blPfY').checked = !!S.platforms.youtube;
       $('blW').value = B.weight;
       $('blR1').innerHTML = opts('r1', B.rank[0], '-'); $('blR2').innerHTML = opts('r2', B.rank[1], '-'); $('blR3').innerHTML = opts('r3', B.rank[2], '-');
     }
@@ -4948,7 +4955,7 @@ setTimeout(apLoad, 300);
   setInterval(() => { if (document.querySelector('#tabs [data-go="ballon"].on') && !document.querySelector('section[data-tab="ballon"] input:focus, section[data-tab="ballon"] select:focus, section[data-tab="ballon"] textarea:focus')) load(); }, 4000);
   $('blOpen').onclick = () => act('open');
   $('blClose').onclick = async () => { if (await ask('Close voting now? Results stay hidden until you show them.')) act('close'); };
-  $('blAdd').onclick = async () => { const r = await act('add', { nom: { name: $('blName').value, pos: $('blPos').value, club: $('blClub').value } }); if (r && r.ok) { $('blName').value = ''; $('blPos').value = ''; $('blClub').value = ''; $('blName').focus(); BL.form = 0; load(); } };
+  $('blAdd').onclick = async () => { const r = await act('add', { nom: { name: $('blName').value, pos: $('blPos').value, club: $('blClub').value, acc: { twitch: $('blTw').value } } }); if (r && r.ok) { $('blName').value = ''; $('blPos').value = ''; $('blClub').value = ''; $('blTw').value = ''; $('blName').focus(); BL.form = 0; load(); } };
   $('blName').onkeydown = (e) => { if (e.key === 'Enter') $('blAdd').click(); };
   $('blHide').onclick = () => { hide = !hide; try { localStorage.setItem('blHide', hide ? '1' : '0'); } catch (e) { /* no storage */ } render(BL.s); };
   document.querySelectorAll('[name=blBoss]').forEach((x) => { x.onchange = async () => {
@@ -4960,7 +4967,7 @@ setTimeout(apLoad, 300);
   $('blUnvote').onclick = async () => { if (!await ask('Remove your vote?')) return; await act('unvote'); BL.form = 0; load(); };
   $('blSave').onclick = async () => {
     const who = (document.querySelector('[name=blWho]:checked') || {}).value;
-    const r = await act('settings', { settings: { opensAt: $('blOpensAt').value ? new Date($('blOpensAt').value).getTime() : null, closesAt: $('blClosesAt').value ? new Date($('blClosesAt').value).getTime() : null, who, botCheck: $('blBot').checked, ack: $('blAck').checked, platforms: { twitch: $('blPfT').checked, kick: $('blPfK').checked, youtube: $('blPfY').checked } } });
+    const r = await act('settings', { settings: { opensAt: $('blOpensAt').value ? new Date($('blOpensAt').value).getTime() : null, closesAt: $('blClosesAt').value ? new Date($('blClosesAt').value).getTime() : null, who, botCheck: $('blBot').checked, confirm: $('blAck').checked, announce: $('blAnn').checked, closingSoon: $('blSoon').checked, chatReveal: $('blRev').checked, remindMins: +$('blRemind').value, platforms: { twitch: $('blPfT').checked, kick: $('blPfK').checked, youtube: $('blPfY').checked } } });
     if (r && r.ok) msg({ msg: 'Rules saved' });
   };
   $('blReset').onclick = async () => { if (await ask('Clear ALL votes and start again? The nominees stay. This can\'t be undone.')) { BL.form = 0; act('reset'); } };

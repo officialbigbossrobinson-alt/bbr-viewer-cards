@@ -92,7 +92,7 @@
   function when(t) {
     if (!t) return '1 vote per stream';
     const d = new Date(t);
-    return '1 vote per stream · change it any time this stream · voting closes <b>' + esc(d.toLocaleDateString('en-GB', { weekday: 'short', day: 'numeric', month: 'short' })) + ', ' + esc(d.toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' })) + '</b>';
+    return '1 vote per stream · you can change it once · voting closes <b>' + esc(d.toLocaleDateString('en-GB', { weekday: 'short', day: 'numeric', month: 'short' })) + ', ' + esc(d.toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' })) + '</b>';
   }
   function left(t) { if (!t) return ''; const ms = t - Date.now(); if (ms <= 0) return 'closed'; const d = Math.floor(ms / 86400000), h = Math.floor(ms / 3600000); return d >= 2 ? 'closes in ' + d + ' days' : h >= 2 ? 'closes in ' + h + ' hours' : 'closes soon'; }
   function apply(a) {
