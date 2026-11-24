@@ -362,7 +362,7 @@
   function load() { fetch('/api/starting').then((r) => r.json()).then(apply).catch(() => setTimeout(load, 3000)); }
   load();
   try {
-    const es = new EventSource('/events');
+    const es = new EventSource('/events?page=starting');
     es.onmessage = (m) => {
       let a; try { a = JSON.parse(m.data); } catch (e) { return; }
       if (a.volume != null) try { SFX.setVolume && SFX.setVolume(a.volume); } catch (e) { /* ignore */ }

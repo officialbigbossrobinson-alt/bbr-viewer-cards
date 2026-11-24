@@ -18,7 +18,7 @@ const TU = require('./lib/tuning');
 const { OBS } = require('./lib/obs');
 const { Diag } = require('./lib/diag');
 const { BSN, BSN_IMAGES, normTokens, fillStory, LEFTOVER_RE } = require('./lib/bsn');
-const APP_VERSION = '40';
+const APP_VERSION = '41';
 const ARCX = require('./lib/arc');
 const RLX = require('./lib/race');
 const BTX = require('./lib/battle');
@@ -1847,8 +1847,8 @@ async function systemCheck(o) {
       C(got ? 'ok' : 'bad', '!card → card on stream', got ? 'sent to the overlay' : 'nothing was sent (on-screen card switched off, or a cooldown)');
     }
     // the overlay itself
-    const ov = overlayState && Date.now() - overlayState.at < 15000 ? overlayState : null;
-    if (!ov) C('bad', 'Overlay in OBS', clients.size ? 'something is connected but the overlay is not reporting: refresh the BBR overlay Browser Source in OBS (right click > Refresh)' : 'not open: add http://localhost:' + PORT + '/overlay as a Browser Source (1920 × 1080)');
+    const ov = await overlayFresh(4000);
+    if (!ov) C('bad', 'Overlay in OBS', overlaysOpen() ? 'the overlay is open but didn\'t answer: refresh the BBR overlay Browser Source in OBS (right click > Refresh)' : 'not open: add http://localhost:' + PORT + '/overlay as a Browser Source (1920 × 1080)' + (clients.size ? '. (Other BBR pages are open: ' + pagesText('overlay') + ', but not the overlay.)' : ''));
     else {
       const why = [];
       if (ov.sceneHold) why.push('cards are being HELD: the overlay isn\'t in the scene on air' + (ST.on ? ' (Starting Soon is on, set to hold alerts)' : '') + '. They play when it is.');
@@ -1996,6 +1996,22 @@ async function systemCheck(o) {
 }
 
 let overlayState = null, overlayErrLast = '';
+// v41: how many of each BBR page are open in OBS (or a browser)
+function pagesOpen() { const n = {}; for (const c of clients) n[c.bbrPage || 'other'] = (n[c.bbrPage || 'other'] || 0) + 1; return n; }
+function overlaysOpen() { return pagesOpen().overlay || 0; }
+const PAGE_NAMES = { overlay: 'overlay', starting: 'Starting Soon', brb: 'BRB', bigcam: 'Big Cam', credits: 'credits', ballon: 'Ballon d\'Or', spin: 'spin', gmeter: 'giveaway meter', ticker: 'news ticker', dashboard: 'dashboard', dock: 'dock', other: 'other' };
+function pagesText(skip) { const n = pagesOpen(); return Object.keys(n).filter((k) => k !== skip).map((k) => (PAGE_NAMES[k] || k) + (n[k] > 1 ? ' ×' + n[k] : '')).join(', '); }
+// the overlay reports every 5 s, but OBS slows a hidden source's timers to once a minute: ask it straight away instead
+async function overlayFresh(ms) {
+  if (!overlaysOpen()) return null;   // closed (or OBS shut): no matter how recent its last report was
+  const fresh = () => overlayState && Date.now() - overlayState.at < 15000;
+  if (fresh()) return overlayState;
+  // straight to the overlay pages (not push(): the System check holds pushes back while it runs)
+  const t = Date.now(), line = 'data: ' + JSON.stringify({ type: 'report' }) + '\n\n';
+  for (const c of clients) if (c.bbrPage === 'overlay') try { c.write(line); } catch (e) { /* gone */ }
+  const end = Date.now() + (ms || 4000); while (Date.now() < end) { if (overlayState && overlayState.at >= t) return overlayState; await new Promise((r) => setTimeout(r, 100)); }
+  return fresh() ? overlayState : null;
+}
 // ---------- BOSS BLOOD PRESSURE ----------
 const bp = new (require('./lib/bp').BP)({ cfg: () => cfg, saveCfg, store, push: (a) => push(a), say: sayAll, streamNo: () => streamNo(),
   onMeltdown: () => { feedAdd('MELTDOWN: the Boss has lost it', '#ff1744'); if (replay.S().on && replay.S().autoMeltdown && isLive()) setTimeout(() => replayNow({ label: 'MELTDOWN', auto: true }).catch(() => {}), 6000); if (bp.S().ticker) addStory({ cat: 'Breaking', text: 'MEDICAL EMERGENCY: THE BOSS HAS HIT MELTDOWN - DOCTORS ON STANDBY', keep: 'stream', freq: 'often', tag: 'bp-melt', breaking: showOn('breaking') }); } });
@@ -2215,7 +2231,7 @@ async function postDiscord(d) {
 async function precheck() {
   const out = [], add = (ok, t, fix) => out.push({ ok, t, fix: fix || '' });
   add(obs.ready, 'OBS linked', 'Battles page: connect OBS (Tools > WebSocket Server Settings)');
-  add(clients.size > 0, 'Overlay open in OBS (' + clients.size + ')', 'Add the overlay browser source');
+  add(overlaysOpen() > 0, 'Overlay open in OBS (' + overlaysOpen() + ')', 'Add http://localhost:' + PORT + '/overlay as a Browser Source (1920 × 1080) in every scene you stream with');
   add(!!twitch.user || !twitch.configured(), 'Twitch connected', 'Platforms page: Connect Twitch');
   add(!kick.configured() || kick.connected, 'Kick chat connected', 'Platforms page: check your Kick name');
   add(!youtube.configured() || youtube.connected || !youtube.live, 'YouTube connected', 'Platforms page: connect YouTube when you go live');
@@ -2274,7 +2290,7 @@ async function setTickerLayer(layer) {
     return { ok: true };
   } catch (e) { return { error: e.message }; }
 }
-const diag = new Diag({ cfg: () => cfg, dataDir: DATA, file: path.join(DATA, 'viewers.json'), platforms: PLATFORMS, obs, battle, overlays: () => clients.size, isLive,
+const diag = new Diag({ cfg: () => cfg, dataDir: DATA, file: path.join(DATA, 'viewers.json'), platforms: PLATFORMS, obs, battle, overlays: () => overlaysOpen(), pagesText: () => pagesText('overlay'), isLive,
   reloadOverlays: () => push({ type: 'reload' }), resume: () => pauseBattles(false), version: APP_VERSION,
   extraFix: async (id) => { if (id !== 'layer') return null; const ok = await obs.overlayToTop(obsLayer); obsLayer = await obs.layerCheck(screenSettings().cards.camera); return ok ? 'Moved the overlay above the camera in OBS' : 'Could not move the overlay'; },
   extra: () => { const out = [];
@@ -3188,6 +3204,8 @@ const server = http.createServer(async (req, res) => {
       res.write('data: ' + JSON.stringify(Object.assign(screenState(), { accent: accent() })) + '\n\n');
       res.write('data: ' + JSON.stringify(bsnTickerEv()) + '\n\n');
       for (const f of connectHooks) { try { const ev = f(); if (ev) res.write('data: ' + JSON.stringify(Object.assign({ accent: accent() }, ev)) + '\n\n'); } catch (e) { /* skip */ } }
+      // v41: each BBR page says what it is (/events?page=overlay), so the checks can tell the overlay from Starting Soon etc.
+      res.bbrPage = String(url.searchParams.get('page') || 'other').replace(/[^a-z0-9-]/gi, '').slice(0, 20) || 'other';
       clients.add(res);
       const hb = setInterval(() => res.write(': ping\n\n'), 25000);
       req.on('close', () => { clients.delete(res); clearInterval(hb); });
@@ -3198,7 +3216,7 @@ const server = http.createServer(async (req, res) => {
       if (b.fix === 'obs') { try { await obs.connect(); } catch (e) { /* shown below */ } }
       const C = [], add = (k, ok, label, detail, fix, optional) => C.push({ k, ok: !!ok, label, detail: detail || '', fix: fix || null, optional: !!optional });
       add('obs', obs.ready, 'OBS connected', obs.ready ? 'version ' + (obs.version || '?') : (obs.error || 'not connected'), obs.ready ? null : 'obs');
-      add('overlay', clients.size > 0, 'Overlay open', clients.size ? clients.size + ' open' : 'add http://localhost:' + PORT + '/overlay as a Browser Source');
+      add('overlay', overlaysOpen() > 0, 'Overlay open', overlaysOpen() ? overlaysOpen() + ' open' : 'add http://localhost:' + PORT + '/overlay as a Browser Source');
       let onAir = null; try { onAir = obs.ready ? await obs.overlayOnAir() : null; } catch (e) { onAir = null; }
       if (obs.ready) add('onair', onAir, 'Overlay in the scene on air', onAir ? obs.onAirScene : 'the scene on air (' + (obs.onAirScene || '?') + ') has no BBR overlay');
       const anyChat = twitch.connected || kick.connected || youtube.connected;
@@ -3234,7 +3252,7 @@ const server = http.createServer(async (req, res) => {
     if (p === '/api/status') {
       const interval = battleOpts().intervalMin * 60000;
       return send(res, 200, {
-        accent: accent(), volume: volume(), port: PORT, viewers: store.all().length, overlays: clients.size,
+        accent: accent(), volume: volume(), port: PORT, viewers: store.all().length, overlays: overlaysOpen(), pages: pagesOpen(),
         twitch: { configured: twitch.configured(), loggedIn: !!cfg.twitchTokens, connected: twitch.connected, login: twitch.user && twitch.user.login, live: twitch.live, game: twitch.game || null, error: twitch.lastError, clientId: cfg.twitchClientId || '', hasSecret: !!cfg.twitchClientSecret },
         kick: { configured: kick.configured(), connected: kick.connected, live: kick.live, game: kick.game, slug: cfg.kickSlug || '', chatroomId: cfg.kickChatroomId || '', channelId: cfg.kickChannelId || '', error: kick.lastError,
           apiConfigured: kick.apiConfigured(), loggedIn: !!cfg.kickTokens, apiUser: kick.user && kick.user.name, clientId: cfg.kickClientId || '', hasSecret: !!cfg.kickClientSecret },

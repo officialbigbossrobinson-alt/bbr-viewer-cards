@@ -168,7 +168,7 @@
   function load() { fetch('/api/brb').then((r) => r.json()).then((d) => apply(d.state)).catch(() => setTimeout(load, 3000)); }
   load();
   try {
-    const es = new EventSource('/events');
+    const es = new EventSource('/events?page=brb');
     es.onmessage = (m) => {
       let a; try { a = JSON.parse(m.data); } catch (e) { return; }
       if (a.type === 'brb' && a.action === 'end') { MUSIC.set({ on: false }); return; }

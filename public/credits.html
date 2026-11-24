@@ -101,7 +101,7 @@
   if (Q.get('card')) { card(); return; }
 
   // ---- when to roll ----
-  try { const es = new EventSource('/events'); es.onmessage = (m) => { try { const a = JSON.parse(m.data); if (a.type === 'credits' && a.action === 'roll') roll(a.secs); } catch (e) { /* ignore */ } }; } catch (e) { /* ignore */ }
+  try { const es = new EventSource('/events?page=credits'); es.onmessage = (m) => { try { const a = JSON.parse(m.data); if (a.type === 'credits' && a.action === 'roll') roll(a.secs); } catch (e) { /* ignore */ } }; } catch (e) { /* ignore */ }
   if (window.obsstudio) {
     window.addEventListener('obsSourceActiveChanged', (e) => { if (e.detail && e.detail.active) { load().then(() => { if (D.settings && D.settings.auto) roll(); }); } else reset(); });
   } else if (Q.get('play')) roll(+Q.get('secs') || 0);

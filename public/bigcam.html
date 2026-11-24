@@ -179,7 +179,7 @@
   function load() { fetch('/api/bigcam').then((r) => r.json()).then((d) => apply(d.state)).catch(() => setTimeout(load, 3000)); }
   load();
   try {
-    const es = new EventSource('/events');
+    const es = new EventSource('/events?page=bigcam');
     es.onmessage = (m) => {
       let a; try { a = JSON.parse(m.data); } catch (e) { return; }
       if (a.type === 'bigcam') return apply(a);

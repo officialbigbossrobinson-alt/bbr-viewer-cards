@@ -498,7 +498,7 @@ html,body{margin:0;background:transparent;overflow:hidden}
 
   // ================= connection =================
   function connect() {
-    const es = new EventSource('/events');
+    const es = new EventSource('/events?page=overlay');
     es.onmessage = (m) => {
       let a;
       try { a = JSON.parse(m.data); } catch (e) { return; }
@@ -515,6 +515,7 @@ html,body{margin:0;background:transparent;overflow:hidden}
       if (a.type === 'pen3d') { if (window.PEN3D) PEN3D.config(a); return; }
       if (a.type === 'theme') return setTheme(a.theme);
       if (a.type === 'stinger') { try { STINGER.play(a, { sound: true }); } catch (e) { /* ignore */ } return; }
+      if (a.type === 'report') { try { reportState(); } catch (e) { /* ignore */ } return; }
       if (a.type === 'gmeter') { try { GMETER.init(stage); GMETER.event(a.where === 'own' ? Object.assign({}, a, { on: false }) : a); } catch (e) { /* ignore */ } return; }
       if (a.type === 'spin') { try { SPIN.init(stage); SPIN.event(a.where === 'own' ? Object.assign({}, a, { phase: 'idle' }) : a); } catch (e) { /* ignore */ } return; }
       if (a.type === 'links') { try { if (!(window.EXTRAS && EXTRAS.panic && EXTRAS.panic())) { LINKS.init(stage); LINKS.show(a); } } catch (e) { /* ignore */ } return; }
@@ -563,9 +564,11 @@ html,body{margin:0;background:transparent;overflow:hidden}
     if (rpChecks >= 2) { rpChecks = 0; EXTRAS.event({ type: 'replay', action: 'stop' }); lastErr = 'a replay screen never closed: cleared'; next(); }
   }
   // tell the app how the cards are doing (Setup > System check shows it)
-  setInterval(() => {
+  function reportState() {
     try { fetch('/api/overlay-state', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ queue: queue.length, busy, battleBusy, sceneHold, otherBusy, rpOn: stage.classList.contains('rp-on'), panic: !!(window.EXTRAS && EXTRAS.panic()), err: lastErr, shown: shownN, next: queue[0] ? queue[0].type : null, g3: window.PEN3D ? PEN3D.status() : null }) }).then((x) => x.json()).then(serverSays).catch(() => {}); } catch (e) { /* ignore */ }
-  }, 5000);
+  }
+  window.BBR_REPORT = reportState;
+  setInterval(reportState, 5000);
   window.BBR_DEBUG = { battle: onBattle, alert: (a) => { queue.push(a); next(); } };
 })();
 </script>

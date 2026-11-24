@@ -138,7 +138,7 @@
   function load() { fetch('/api/ballon/screen').then((r) => r.json()).then(apply).catch(() => setTimeout(load, 3000)); }
   load(); setInterval(() => { if (st && st.show && st.show.screen === 'corner') $('cLeft').textContent = left(st.closesAt); }, 60000);
   try {
-    const es = new EventSource('/events');
+    const es = new EventSource('/events?page=ballon');
     es.onmessage = (m) => {
       let a; try { a = JSON.parse(m.data); } catch (e) { return; }
       if (a.type === 'reload') return location.reload();

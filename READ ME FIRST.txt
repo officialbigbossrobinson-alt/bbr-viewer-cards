@@ -1,4 +1,10 @@
-WHAT'S NEW IN v40 (Ballon d'Or chat)
+WHAT'S NEW IN v41 (overlay check)
+   - "Overlay open in OBS" counts only the BBR overlay (http://localhost:3000/overlay), not your
+     Starting Soon / BRB / Big Cam / Ballon d'Or pages. If it's missing, the check lists what IS open.
+   - No more false "something is connected but the overlay is not reporting": the System check asks
+     the overlay directly (OBS slows down sources in scenes you're not on).
+
+WHAT WAS NEW IN v40 (Ballon d'Or chat)
    - One vote per stream, and they can change it ONCE that stream. A second change is refused
      ("you've already changed your vote this stream, so it stays on #4").
    - Every vote gets an answer in chat ("✅ Vote counted: @name #4 Rossi"). Votes in the same few

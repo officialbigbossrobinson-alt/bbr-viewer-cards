@@ -644,7 +644,7 @@
 <script>
   // standalone OBS source (the ticker in front of / behind the camera): follow the app's show / hide
   if (/standalone=1/.test(location.search)) {
-    try { const es = new EventSource('/events'); es.onmessage = (m) => { try { const a = JSON.parse(m.data); if (a.type === 'bsnTicker') { document.body.classList.toggle('bsn-hide-ticker', !!a.hide || !a.on || !a.separate); } } catch (e) { /* ignore */ } }; } catch (e) { /* ignore */ }
+    try { const es = new EventSource('/events?page=ticker'); es.onmessage = (m) => { try { const a = JSON.parse(m.data); if (a.type === 'bsnTicker') { document.body.classList.toggle('bsn-hide-ticker', !!a.hide || !a.on || !a.separate); } } catch (e) { /* ignore */ } }; } catch (e) { /* ignore */ }
   }
 </script>
 </body>
