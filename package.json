@@ -1,7 +1,7 @@
 {
   "name": "bbr-viewer-cards",
   "productName": "BBR Viewer Cards",
-  "version": "41.0.0",
+  "version": "42.0.0",
   "description": "Viewer cards, battles, giveaways and overlays for bigbossrobinson's streams (Twitch, Kick, YouTube).",
   "main": "desktop/main.js",
   "author": "bigbossrobinson",

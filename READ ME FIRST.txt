@@ -1,4 +1,12 @@
-WHAT'S NEW IN v41 (overlay check)
+WHAT'S NEW IN v42 (OBS dock, Starting Soon, credits)
+   - "localhost" always reaches the app now (it also answers on localhost's IPv6 address). A white
+     BBR dock, or Starting Soon / credits not reacting in OBS, was OBS missing the app.
+   - If another program uses localhost:3000, Setup > System check says so: then use
+     http://127.0.0.1:3000/... in OBS instead (dock: Docks > Custom Browser Docks).
+   - Credits roll by themselves again even when there's no stream to list yet.
+   - System check: "BBR pages OBS has open" shows the dock, overlay, Starting Soon, credits...
+
+WHAT WAS NEW IN v41 (overlay check)
    - "Overlay open in OBS" counts only the BBR overlay (http://localhost:3000/overlay), not your
      Starting Soon / BRB / Big Cam / Ballon d'Or pages. If it's missing, the check lists what IS open.
    - No more false "something is connected but the overlay is not reporting": the System check asks

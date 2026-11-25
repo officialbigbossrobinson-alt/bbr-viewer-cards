@@ -1,5 +1,6 @@
-Version 41: overlay check fixed.
+Version 42: OBS dock, Starting Soon and credits.
 
-- "Overlay open in OBS" now counts only the BBR overlay. Before, it counted every BBR page open in OBS (Starting Soon, BRB, Big Cam, Ballon d'Or...), so it could say 6 when the overlay itself wasn't one of them.
-- No more false "the overlay is not reporting": OBS slows down sources in scenes you're not on, so the overlay's regular check-in could be a minute late. The System check now asks the overlay directly and gets an answer at once.
-- If the overlay really isn't open, the check says so and lists the BBR pages that are open.
+- The app now also answers on localhost's second (IPv6) address. On some PCs "localhost" goes there first, so OBS docks and Browser Sources set to http://localhost:3000 could miss the app: a white dock, and Starting Soon / credits that never react when you switch to them.
+- If another program on your PC is already using that address, the System check says so and gives you the address to use instead (http://127.0.0.1:3000/...).
+- Fixed: the credits didn't roll by themselves when the app had no stream to put in them.
+- The System check lists the BBR pages OBS has open (dock, overlay, Starting Soon, credits...), so you can see at a glance what's connected.

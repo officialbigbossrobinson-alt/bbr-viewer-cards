@@ -18,7 +18,7 @@ const TU = require('./lib/tuning');
 const { OBS } = require('./lib/obs');
 const { Diag } = require('./lib/diag');
 const { BSN, BSN_IMAGES, normTokens, fillStory, LEFTOVER_RE } = require('./lib/bsn');
-const APP_VERSION = '41';
+const APP_VERSION = '42';
 const ARCX = require('./lib/arc');
 const RLX = require('./lib/race');
 const BTX = require('./lib/battle');
@@ -1049,7 +1049,7 @@ function creditsData(no) {
   const all = store.data.streams || {};
   const n = no || streamNo() || Math.max(0, ...Object.keys(all).map(Number));
   const s = all[n];
-  if (!s) return { no: n, empty: true, sections: [] };
+  if (!s) return { no: n, empty: true, sections: [], settings: creditsSettings() };   // v42: settings too, or the credits page never rolls by itself
   const V = store.data.viewers, name = (k) => (V[k] && V[k].display) || String(k).split(':').pop();
   const ok = (k) => !(V[k] && V[k].isBroadcaster);
   const rows = Object.entries(s.v || {}).filter(([k]) => ok(k));
@@ -2290,7 +2290,7 @@ async function setTickerLayer(layer) {
     return { ok: true };
   } catch (e) { return { error: e.message }; }
 }
-const diag = new Diag({ cfg: () => cfg, dataDir: DATA, file: path.join(DATA, 'viewers.json'), platforms: PLATFORMS, obs, battle, overlays: () => overlaysOpen(), pagesText: () => pagesText('overlay'), isLive,
+const diag = new Diag({ cfg: () => cfg, dataDir: DATA, file: path.join(DATA, 'viewers.json'), platforms: PLATFORMS, obs, battle, overlays: () => overlaysOpen(), pagesText: () => pagesText('overlay'), pagesOpen: () => pagesOpen(), obsSeen: () => OBS_SEEN, localhost6: () => LOCALHOST6, port: () => PORT, isLive,
   reloadOverlays: () => push({ type: 'reload' }), resume: () => pauseBattles(false), version: APP_VERSION,
   extraFix: async (id) => { if (id !== 'layer') return null; const ok = await obs.overlayToTop(obsLayer); obsLayer = await obs.layerCheck(screenSettings().cards.camera); return ok ? 'Moved the overlay above the camera in OBS' : 'Could not move the overlay'; },
   extra: () => { const out = [];
@@ -3150,7 +3150,10 @@ function testBattle(mode) {
   return true;
 }
 
+// v42: which BBR pages OBS itself has opened (its browser says "OBS" in its user agent), for the System check
+const OBS_SEEN = {}; let LOCALHOST6 = { state: 'unknown' };
 const server = http.createServer(async (req, res) => {
+  try { if (/\bOBS\//.test(req.headers['user-agent'] || '')) { const pth = (req.url || '').split('?')[0]; if (/^\/(dock|overlay|starting|brb|credits|bigcam|ballon|spin|gmeter)$/.test(pth)) OBS_SEEN[pth.slice(1)] = { at: Date.now(), host: String(req.headers.host || '') }; } } catch (e) { /* ignore */ }
   const url = new URL(req.url, 'http://localhost');
   const p = url.pathname;
   try {
@@ -4522,6 +4525,14 @@ server.on('error', (e) => {
 });
 server.listen(PORT, '127.0.0.1', () => {
   if (DESK.on) { try { process.send({ type: 'ready', port: PORT, version: APP_VERSION }); } catch (e) { /* ignore */ } }
+  // v42: "localhost" can mean the IPv6 address [::1] on Windows. Listen there too, so OBS docks and sources that use
+  // localhost always reach this app. If another program already uses [::1]:PORT, OBS can end up talking to it instead
+  // (white dock, Starting Soon / credits not reacting): the System check says so and gives the 127.0.0.1 address.
+  try {
+    const s6 = http.createServer(server.listeners('request')[0]);
+    s6.on('error', (e) => { LOCALHOST6 = { state: e.code === 'EADDRINUSE' ? 'taken' : 'none', code: e.code }; if (e.code === 'EADDRINUSE') console.error('ERR another program is using localhost:' + PORT + ' (IPv6 [::1]). OBS pages set to localhost may reach it instead of BBR: use http://127.0.0.1:' + PORT + '/... or change the port in Setup.'); });
+    s6.listen(PORT, process.env.BBR_ALT_HOST || '::1', () => { LOCALHOST6 = { state: 'ok' }; });   // BBR_ALT_HOST: tests only
+  } catch (e) { LOCALHOST6 = { state: 'none', code: e.message }; }
   console.log('');
   console.log('  BBR Viewer Cards is running.');
   console.log('  Dashboard:  http://localhost:' + PORT);
