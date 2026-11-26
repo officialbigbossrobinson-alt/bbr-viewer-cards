@@ -181,6 +181,38 @@ html,body{margin:0;background:transparent;overflow:hidden}
   .hx-banner{position:absolute;left:50%;top:38%;transform:translate(-50%,-50%);z-index:60;pointer-events:none;text-align:center;font-family:'Barlow Condensed',sans-serif}
   .hx-banner .a{font:900 italic 96px/1 'Barlow Condensed',sans-serif;letter-spacing:4px;color:#ffe48a;text-shadow:5px 5px 0 #a0216f,10px 10px 0 #12061f}
   .hx-banner .b{display:inline-block;margin-top:10px;background:#12061f;color:#2ef2ff;font:800 30px 'Barlow Condensed',sans-serif;letter-spacing:4px;padding:4px 20px;transform:skewX(-10deg)}
+  /* ===== v43: Elite Playoffs (football in black & gold: matte black glass, gold foil, a laurel crest) ===== */
+  #stage{--gold:linear-gradient(135deg,#8a6a24 0%,#f6e3a1 22%,#c9a24a 45%,#fff2c2 58%,#b48a33 78%,#6e5219 100%)}
+  #stage.theme-elite .al-wrap{--k:#D9B45A}
+  #stage.theme-elite .al-panel{background:radial-gradient(120% 140% at 0% 0%,#1d1a14 0%,#0d0d0e 45%,#060607 100%);border:0;border-radius:6px;box-shadow:0 24px 60px rgba(0,0,0,.6),0 0 0 2px #0a0a0a,0 0 0 5px #D9B45A,0 0 40px rgba(217,180,90,.35)}
+  #stage.theme-elite .al-panel::before{content:"ELITE PLAYOFFS";position:absolute;left:auto;bottom:auto;right:26px;top:16px;width:auto;height:auto;font:800 17px 'Barlow Condensed',sans-serif;letter-spacing:6px;background:var(--gold);-webkit-background-clip:text;background-clip:text;color:transparent}
+  #stage.theme-elite .al-panel::after{content:"";position:absolute;left:24px;right:24px;bottom:14px;height:2px;background:linear-gradient(90deg,transparent,#D9B45A 20%,#fff2c2 50%,#D9B45A 80%,transparent);opacity:.8}
+  #stage.theme-elite .al-edge,#stage.theme-elite .al-streak{display:none}
+  #stage.theme-elite .al-sheen{background:linear-gradient(90deg,transparent,rgba(255,236,180,.18),transparent)}
+  #stage.theme-elite .al-badge{border-radius:3px;background:var(--gold);color:#16110a;box-shadow:0 8px 22px rgba(0,0,0,.6),0 0 0 2px #0b0b0c;letter-spacing:4px}
+  #stage.theme-elite .al-badge .ic{background:#0b0b0c;color:#D9B45A}
+  #stage.theme-elite .al-kick{color:#D9B45A;letter-spacing:6px}
+  #stage.theme-elite .al-name{background:linear-gradient(180deg,#fff8e1 0%,#f3e7c9 55%,#cfae62 100%);-webkit-background-clip:text;background-clip:text;color:transparent;filter:drop-shadow(0 3px 0 rgba(0,0,0,.6))}
+  #stage.theme-elite .al-why{color:#cbbf9f}
+  #stage.theme-elite .al-why b{color:#F3E7C9}
+  #stage.theme-elite .al-amt{background:var(--gold);-webkit-background-clip:text;background-clip:text;color:transparent;text-shadow:none;filter:drop-shadow(0 0 10px rgba(217,180,90,.5))}
+  #stage.theme-elite .xchat .m{background:rgba(9,9,10,.9);border:1px solid rgba(217,180,90,.55);border-left:4px solid #D9B45A}
+  #stage.theme-elite .xchat .m b{color:#D9B45A}
+  /* the "theme on" moment */
+  .el-plate{position:absolute;right:34px;top:34px;z-index:9;pointer-events:none;max-width:860px}
+  #stage.po-on > .xr{display:none!important}
+  /* full time in black & gold */
+  #stage.theme-elite .xft{z-index:62}
+  #stage.theme-elite .xft .k{background:var(--gold);-webkit-background-clip:text;background-clip:text;color:transparent;letter-spacing:10px}
+  #stage.theme-elite .xft .box{background:#0b0b0c;border:0;border-radius:6px;box-shadow:0 20px 70px rgba(0,0,0,.7),0 0 0 2px #050505,0 0 0 5px #D9B45A}
+  #stage.theme-elite .xft .t.us{background:var(--gold);color:#16110a}
+  #stage.theme-elite .xft .s{color:#F3E7C9}
+  #stage.theme-elite .xft .r{border-radius:3px;background:var(--gold);color:#16110a;letter-spacing:10px}
+  #stage.theme-elite .xft .rec{color:#cbbf9f}
+  .el-banner{position:absolute;left:50%;top:40%;transform:translate(-50%,-50%);z-index:60;pointer-events:none;text-align:center;font-family:'Barlow Condensed',sans-serif}
+  .el-banner .cr{width:120px;height:120px;margin:0 auto 6px;display:block}
+  .el-banner .a{font:800 104px/1 'Barlow Condensed',sans-serif;letter-spacing:10px;background:linear-gradient(135deg,#8a6a24 0%,#f6e3a1 22%,#c9a24a 45%,#fff2c2 58%,#b48a33 78%,#6e5219 100%);-webkit-background-clip:text;background-clip:text;color:transparent;filter:drop-shadow(0 6px 0 #000) drop-shadow(0 0 30px rgba(217,180,90,.45))}
+  .el-banner .b{display:inline-block;margin-top:12px;background:#0b0b0c;color:#F3E7C9;font:700 30px 'Barlow Condensed',sans-serif;letter-spacing:8px;padding:6px 26px;border:2px solid #D9B45A}
 </style>
 </head>
 <body>
@@ -194,6 +226,7 @@ html,body{margin:0;background:transparent;overflow:hidden}
 <script src="/links.js"></script>
 <script src="/gmeter.js"></script>
 <script src="/spin.js"></script>
+<script src="/elite.js"></script>
 <script src="/stinger.js"></script>
 <script src="/kits.js"></script>
 <script src="/stadium3d.js"></script>
@@ -474,7 +507,32 @@ html,body{margin:0;background:transparent;overflow:hidden}
     const line = k === 'giftbomb' || k === 'gift' ? who + ' JUST GIFTED ' + (n || '') : k === 'sub' || k === 'resub' ? who + ' SUBSCRIBED' : k === 'bits' ? who + ' SENT ' + (n || '') + ' BITS' : k === 'kicks' ? who + ' SENT ' + (n || '') + ' KICKS' : k === 'raid' ? who + ' RAIDED WITH ' + (n || '') : k === 'follow' ? who + (THEME === 'heist' ? ' JOINED THE CREW' : ' JOINED THE CONVOY') : null;
     if (line) { etsNews.push(line); while (etsNews.length > 10) etsNews.shift(); etsTick(); }
   }
-  function setTheme(th) { const was = THEME; THEME = th === 'ets' || th === 'heist' ? th : 'football'; stage.classList.toggle('theme-ets', THEME === 'ets'); stage.classList.toggle('theme-heist', THEME === 'heist'); if (was !== THEME) { etsNews.length = 0; if (THEME === 'heist' && themeSeen) hxBanner('SUNSET HEIST', 'THEME ON'); } themeSeen = true; etsTick(); }
+  // v43: 'elite' = football in black & gold (THEME stays 'football' for everything football does)
+  let ELITE = false;
+  function setTheme(th) { const was = THEME, wasE = ELITE; ELITE = th === 'elite'; THEME = th === 'ets' || th === 'heist' ? th : 'football'; stage.classList.toggle('theme-ets', THEME === 'ets'); stage.classList.toggle('theme-heist', THEME === 'heist'); stage.classList.toggle('theme-elite', ELITE); window.BBR_ELITE = ELITE; if (was !== THEME) { etsNews.length = 0; if (THEME === 'heist' && themeSeen) hxBanner('SUNSET HEIST', 'THEME ON'); } if (ELITE && !wasE && themeSeen) elBanner(); themeSeen = true; etsTick(); }
+  // v43: the playoff tracker plate (top right, where the team results bar is: it takes its place while it's on)
+  let poEl = null;
+  function drawPlayoffs(a) {
+    window.BBR_PO = a;
+    const show = !!(a && a.show && window.BBR_TRACKER);
+    stage.classList.toggle('po-on', show);
+    if (!show) { if (poEl) { const e = poEl; poEl = null; e.animate([{ opacity: 1 }, { opacity: 0 }], { duration: 300, fill: 'forwards' }).onfinish = () => e.remove(); } return; }
+    const fresh = !poEl;
+    if (!poEl) { poEl = document.createElement('div'); poEl.className = 'el-plate'; stage.appendChild(poEl); }
+    const prev = poEl.dataset.k, k = JSON.stringify([a.list, a.matches, a.status, a.title]);
+    if (prev === k) return; poEl.dataset.k = k;
+    poEl.innerHTML = window.BBR_TRACKER(a, { compact: a.matches > 12 });
+    if (fresh) poEl.animate([{ opacity: 0, transform: 'translateY(-20px)' }, { opacity: 1, transform: 'none' }], { duration: 500, easing: 'cubic-bezier(.2,1,.3,1)' });
+    else if (prev) { const last = poEl.querySelectorAll('.el-s')[Math.max(0, a.played - 1)]; if (last && a.played) last.animate([{ transform: 'scale(1.8)', filter: 'brightness(2)' }, { transform: 'scale(1)', filter: 'none' }], { duration: 700, easing: 'cubic-bezier(.2,1.4,.4,1)' }); }
+  }
+  function elBanner() {
+    const b = document.createElement('div'); b.className = 'el-banner';
+    b.innerHTML = (window.BBR_CREST ? window.BBR_CREST(120) : '') + '<div class="a">ELITE PLAYOFFS</div><div class="b">PLAYOFF NIGHT</div>';
+    stage.appendChild(b);
+    b.animate([{ opacity: 0, transform: 'translate(-50%,-50%) scale(.85)', filter: 'blur(8px)' }, { opacity: 1, transform: 'translate(-50%,-50%) scale(1)', filter: 'blur(0)' }], { duration: 700, easing: 'cubic-bezier(.2,1,.3,1)' });
+    try { SFX.play('fanfare'); } catch (e) { /* no sound */ }
+    setTimeout(() => { b.animate([{ opacity: 1 }, { opacity: 0 }], { duration: 600, fill: 'forwards' }).onfinish = () => b.remove(); }, 3400);
+  }
   let themeSeen = false;
   // v31: big comic-style banner (theme on, game won). Original wording, not GTA's.
   function hxBanner(a, b, ms) {
@@ -515,6 +573,7 @@ html,body{margin:0;background:transparent;overflow:hidden}
       if (a.type === 'pen3d') { if (window.PEN3D) PEN3D.config(a); return; }
       if (a.type === 'theme') return setTheme(a.theme);
       if (a.type === 'stinger') { try { STINGER.play(a, { sound: true }); } catch (e) { /* ignore */ } return; }
+      if (a.type === 'playoffs') { try { drawPlayoffs(a); } catch (e) { /* ignore */ } return; }
       if (a.type === 'report') { try { reportState(); } catch (e) { /* ignore */ } return; }
       if (a.type === 'gmeter') { try { GMETER.init(stage); GMETER.event(a.where === 'own' ? Object.assign({}, a, { on: false }) : a); } catch (e) { /* ignore */ } return; }
       if (a.type === 'spin') { try { SPIN.init(stage); SPIN.event(a.where === 'own' ? Object.assign({}, a, { phase: 'idle' }) : a); } catch (e) { /* ignore */ } return; }

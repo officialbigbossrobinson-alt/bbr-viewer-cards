@@ -14,6 +14,7 @@ window.STINGER = (function () {
     football: { a: '#0d2459', b: '#e3132c', c: '#f5c400', text: 'BOSS SPORTS NEWS', sub: 'BIGBOSSROBINSON' },
     arc: { a: '#141414', b: '#f2c200', c: '#e53b2c', text: 'RAIDER INCOMING', sub: 'BIGBOSSROBINSON' },
     mgs: { a: '#06140c', b: '#3dff7a', c: '#bfffd4', text: 'INFILTRATING', sub: 'BIGBOSSROBINSON' },
+    elite: { a: '#0b0b0c', b: '#D9B45A', c: '#F3E7C9', text: 'ELITE PLAYOFFS', sub: 'BIGBOSSROBINSON · PLAYOFF NIGHT' },
     heist: { a: '#c2306f', b: '#2ef2ff', c: '#ffe48a', text: 'THE CREW IS BACK', sub: 'BIGBOSSROBINSON' },
     neon: { a: '#12061f', b: '#c58bff', c: '#22d3ee', text: 'BIGBOSSROBINSON', sub: 'TWITCH · KICK · YOUTUBE' },
   };
@@ -137,7 +138,7 @@ window.STINGER = (function () {
       else if (ev.look === 'arc') { SFX.play('alarm'); SFX.play('whoosh', t * 0.2); }
       else if (ev.variant === 'comic') { SFX.play('whoosh'); SFX.play('thud', t * (c - 0.1)); SFX.play('impact', t * c); }
       else if (ev.look === 'mgs') { SFX.play('beep'); SFX.play('whoosh', t * 0.2); }
-      else { SFX.play('whoosh'); if (ev.look === 'football') SFX.play('whistle', t * c); }
+      else { SFX.play('whoosh'); if (ev.look === 'football' || ev.look === 'elite') SFX.play('whistle', t * c); }
     } catch (e) { /* no audio */ }
   }
   // play: o.sound = false on every source except the overlay

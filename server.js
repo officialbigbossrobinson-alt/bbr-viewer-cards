@@ -18,7 +18,7 @@ const TU = require('./lib/tuning');
 const { OBS } = require('./lib/obs');
 const { Diag } = require('./lib/diag');
 const { BSN, BSN_IMAGES, normTokens, fillStory, LEFTOVER_RE } = require('./lib/bsn');
-const APP_VERSION = '42';
+const APP_VERSION = '43';
 const ARCX = require('./lib/arc');
 const RLX = require('./lib/race');
 const BTX = require('./lib/battle');
@@ -141,9 +141,15 @@ function themeName() {
   const g = currentGame(), auto = cfg.themeAuto !== false;
   if (auto && HEIST_RE.test(g)) return 'heist';
   if (auto && TRUCK_RE.test(g)) return 'ets';
-  if (auto && FOOTY_RE.test(g)) return 'football';
-  return cfg.theme === 'ets' || cfg.theme === 'heist' ? cfg.theme : 'football';
+  const po = cfg.playoffs && cfg.playoffs.on && cfg.playoffs.theme !== false;
+  if (auto && FOOTY_RE.test(g)) return po ? 'elite' : 'football';
+  const base = cfg.theme === 'ets' || cfg.theme === 'heist' ? cfg.theme : cfg.theme === 'elite' ? 'elite' : 'football';
+  // v43: Playoff night turns football into Elite Playoffs (black & gold)
+  if (base === 'football' && po) return 'elite';
+  return base;
 }
+// v43: a football-type theme (Elite Playoffs is football in black & gold)
+const isFooty = (t) => t === 'football' || t === 'elite';
 
 // ---------- chat output ----------
 // every bot reply is also kept here (System check reads it to prove commands answer)
@@ -1226,6 +1232,7 @@ connectHooks.push(() => Object.assign({ type: 'bossrecord' }, bossInfo()));
 function actionList() {
   const A = [];
   const add = (group, id, label, u, color) => A.push({ group, id, label, u, color });
+  add('Game', 'playoffs', 'Playoff night: on / off (Elite Playoffs)', '/control/playoffs', '#D9B45A'); add('Game', 'playoffs-newrun', 'Playoffs: start a new run', '/control/playoffs-newrun', '#D9B45A');
   add('Game', 'result-win', 'Result: win', '/control/result-win', '#3dff9a'); add('Game', 'result-draw', 'Result: draw', '/control/result-draw', '#ffd23f'); add('Game', 'result-loss', 'Result: loss', '/control/result-loss', '#ff6b7d'); add('Game', 'result-undo', 'Result: undo', '/control/result-undo', '#a7b0ba');
   for (const c of counters.list()) { add('Game', 'counter-plus:' + c.id, c.name + ' +1', '/control/counter-plus?id=' + encodeURIComponent(c.id), c.color); add('Game', 'counter-minus:' + c.id, c.name + ' -1', '/control/counter-minus?id=' + encodeURIComponent(c.id), c.color); }
   add('Game', 'redcard', 'Red card rule (tap again to clear)', '/control/redcard', '#ff3b3b');
@@ -1373,6 +1380,7 @@ function dockState() {
   st.health = { twitch: twitch.configured() ? !!twitch.connected : null, kick: kick.configured() ? !!kick.connected : null, youtube: youtube.configured() ? !!youtube.connected : null, obs: !!obs.ready, overlay: clients.size > 0, cards: !(st.safety && st.safety.frozen) };
   st.gamesOpts = { letMePlay: cfg.letMePlay !== false, joinReplies: cfg.joinReplies !== false, idle: TV.general.startIdleSecs != null ? TV.general.startIdleSecs : 10, battlesPaused: !!cfg.battlesPaused };
   st.theme = themeName();
+  try { st.playoffs = playoffs.state(); } catch (e) { /* ignore */ }
   try { const P = spin.payload(); st.spin = { phase: P.phase, winner: P.winner, spinEndsAt: P.spinEndsAt, claimEndsAt: P.claimEndsAt, cmd: P.cmd, test: P.test, now: P.now }; } catch (e) { /* ignore */ }
   try { const X = sgw.state(); st.sgw = { open: X.open, count: X.count, cmd: X.settings.cmd, needMins: X.settings.needMins, on: X.settings.on, winners: X.winners.slice(0, 3), entries: X.entries.slice(0, 400).map((e) => ({ key: e.key, d: e.display, p: e.platform, m: e.mins, h: !!e.byHand })) }; } catch (e) { /* ignore */ }
   try { const G = gmeter.payload(); st.gmeter = { mode: G.mode, enabled: G.enabled, prize: G.words.prize, on: G.on, running: G.running, paused: G.paused, ended: G.ended, left: G.left, endsAt: G.endsAt, value: G.value, goal: G.goal, hit: G.hit, entries: G.entries, title: G.words.title, unit: G.words.unit, hasTimer: G.hasTimer, winner: G.winner }; } catch (e) { /* ignore */ }
@@ -1490,6 +1498,12 @@ function counterAdd(id, d) {
 const { Results } = require('./lib/results');
 const results = new Results({ store, cfg: () => cfg, saveCfg, push: (a) => push(a), streamNo, currentGame, say: (m) => sayAll(m) });
 connectHooks.push(() => results.state());
+// v43 Elite Playoffs tracker (lib/playoffs.js): mirrors the W / D / L buttons while Playoff night is on
+const playoffs = new (require('./lib/playoffs').Playoffs)({ store, cfg: () => cfg, saveCfg, push: (a) => push(a), say: (m) => sayAll(m), feed: (a, b) => feedAdd(a, b), onChange: () => { try { themePush(); } catch (e) { /* ignore */ } } });
+connectHooks.push(() => playoffs.state());
+{ const ra = results.add.bind(results), ru = results.undo.bind(results);
+  results.add = (...x) => { const r = ra(...x); try { if (r && r.ok && playoffs.S().on && results.team().type === 'wdl') { const d = results.data(results.team()); const p2 = playoffs.add(r.idx, d && d.last && d.last.us != null ? d.last : null); if (p2.ok) { const L = playoffs.D().list; L[L.length - 1].src = 'results'; } } } catch (e) { console.error('[playoffs]', e.message); } return r; };
+  results.undo = (...x) => { const r = ru(...x); try { if (r && r.ok && playoffs.S().on) { const L = playoffs.D().list; if (L.length && L[L.length - 1].src === 'results') playoffs.undo(); } } catch (e) { console.error('[playoffs]', e.message); } return r; }; }
 const { ClubStats } = require('./lib/clubstats');
 const clubStats = new ClubStats({ store, cfg: () => cfg, saveCfg, push: (a) => push(a), say: (m) => sayAll(m), sheet: () => squad.state().sheet,
   givePoint: (k, n) => { const v = store.data.viewers[k]; if (v && n > 0) { giveCardPoints(store.primary(v) || v, n); store.save(); } },
@@ -2000,7 +2014,8 @@ let overlayState = null, overlayErrLast = '';
 function pagesOpen() { const n = {}; for (const c of clients) n[c.bbrPage || 'other'] = (n[c.bbrPage || 'other'] || 0) + 1; return n; }
 function overlaysOpen() { return pagesOpen().overlay || 0; }
 const PAGE_NAMES = { overlay: 'overlay', starting: 'Starting Soon', brb: 'BRB', bigcam: 'Big Cam', credits: 'credits', ballon: 'Ballon d\'Or', spin: 'spin', gmeter: 'giveaway meter', ticker: 'news ticker', dashboard: 'dashboard', dock: 'dock', other: 'other' };
-function pagesText(skip) { const n = pagesOpen(); return Object.keys(n).filter((k) => k !== skip).map((k) => (PAGE_NAMES[k] || k) + (n[k] > 1 ? ' ×' + n[k] : '')).join(', '); }
+// 'embed' = a page inside another BBR page (the ticker inside the overlay / Starting Soon): not a page of its own
+function pagesText(skip) { const n = pagesOpen(); return Object.keys(n).filter((k) => k !== skip && k !== 'embed').map((k) => (PAGE_NAMES[k] || k) + (n[k] > 1 ? ' ×' + n[k] : '')).join(', '); }
 // the overlay reports every 5 s, but OBS slows a hidden source's timers to once a minute: ask it straight away instead
 async function overlayFresh(ms) {
   if (!overlaysOpen()) return null;   // closed (or OBS shut): no matter how recent its last report was
@@ -2486,6 +2501,9 @@ async function onChat(platform, e, test) {
     const m = /(\d{1,2})\s*[-:]\s*(\d{1,2})/.exec(text); if (!m) return;
     const r = squad.predict(v.key, +m[1], +m[2]);
     if (!onCooldown('!predict-' + v.key, 15000)) say(platform, '@' + v.display + ' ' + (r.error ? r.error : 'prediction locked in: ' + m[1] + '-' + m[2] + '.'));
+  } else if (cmd === '!playoffs' || cmd === '!playoff') {
+    if (onCooldown('!playoffs-' + platform, 20000)) return;
+    sayOnce(platform, playoffs.S().on || playoffs.D().list.length ? playoffs.line() : 'No playoffs on right now.');
   } else if (cmd === '!record' || cmd === '!results') {
     if (onCooldown('!record-' + platform, 30000)) return;
     sayOnce(platform, results.line());
@@ -3040,7 +3058,7 @@ function importList(platform, text, kind) {
 // ---------- web server ----------
 const TYPES = { '.html': 'text/html; charset=utf-8', '.js': 'text/javascript; charset=utf-8', '.css': 'text/css; charset=utf-8' };
 const PAGES = { '/gmeter': 'gmeter.html', '/gmeter.js': 'gmeter.js', '/brb': 'brb.html', '/bigcam': 'bigcam.html', '/music.js': 'music.js', '/links.js': 'links.js', '/stinger.js': 'stinger.js', '/': 'dashboard.html', '/overlay': 'overlay.html', '/credits': 'credits.html', '/card.js': 'card.js', '/card.css': 'card.css', '/sfx.js': 'sfx.js',
-  '/race.js': 'race.js', '/scene3d.js': 'scene3d.js', '/penalty.js': 'penalty.js', '/teampens.js': 'teampens.js', '/bp.js': 'bp.js', '/starting': 'starting.html', '/ballon': 'ballon.html', '/spin': 'spin.html', '/spin.js': 'spin.js', '/arc.js': 'arc.js', '/alerts.js': 'alerts.js', '/textures.js': 'textures.js', '/giveaway.js': 'giveaway.js', '/hud.js': 'hud.js', '/challenges.js': 'challenges.js', '/camfx.js': 'camfx.js', '/boards.js': 'boards.js', '/raidnight.js': 'raidnight.js', '/landmarks.js': 'landmarks.js', '/screen.js': 'screen.js', '/extras.js': 'extras.js', '/broadcast.js': 'broadcast.js', '/scenes': 'scenes.html', '/teeth-tracker': 'teeth.html', '/dock': 'dock.html', '/analysis': 'analysis.html', '/draw.js': 'draw.js', '/stadium3d.js': 'stadium3d.js', '/kits.js': 'kits.js', '/pen3d.js': 'pen3d.js' };
+  '/race.js': 'race.js', '/scene3d.js': 'scene3d.js', '/penalty.js': 'penalty.js', '/teampens.js': 'teampens.js', '/bp.js': 'bp.js', '/starting': 'starting.html', '/ballon': 'ballon.html', '/spin': 'spin.html', '/spin.js': 'spin.js', '/elite.js': 'elite.js', '/arc.js': 'arc.js', '/alerts.js': 'alerts.js', '/textures.js': 'textures.js', '/giveaway.js': 'giveaway.js', '/hud.js': 'hud.js', '/challenges.js': 'challenges.js', '/camfx.js': 'camfx.js', '/boards.js': 'boards.js', '/raidnight.js': 'raidnight.js', '/landmarks.js': 'landmarks.js', '/screen.js': 'screen.js', '/extras.js': 'extras.js', '/broadcast.js': 'broadcast.js', '/scenes': 'scenes.html', '/teeth-tracker': 'teeth.html', '/dock': 'dock.html', '/analysis': 'analysis.html', '/draw.js': 'draw.js', '/stadium3d.js': 'stadium3d.js', '/kits.js': 'kits.js', '/pen3d.js': 'pen3d.js' };
 // your own textures / sounds: the user folder first, then the ones that come with the app
 const TEX_DIRS = [...new Set([path.join(HOME, 'textures'), path.join(ROOT, 'textures')])];
 const IMG = { '.jpg': 'image/jpeg', '.jpeg': 'image/jpeg', '.png': 'image/png', '.webp': 'image/webp' };
@@ -3400,7 +3418,9 @@ const server = http.createServer(async (req, res) => {
       else if (a === 'music-play') { const m = media.get(url.searchParams.get('id') || ''), w = url.searchParams.get('where'); if (!m || m.kind !== 'music') msg = 'That song isn\'t in Photos & music'; else { push({ type: 'music', act: 'play', url: media.url(m.id), name: m.name, where: /^(starting|brb|bigcam)$/.test(w || '') ? w : 'all' }); msg = 'Playing ' + m.name; } }
       else if (a === 'music-stopsong') { const w = url.searchParams.get('where'); push({ type: 'music', act: 'stopsong', where: /^(starting|brb|bigcam)$/.test(w || '') ? w : 'all' }); msg = 'Song stopped'; }
       else if (a === 'music-mute') { cfg.musicMuted = !cfg.musicMuted; saveCfg(); push({ type: 'music', act: cfg.musicMuted ? 'mute' : 'unmute' }); msg = cfg.musicMuted ? 'Music muted' : 'Music on'; }
-      else if (a === 'theme-ets' || a === 'theme-football' || a === 'theme-heist') { cfg.theme = a.slice(6); cfg.themeAuto = false; saveCfg(); themePush(); msg = a === 'theme-ets' ? 'Euro Truck Simulator theme on' : a === 'theme-heist' ? 'Sunset Heist (GTA-style) theme on' : 'Football theme on'; }
+      else if (a === 'playoffs' || a === 'playoffs-on' || a === 'playoffs-off') { const on = a === 'playoffs' ? !playoffs.S().on : a === 'playoffs-on'; playoffs.set({ on }); msg = on ? 'Playoff night ON: Elite Playoffs (black & gold)' : 'Playoff night off'; }
+      else if (a === 'playoffs-newrun') { msg = playoffs.newRun().msg; }
+      else if (a === 'theme-ets' || a === 'theme-football' || a === 'theme-heist' || a === 'theme-elite') { cfg.theme = a.slice(6); cfg.themeAuto = false; saveCfg(); themePush(); msg = a === 'theme-ets' ? 'Euro Truck Simulator theme on' : a === 'theme-heist' ? 'Sunset Heist (GTA-style) theme on' : a === 'theme-elite' ? 'Elite Playoffs theme on' : 'Football theme on'; }
       else if (a === 'starting-stop') { stStop(); msg = 'Countdown stopped'; }
       else if (a === 'starting-plus1') { stAdd(60); msg = '+1 minute'; }
       else if (a === 'starting-minus1') { stAdd(-60); msg = '-1 minute'; }
@@ -3540,8 +3560,8 @@ const server = http.createServer(async (req, res) => {
       return send(res, 200, Object.assign(r, { settings: screens.stingS(), looks: SCR.LOOKS, scenes: await screens.sceneList() }));
     }
     if (p === '/api/theme') {
-      if (req.method === 'POST') { const b = await readBody(req); if (['ets', 'football', 'heist'].includes(b.theme)) cfg.theme = b.theme; if (typeof b.auto === 'boolean') cfg.themeAuto = b.auto; saveCfg(); themePush(); }
-      return send(res, 200, { theme: themeName(), chosen: ['ets', 'heist'].includes(cfg.theme) ? cfg.theme : 'football', auto: cfg.themeAuto !== false, game: currentGame() });
+      if (req.method === 'POST') { const b = await readBody(req); if (['ets', 'football', 'heist', 'elite'].includes(b.theme)) cfg.theme = b.theme; if (typeof b.auto === 'boolean') cfg.themeAuto = b.auto; saveCfg(); themePush(); }
+      return send(res, 200, { theme: themeName(), chosen: ['ets', 'heist', 'elite'].includes(cfg.theme) ? cfg.theme : 'football', auto: cfg.themeAuto !== false, game: currentGame(), playoffs: playoffs.S().on });
     }
     if (p === '/api/pen3d') { if (req.method === 'POST') { const b = await readBody(req); if (b.settings) p3Set(b.settings); } return send(res, 200, { settings: p3S(), live: p3Live(), missing: p3Files(), kickMs: BTX.MODES.shootout.timing.kick, clubs: require('./public/kits.js').KITS.map((k) => ({ id: k.id, name: k.name, ui: k.ui, words: k.words })) }); }
     if (p === '/api/gfx') { if (req.method === 'POST') { const b = await readBody(req); if (b.mode) { cfg.gfxLight = ['on', 'auto'].includes(b.mode) ? b.mode : 'off'; saveCfg(); } if (b.resetAuto) gfxAutoOn = false; pushGfx(); } return send(res, 200, { mode: gfxMode(), light: gfxOn(), auto: gfxAutoOn }); }
@@ -3822,6 +3842,18 @@ const server = http.createServer(async (req, res) => {
       else if (b.id && widgets()[b.id]) { if (b.clear) delete L[b.id]; else L[b.id] = { x: Math.round(Math.max(0, Math.min(1900, +b.x || 0))), y: Math.round(Math.max(0, Math.min(1070, +b.y || 0))), s: Math.max(0.5, Math.min(1.6, +b.s || 1)) }; }
       saveCfg(); push(layoutState());
       return send(res, 200, { ok: true, group: g, pos: (cfg.layouts || {})[g] || {} });
+    }
+    if (p === '/api/playoffs') {
+      if (req.method === 'POST') {
+        const b = await readBody(req); let r = {};
+        if (b.settings && typeof b.settings === 'object') { playoffs.set(b.settings); r.msg = 'Saved'; }
+        if (b.action === 'newrun') r = playoffs.newRun();
+        else if (b.action === 'undo') r = playoffs.undo();
+        else if (b.action === 'add') { const i = ['W', 'D', 'L'].indexOf(String(b.r || '').toUpperCase()); r = playoffs.add(i, b.score || null); }
+        else if (b.action === 'list') r = playoffs.setList(b.list);
+        return send(res, 200, Object.assign(playoffs.state(), { settings: playoffs.S(), line: playoffs.line(), theme: themeName() }, r && r.error ? { error: r.error } : { msg: r && r.msg }));
+      }
+      return send(res, 200, Object.assign(playoffs.state(), { settings: playoffs.S(), line: playoffs.line(), theme: themeName() }));
     }
     if (p === '/api/results' && req.method === 'GET') return send(res, 200, Object.assign(results.state(), { settings: results.S(), line: results.line() }));
     if (p === '/api/results' && req.method === 'POST') {

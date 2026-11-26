@@ -1,4 +1,13 @@
-WHAT'S NEW IN v42 (OBS dock, Starting Soon, credits)
+WHAT'S NEW IN v43 (Elite Playoffs)
+   - Playoff night: Scenes > Theme (or the dock, or Stream Deck /control/playoffs). Football turns
+     black & gold everywhere: alerts, chat, full time, Starting Soon ("PLAYOFF NIGHT"), half-time,
+     replays, the giveaway meter, the ticker, stingers. Turn it off and everything goes back.
+   - The playoff tracker: "ELITE PLAYOFFS · MATCH 4 OF 10", W / D / L slots, and what you need
+     ("NEED 3 MORE WINS FROM 5 FOR RANK I"). Top right on stream (instead of the results bar),
+     on Starting Soon and on the dock. Set the matches (default 10) and a wins target in Playoff
+     settings. Your usual W / D / L buttons fill it in. Chat: !playoffs.
+
+WHAT WAS NEW IN v42 (OBS dock, Starting Soon, credits)
    - "localhost" always reaches the app now (it also answers on localhost's IPv6 address). A white
      BBR dock, or Starting Soon / credits not reacting in OBS, was OBS missing the app.
    - If another program uses localhost:3000, Setup > System check says so: then use

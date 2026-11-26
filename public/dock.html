@@ -7,6 +7,7 @@
 <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 <style>
   /* v39: in-page yes / no (the app window's own confirm box breaks typing on Windows) */
+  .card.po{border-color:#D9B45A;background:#0b0b0c}.potr{overflow:hidden;margin-bottom:8px}.potr .el-tr{box-shadow:none;padding:4px 0;background:none;gap:8px}.potr .el-crest{flex:none}.potr .el-hd,.potr .el-st,.potr .el-st em{flex-wrap:wrap;white-space:normal;row-gap:2px}.potr .el-slots{grid-template-columns:repeat(var(--n),minmax(12px,18px))}
   .spinst{display:block;margin-top:8px;font-size:15px;font-weight:800}.spinst.y{color:#E8C468}.spinst.g{color:var(--grn)}.spinst.r{color:var(--red)}
   .askd{position:fixed;inset:0;z-index:99;background:rgba(0,0,0,.65);display:grid;place-items:center;padding:14px}.askd[hidden]{display:none}
   .askd>div{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:16px;max-width:380px;display:flex;flex-direction:column;gap:12px}.askd p{margin:0;white-space:pre-wrap;font-size:14px;line-height:1.45}.askd .r{display:flex;gap:8px;justify-content:flex-end}
@@ -87,6 +88,7 @@
     <button data-t="live">Live</button><button data-t="replay">Replay</button><button data-t="games">Games</button><button data-t="give">Give&shy;away</button><button data-t="search">Search</button><button data-t="fix" class="fx">Fix it</button>
   </div>
 </div>
+<script src="/elite.js"></script>
 <script>
 (function () {
   const $ = (id) => document.getElementById(id);
@@ -120,6 +122,14 @@
     if (!(d.boss && d.boss.boss && d.boss.bossRole)) return '';
     const Z = [['lt', 'TOP L'], ['ct', 'TOP'], ['rt', 'TOP R'], ['l', 'LEFT'], ['c', 'CENTRE'], ['r', 'RIGHT'], ['lb', 'LOW L'], ['cb', 'LOW'], ['rb', 'LOW R']];
     return '<div class="card r"><div class="hd"><span class="t">BEAT THE BOSS · YOUR KICK</span></div><div class="g3 lcr3">' + Z.map(([k, n]) => B('/control/boss-' + k, n)).join('') + '</div></div>';
+  }
+  // v43: Playoff night (Elite Playoffs): on / off, the run, and W / D / L (they count for the results bar too)
+  function poCard(d) {
+    const P = d.playoffs; if (!P || (!P.on && !/^(football|elite)$/.test(d.theme || ''))) return '';
+    if (!P.on) return '<div class="card"><div class="g2">' + B('/control/playoffs-on', 'PLAYOFF NIGHT', '', ' style="border-color:#D9B45A;color:#F3E7C9;font-weight:800;letter-spacing:2px"') + '</div></div>';
+    return '<div class="card po"><div class="potr">' + (window.BBR_TRACKER ? BBR_TRACKER(P, { compact: true }) : esc(P.status)) + '</div>' +
+      '<div class="g3">' + B('/control/result-win', 'WIN', '', ' style="border-color:#D9B45A;color:#F3E7C9;font-weight:800"') + B('/control/result-draw', 'DRAW') + B('/control/result-loss', 'LOSS') + '</div>' +
+      '<div class="g2">' + B('/control/result-undo', 'Undo last') + B('/control/playoffs-off', 'Playoff night off', '', ' data-ask="Turn Playoff night off? The stream goes back to your normal theme."') + '</div></div>';
   }
   function gameCard(d) {
     if (!d.game) return '';
@@ -165,7 +175,7 @@
   // ---------- tabs ----------
   const QUICK_SKIP = /^(result-|start$|replay$|clip$|cards-|starting-)/;
   function live(d) {
-    let h = guardCard(d) + brbCard(d) + lobbyCard(d) + bossKick(d) + gameCard(d) + startingCard(d) + smallBars(d);
+    let h = guardCard(d) + poCard(d) + brbCard(d) + lobbyCard(d) + bossKick(d) + gameCard(d) + startingCard(d) + smallBars(d);
     h += giveCard(d);
     // v33: giveaway meter
     const G = d.gmeter;
@@ -373,7 +383,7 @@
   function draw() {
     const d = D, mins = d.liveSince && d.live ? Math.floor((Date.now() - d.liveSince) / 60000) : 0, bad = healthBad(d.health);
     $('top').innerHTML = '<span class="live' + (d.live ? ' on' : '') + '">' + (d.live ? 'LIVE ' + Math.floor(mins / 60) + ':' + String(mins % 60).padStart(2, '0') : 'OFFLINE') + '</span>' +
-      (d.viewers != null ? '<span class="muted">' + d.viewers + ' viewers</span>' : '') + (d.theme === 'ets' ? '<span class="muted">ETS theme</span>' : d.theme === 'heist' ? '<span class="muted" style="color:#ff3d8b">Heist theme</span>' : '') + (d.panic ? '<span style="color:#ff6b7d;font-weight:700">HIDDEN</span>' : '') +
+      (d.viewers != null ? '<span class="muted">' + d.viewers + ' viewers</span>' : '') + (d.theme === 'ets' ? '<span class="muted">ETS theme</span>' : d.theme === 'elite' ? '<span class="muted" style="color:#D9B45A">Elite Playoffs</span>' : d.theme === 'heist' ? '<span class="muted" style="color:#ff3d8b">Heist theme</span>' : '') + (d.panic ? '<span style="color:#ff6b7d;font-weight:700">HIDDEN</span>' : '') +
       '<button class="hp' + (bad.length ? ' bad' : '') + '" data-tab="fix"><i></i>' + (bad.length ? bad.map((k) => NAMES[k]).join(', ') + (bad.length === 1 && bad[0] === 'cards' ? ' frozen' : ' down') : 'All good') + '</button>';
     const fx = document.querySelector('.tabs .fx'); fx.innerHTML = 'Fix it' + (bad.length ? '<span class="dot"></span>' : '');
     document.querySelectorAll('.tabs [data-t]').forEach((b) => b.classList.toggle('on', b.dataset.t === tab));

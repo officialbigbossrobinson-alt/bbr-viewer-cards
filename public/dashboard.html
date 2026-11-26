@@ -125,6 +125,14 @@ details summary{cursor:pointer;font-weight:600}.dp-page{margin-top:14px}.dp-keys
 .th-card{border:1px solid var(--line,#2b313b);border-radius:14px;overflow:hidden;background:#181c22}.th-card.on{border:3px solid #ffd400}
 .th-pv{height:170px;position:relative;overflow:hidden}
 .th-foot{background:#0c1a44}.th-foot b{position:absolute;left:16px;top:16px;background:#e3132c;color:#fff;font:800 16px 'Barlow Condensed',sans-serif;padding:4px 10px}.th-card .th-foot span{position:absolute;left:16px;top:56px;color:#fff;font:800 40px 'Barlow Condensed',sans-serif}.th-foot i{position:absolute;left:0;right:0;bottom:0;height:26px;background:#fff;color:#0c1a44;font:800 13px 'Barlow Condensed',sans-serif;font-style:normal;padding:5px 10px;box-sizing:border-box}
+.th-pv.th-elite{background:radial-gradient(120% 120% at 20% 10%,#1d1a14,#0b0b0c 60%,#050506);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;margin-top:0}.th-elite b{font-size:20px;letter-spacing:4px;white-space:nowrap;background:linear-gradient(135deg,#8a6a24 0%,#f6e3a1 22%,#c9a24a 45%,#fff2c2 58%,#b48a33 78%,#6e5219 100%);-webkit-background-clip:text;background-clip:text;color:transparent}.th-elite em{font-style:normal;font-size:11px;letter-spacing:4px;color:#F3E7C9}
+.po-card{border-color:rgba(217,180,90,.45)!important}.po-card h2{display:flex;align-items:center;gap:10px}
+.po-sw{display:flex;align-items:center;gap:14px;flex-wrap:wrap;margin:6px 0 12px}
+.po-sw button.po-big{min-height:52px;min-width:220px;font-size:17px;font-weight:800;letter-spacing:2px;border:2px solid #D9B45A;color:#F3E7C9;background:#0b0b0c}
+.po-sw button.po-big.on{background:linear-gradient(135deg,#8a6a24 0%,#f6e3a1 22%,#c9a24a 45%,#fff2c2 58%,#b48a33 78%,#6e5219 100%);color:#16110a;border-color:transparent}
+.po-pv{margin:8px 0 12px;overflow-x:auto}
+.po-res{display:flex;gap:8px;flex-wrap:wrap;align-items:center}.po-res button{min-width:64px;font-weight:800}
+.po-res .w{border-color:#D9B45A;color:#F3E7C9}.po-res .d{border-color:#8c7f63}.po-res .l{border-color:#555}
 .th-heist{background:linear-gradient(180deg,#1d0b3a,#5b1a6e 30%,#c2306f 55%,#ff6a5a 72%,#2a0f3d 72.5%,#120624)}.th-heist .sun{position:absolute;left:55%;top:50px;width:90px;height:90px;border-radius:50%;background:linear-gradient(#ffe68a,#ff4f7b)}.th-heist .city{position:absolute;left:0;right:0;top:92px;height:32px;background:#140726;clip-path:polygon(0 100%,0 50%,10% 50%,10% 10%,16% 10%,16% 60%,40% 60%,40% 20%,46% 20%,46% 0,50% 0,50% 40%,70% 40%,70% 15%,78% 15%,78% 55%,100% 55%,100% 100%)}.th-card .th-heist b{position:absolute;left:14px;top:18px;font:900 italic 30px 'Barlow Condensed',sans-serif;color:#ffe48a;text-shadow:3px 3px 0 #c2306f,5px 5px 0 #12061f}.th-heist em{position:absolute;left:0;right:0;bottom:0;height:26px;background:linear-gradient(90deg,#ff3d8b,#ff9a3c);color:#fff;font:800 italic 13px 'Barlow Condensed',sans-serif;padding:5px 10px;box-sizing:border-box}
 .th-ets{background:linear-gradient(180deg,#13284d,#2b4f7e 55%,#d9874a)}.th-ets .sg{position:absolute;left:16px;top:16px;background:#0b4fa8;border:3px solid #fff;border-radius:8px;color:#fff;padding:6px 12px}.th-ets .sg small{display:block;font:700 12px Inter,sans-serif}.th-ets .sg b{font:800 28px 'Barlow Condensed',sans-serif}.th-ets em{position:absolute;right:16px;top:22px;background:#ffd400;color:#111;font:800 14px 'Barlow Condensed',sans-serif;font-style:normal;padding:4px 10px;border-radius:4px}.th-ets i{position:absolute;left:0;right:0;bottom:0;height:46px;background:#2a2d33;border-top:6px solid #8f9499}
 .th-row{display:flex;justify-content:space-between;align-items:center;padding:12px 14px;gap:10px}.th-row button{min-height:44px;min-width:80px}
@@ -1834,6 +1842,32 @@ body.bl-hide .bl-std,body.bl-hide .bl-stdc{visibility:hidden}
       <label class="tog"><input type="checkbox" id="gmSay"> <span>Tell chat when it starts, at the goal, at time's up and the winner</span></label>
       <div class="actions"><button class="primary" id="gmSave">Save</button><span class="state" id="gmSaved"></span></div>
     </section>
+    <!-- ===== v43: Playoff night (Elite Playoffs theme + tracker) ===== -->
+    <section data-tab="theme" class="card wide po-card" id="poCard">
+      <h2><span id="poCrest"></span>Playoff night</h2>
+      <p class="help">Turn it on for your Elite playoff matches: football becomes black &amp; gold everywhere (alerts, Starting Soon, half-time, replays, the giveaway meter, full time), and the playoff tracker takes the place of the results bar. Every W / D / L you enter (here, the dock, the Results page, the Stream Deck) counts towards the run.</p>
+      <div class="po-sw"><button class="po-big" id="poOn" aria-pressed="false">PLAYOFF NIGHT: OFF</button><span class="state" id="poNow" role="status"></span></div>
+      <div class="po-pv" id="poPv"></div>
+      <div class="po-res"><span class="help" style="margin:0">Result:</span><button class="w" data-po="0">WIN</button><button class="d" data-po="1">DRAW</button><button class="l" data-po="2">LOSS</button>
+        <label style="flex-direction:row;align-items:center;gap:6px;margin:0">Score <input id="poUs" type="number" min="0" max="99" style="width:64px" aria-label="Our goals"> – <input id="poThem" type="number" min="0" max="99" style="width:64px" aria-label="Their goals"></label>
+        <label style="flex-direction:row;align-items:center;gap:6px;margin:0">v <input id="poOpp" maxlength="30" placeholder="Opponent (optional)" style="width:170px"></label>
+        <button id="poUndo">Undo last</button><span class="state" id="poMsg"></span></div>
+      <p class="help">A score on its own is enough: 3–1 counts as a win. While Playoff night is off these buttons only change the tracker.</p>
+      <details class="bc-more"><summary>Playoff settings</summary>
+        <div class="cc-grid">
+          <label>Title <input id="poTitle" maxlength="30" placeholder="ELITE PLAYOFFS"></label>
+          <label>Matches in the run <input id="poMatches" type="number" min="1" max="40"></label>
+          <label>Wins target (0 = none) <input id="poTarget" type="number" min="0" max="40"></label>
+          <label>Target name (optional) <input id="poTLabel" maxlength="24" placeholder="e.g. RANK I, PROMOTION"></label>
+        </div>
+        <label class="tog"><input type="checkbox" id="poShow"> <span>Show the tracker on stream (in place of the results bar)</span></label>
+        <label class="tog"><input type="checkbox" id="poTheme"> <span>Switch the stream to the Elite Playoffs look while Playoff night is on</span></label>
+        <label class="tog"><input type="checkbox" id="poChat"> <span>Tell chat the run after every result (chat can also type <code>!playoffs</code>)</span></label>
+        <div class="actions"><button class="primary" id="poSave">Save</button><button id="poNew">Start a new playoff run</button><span class="state" id="poSaved"></span></div>
+        <label>Fix the run by hand (W / D / L in order, e.g. <code>W W L D</code>) <input id="poFix" maxlength="120"></label><div class="actions"><button id="poFixGo">Replace the run</button></div>
+        <p class="help">Stream Deck: <code>/control/playoffs</code> (on / off), <code>/control/playoffs-newrun</code>.</p>
+      </details>
+    </section>
     <!-- ===== v29: Theme ===== -->
     <section data-tab="theme" class="card wide">
       <h2>Stream theme</h2>
@@ -1841,6 +1875,7 @@ body.bl-hide .bl-std,body.bl-hide .bl-stdc{visibility:hidden}
       <div class="th-grid">
         <div class="th-card" id="thFoot"><div class="th-pv th-foot"><b>BBR</b><span>STARTING SOON</span><i>BOSS SPORTS NEWS · RUMOUR …</i></div><div class="th-row"><span><b>Football</b><br><small>Boss Sports News · FC 27</small></span><button data-theme="football">Use</button></div></div>
         <div class="th-card" id="thEts"><div class="th-pv th-ets"><div class="sg"><small>BBR HAULAGE</small><b>DEPARTING SOON</b></div><em>E40</em><i></i></div><div class="th-row"><span><b>Euro Truck Simulator</b><br><small>Motorway signs · BBR Haulage · CB radio chat</small></span><button data-theme="ets">Use</button></div></div>
+        <div class="th-card" id="thElite"><div class="th-pv th-elite"><span id="thEliteCrest"></span><b>ELITE PLAYOFFS</b><em>PLAYOFF NIGHT</em></div><div class="th-row"><span><b>Elite Playoffs</b><br><small>Football in black &amp; gold · playoff tracker</small></span><button data-theme="elite">Use</button></div></div>
         <div class="th-card" id="thHeist"><div class="th-pv th-heist"><div class="sun"></div><div class="city"></div><b>THE JOB STARTS SOON</b><em>COAST NEWS 24</em></div><div class="th-row"><span><b>Sunset Heist (GTA-style)</b><br><small>Sunset &amp; neon · crew-file cards · burner-phone chat</small></span><button data-theme="heist">Use</button></div></div>
       </div>
       <label class="tog"><input type="checkbox" id="thAuto"> <span>Switch by itself: a truck game on Twitch / Kick (Euro Truck Simulator 2, American Truck Simulator) picks the ETS theme, Grand Theft Auto picks Sunset Heist, a football game picks Football</span></label>
@@ -2216,6 +2251,7 @@ body.bl-hide .bl-std,body.bl-hide .bl-stdc{visibility:hidden}
 <div class="tip" id="tip"></div>
 <script src="/kits.js"></script>
 <script src="/card.js"></script>
+<script src="/elite.js"></script>
 <script src="/sfx.js"></script>
 <script>
 const $ = (id) => document.getElementById(id);
@@ -2951,13 +2987,38 @@ $('dpTxt').onclick = async () => { if (!DP.list) await loadDeckPack(); const a =
 // ===== v29: Theme tab =====
 async function loadTheme(r) {
   r = r || await fetch('/api/theme').then((x) => x.json()).catch(() => null); if (!r) return;
-  $('thFoot').classList.toggle('on', r.theme === 'football'); $('thEts').classList.toggle('on', r.theme === 'ets'); $('thHeist').classList.toggle('on', r.theme === 'heist');
+  $('thFoot').classList.toggle('on', r.theme === 'football'); $('thEts').classList.toggle('on', r.theme === 'ets'); $('thHeist').classList.toggle('on', r.theme === 'heist'); $('thElite').classList.toggle('on', r.theme === 'elite');
   document.querySelectorAll('[data-theme]').forEach((b) => { b.textContent = b.dataset.theme === r.theme ? 'IN USE' : 'Use'; });
   $('thAuto').checked = r.auto;
-  $('thNow').textContent = 'On stream now: ' + (r.theme === 'ets' ? 'Euro Truck Simulator' : r.theme === 'heist' ? 'Sunset Heist (GTA-style)' : 'Football') + (r.auto ? ' (switching by itself' + (r.game ? ': the game is ' + r.game : '') + ')' : ' (chosen by you)');
+  $('thNow').textContent = 'On stream now: ' + (r.theme === 'ets' ? 'Euro Truck Simulator' : r.theme === 'heist' ? 'Sunset Heist (GTA-style)' : r.theme === 'elite' ? 'Elite Playoffs' + (r.playoffs ? ' (Playoff night)' : '') : 'Football') + (r.auto ? ' (switching by itself' + (r.game ? ': the game is ' + r.game : '') + ')' : ' (chosen by you)');
   loadSs();
 }
 document.querySelectorAll('[data-theme]').forEach((b) => { b.onclick = async () => loadTheme(await post('/api/theme', { theme: b.dataset.theme, auto: false })); });
+// ---------- v43: Playoff night ----------
+const PO = { form: 0 };
+async function poLoad(r) {
+  r = r || await fetch('/api/playoffs').then((x) => x.json()).catch(() => null); if (!r) return; PO.d = r;
+  const S = r.settings, on = S.on;
+  if (!$('poCrest').firstChild && window.BBR_CREST) { $('poCrest').innerHTML = BBR_CREST(34); $('thEliteCrest').innerHTML = BBR_CREST(54); }
+  $('poOn').classList.toggle('on', on); $('poOn').setAttribute('aria-pressed', on ? 'true' : 'false'); $('poOn').textContent = 'PLAYOFF NIGHT: ' + (on ? 'ON' : 'OFF');
+  $('poNow').textContent = on ? (r.theme === 'elite' ? 'The stream is in the Elite Playoffs look.' : 'On, but the look stays as it is (see settings).') : 'Off: the stream uses your normal theme.';
+  $('poPv').innerHTML = window.BBR_TRACKER ? BBR_TRACKER(r, { compact: r.matches > 12 }) : esc(r.line);
+  if (!PO.form) { PO.form = 1; $('poTitle').value = S.title; $('poMatches').value = S.matches; $('poTarget').value = S.target; $('poTLabel').value = S.targetLabel; $('poShow').checked = S.show; $('poTheme').checked = S.theme; $('poChat').checked = S.chat; }
+}
+$('poOn').onclick = async () => { const r = await post('/api/playoffs', { settings: { on: !(PO.d && PO.d.settings.on) } }); poLoad(r); loadTheme(); };
+document.querySelectorAll('[data-po]').forEach((b) => { b.onclick = async () => {
+  const us = $('poUs').value, them = $('poThem').value, opp = $('poOpp').value.trim(), score = us !== '' && them !== '' ? { us: +us, them: +them, opp } : null;
+  let r;
+  if (PO.d && PO.d.settings.on) { r = await post('/api/results', score ? { score } : { add: +b.dataset.po }); r = await fetch('/api/playoffs').then((x) => x.json()); }
+  else r = await post('/api/playoffs', { action: 'add', r: ['W', 'D', 'L'][score ? (score.us > score.them ? 0 : score.us === score.them ? 1 : 2) : +b.dataset.po], score });
+  $('poMsg').innerHTML = r.error ? err(r.error) : 'Saved'; $('poUs').value = ''; $('poThem').value = ''; $('poOpp').value = ''; poLoad(r);
+}; });
+$('poUndo').onclick = async () => { let r; if (PO.d && PO.d.settings.on) { await post('/api/results', { undo: true }); r = await fetch('/api/playoffs').then((x) => x.json()); } else r = await post('/api/playoffs', { action: 'undo' }); $('poMsg').innerHTML = r.error ? err(r.error) : 'Undone'; poLoad(r); };
+$('poSave').onclick = async () => { const r = await post('/api/playoffs', { settings: { title: $('poTitle').value, matches: +$('poMatches').value, target: +$('poTarget').value, targetLabel: $('poTLabel').value, show: $('poShow').checked, theme: $('poTheme').checked, chat: $('poChat').checked } }); $('poSaved').textContent = 'Saved'; PO.form = 0; poLoad(r); loadTheme(); };
+$('poNew').onclick = async () => { if (!(await ask('Start a new playoff run? The current one is kept as "last run".', { ok: 'Start a new run' }))) return; poLoad(await post('/api/playoffs', { action: 'newrun' })); $('poSaved').textContent = 'New run started'; };
+$('poFixGo').onclick = async () => { const L = $('poFix').value.toUpperCase().split(/[^WDL]+/).filter(Boolean); if (!(await ask('Replace the run with: ' + (L.join(' ') || 'nothing') + '?', { ok: 'Replace' }))) return; poLoad(await post('/api/playoffs', { action: 'list', list: L })); $('poFix').value = ''; };
+setInterval(() => { if (document.querySelector('[data-tab="theme"]:not(.hide)') && !(document.activeElement && document.activeElement.closest && document.activeElement.closest('#poCard input'))) poLoad(); }, 3000);
+poLoad();
 $('thAuto').onchange = async () => loadTheme(await post('/api/theme', { auto: $('thAuto').checked }));
 const thGo = async (u) => { const m = await fetch('/control/' + u).then((x) => x.text()).catch(() => 'Could not reach the app'); $('thMsg').textContent = m; loadSs(); };
 $('thStart').onclick = () => thGo('starting-start'); $('thStop').onclick = () => thGo('starting-stop');
@@ -3186,7 +3247,7 @@ async function gmLoad(r) {
   if (!GM.form) {
     GM.form = 1;
     $('gmPreset').innerHTML = Object.entries(r.presets).map(([k, n]) => '<option value="' + k + '">' + esc(n) + '</option>').join('');
-    $('gmLook').innerHTML = '<option value="auto">Match the game (now: ' + esc(r.look) + ')</option>' + ['football', 'ets', 'ats', 'heist', 'arc', 'mgs', 'neon'].map((k) => '<option value="' + k + '">' + ({ football: 'Football (Boss Sports News)', ets: 'Euro Truck Simulator', ats: 'American Truck Simulator', heist: 'Sunset Heist (GTA)', arc: 'Arc Raiders', mgs: 'Metal Gear', neon: 'Neon (anything)' }[k]) + '</option>').join('');
+    $('gmLook').innerHTML = '<option value="auto">Match the game (now: ' + esc(r.look) + ')</option>' + ['football', 'elite', 'ets', 'ats', 'heist', 'arc', 'mgs', 'neon'].map((k) => '<option value="' + k + '">' + ({ football: 'Football (Boss Sports News)', elite: 'Elite Playoffs (black & gold)', ets: 'Euro Truck Simulator', ats: 'American Truck Simulator', heist: 'Sunset Heist (GTA)', arc: 'Arc Raiders', mgs: 'Metal Gear', neon: 'Neon (anything)' }[k]) + '</option>').join('');
     $('gmPreset').value = S.preset; $('gmGoal').value = S.goal; $('gmHours').value = S.hours; $('gmMins').value = S.mins; $('gmSecs').value = S.secs; $('gmKey').value = S.keyword; $('gmLook').value = S.look;
     $('gmPos').value = S.pos; $('gmScale').value = S.scale; $('gmX').value = S.x; $('gmY').value = S.y; $('gmWhere').value = S.where; $('gmHide').value = S.hideAfter;
     document.querySelectorAll('[data-gmw]').forEach((i) => { i.value = S.weights[i.dataset.gmw]; }); $('gmWeights').style.display = S.preset === 'mixed' ? '' : 'none';

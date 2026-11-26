@@ -20,6 +20,10 @@
       --slant: 14px;       /* angle on the brand and clock panels */
     }
 
+    /* v43 Elite Playoffs: the same ticker in black & gold */
+    body.elite { --ink: #0b0b0c; --navy: #1d1a14; --red: #9c7a2e; --gold: #D9B45A; --paper: #F3E7C9; --muted: #6d6250; }
+    body.elite .brand-mark { background: linear-gradient(135deg,#8a6a24 0%,#f6e3a1 22%,#c9a24a 45%,#fff2c2 58%,#b48a33 78%,#6e5219 100%) !important; color: #16110a !important; }
+
     /* Transparent page so only the bar shows in OBS */
     html, body {
       margin: 0;
@@ -642,10 +646,13 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
   <script src="goalflash.js"></script>
 <script>
-  // standalone OBS source (the ticker in front of / behind the camera): follow the app's show / hide
-  if (/standalone=1/.test(location.search)) {
-    try { const es = new EventSource('/events?page=ticker'); es.onmessage = (m) => { try { const a = JSON.parse(m.data); if (a.type === 'bsnTicker') { document.body.classList.toggle('bsn-hide-ticker', !!a.hide || !a.on || !a.separate); } } catch (e) { /* ignore */ } }; } catch (e) { /* ignore */ }
-  }
+  // one connection to the app: the theme (v43 Elite Playoffs = black & gold, in the overlay, on Starting Soon and on its own),
+  // and, as a standalone OBS source (in front of / behind the camera), the app's show / hide
+  (function () {
+    const set = (t) => document.body.classList.toggle('elite', t === 'elite'), alone = /standalone=1/.test(location.search);
+    fetch('/api/theme').then((r) => r.json()).then((t) => set(t.theme)).catch(() => {});
+    try { const es = new EventSource('/events?page=' + (alone ? 'ticker' : 'embed')); es.onmessage = (m) => { try { const a = JSON.parse(m.data); if (a.type === 'theme') set(a.theme); if (alone && a.type === 'bsnTicker') { document.body.classList.toggle('bsn-hide-ticker', !!a.hide || !a.on || !a.separate); } } catch (e) { /* ignore */ } }; } catch (e) { /* ignore */ }
+  })();
 </script>
 </body>
 </html>

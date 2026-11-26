@@ -12,7 +12,7 @@ window.GMETER = (function () {
     mgs: '<svg viewBox="0 0 40 40" aria-hidden="true"><path d="M20 3l17 32H3z" fill="#ff3b3b" stroke="#300" stroke-width="2"/><text x="20" y="31" font-size="20" text-anchor="middle" font-weight="900" fill="#fff">!</text></svg>',
     neon: '<svg viewBox="0 0 40 40" aria-hidden="true"><path d="M20 3l5 11 12 1-9 8 3 12-11-6-11 6 3-12-9-8 12-1z" fill="#fff" stroke="var(--acc)" stroke-width="2"/></svg>',
   };
-  const iconOf = (L) => ICON[L === 'ets' || L === 'ats' ? 'truck' : L] || ICON.neon;
+  const iconOf = (L) => L === 'elite' && window.BBR_CREST ? window.BBR_CREST(40) : ICON[L === 'ets' || L === 'ats' ? 'truck' : L === 'elite' ? 'football' : L] || ICON.neon;
   function addCss() {
     if (css) return; css = true;
     const s = document.createElement('style');
@@ -59,6 +59,10 @@ window.GMETER = (function () {
 .gm.lk-ets .bar,.gm.lk-ats .bar{border-radius:4px;background:repeating-linear-gradient(90deg,rgba(0,0,0,.35) 0 40px,rgba(0,0,0,.25) 40px 44px)}.gm.lk-ets .fill,.gm.lk-ats .fill{border-radius:4px}
 .gm.lk-ets .bar .head,.gm.lk-ats .bar .head{width:70px;height:40px;margin:-28px 0 0 -52px}
 .gm.lk-ats{--bg:#0c6b35;--acc:#ffffff;--hdink:#0c6b35;--acc2:#ffcc33;--track:rgba(0,0,0,.3);--sub:#d9f2e2}
+.gm.lk-elite{--bg:radial-gradient(140% 160% at 0% 0%,#1d1a14,#0b0b0c 55%,#060607);--acc:#D9B45A;--hdink:#16110a;--acc2:#F3E7C9;--sub:#cbbf9f}
+.gm.lk-elite .bx{border-radius:6px;box-shadow:0 18px 40px rgba(0,0,0,.55),0 0 0 2px #050505,0 0 0 5px #D9B45A}
+.gm.lk-elite .fill{background:linear-gradient(90deg,#8a6a24,#f6e3a1 40%,#c9a24a 70%,#fff2c2)}
+.gm.lk-elite .hd{background:linear-gradient(135deg,#8a6a24 0%,#f6e3a1 22%,#c9a24a 45%,#fff2c2 58%,#b48a33 78%,#6e5219 100%)}.gm.lk-elite .hd b{color:#16110a;letter-spacing:6px}
 .gm.lk-heist{--bg:linear-gradient(160deg,#2b0f4d,#7a1d6a 55%,#c2306f);--acc:#ff3d8b;--acc2:#2ef2ff;--sub:#ffd9ea}
 .gm.lk-heist .bx{border-radius:4px;border:3px solid #fff;box-shadow:8px 8px 0 #12061f}.gm.lk-heist .hd b,.gm.lk-heist .nums b,.gm.lk-heist .tm b{font-style:italic}
 .gm.lk-heist .hd b{text-shadow:3px 3px 0 #12061f}.gm.lk-heist .pz{color:#ffe48a}

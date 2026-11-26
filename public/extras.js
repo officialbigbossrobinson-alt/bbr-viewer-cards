@@ -28,7 +28,7 @@
   .xft .k{font-size:22px;font-weight:800;letter-spacing:8px;color:#f6d77a}
   .xft .box{margin-top:8px;display:flex;align-items:center;border-radius:18px;overflow:hidden;background:rgba(10,12,15,.95);border:3px solid var(--rc);box-shadow:0 20px 70px rgba(0,0,0,.6)}
   .xft .t{padding:16px 26px;font-size:46px;font-weight:800;white-space:nowrap}.xft .t.us{background:var(--tc)}
-  .xft .s{padding:0 26px;font-size:84px;font-weight:800;line-height:1}
+  .xft .s{padding:0 26px;font-size:84px;font-weight:800;line-height:1;white-space:nowrap}
   .xft .r{margin-top:12px;display:inline-block;padding:6px 30px;border-radius:999px;background:var(--rc);color:#0b0d10;font-size:40px;font-weight:800;letter-spacing:6px}
   .xft .rec{margin-top:10px;font-family:Inter,sans-serif;font-size:18px;color:#c9d0d7}
   .xsp{position:absolute;right:60px;top:150px;width:640px;z-index:7;border-radius:18px;overflow:hidden;background:rgba(10,12,15,.95);border:2px solid #e01e2e;font-family:'Barlow Condensed',sans-serif;color:#f2f5f7;box-shadow:0 20px 60px rgba(0,0,0,.6)}
@@ -170,6 +170,14 @@
   .xrp.g-ats .lk.top,.xrp.g-ats .lk.st{background:#1d3f8f;border-color:#0c6b35}.xrp.g-ats .lk.top em,.xrp.g-ats .lk.st strong{color:#ffcc33}.xrp.g-ats .scp{background:#f2f2f2;color:#1d3f8f}
   .xrp.g-ats .wall{background:radial-gradient(ellipse at 30% 20%,#12285c,#1d3f8f 60%)}.xrp.g-ats .wall .sweep{background:#0c6b35}.xrp.g-ats .wall .sweep2{background:#ffcc33}
   .xrps.g-ats .b1{background:#0c6b35}.xrps.g-ats .b3{background:#ffcc33}.xrps.g-ats .b2{background:linear-gradient(135deg,#12285c,#1d3f8f)}.xrps.g-ats .tx small{color:#ffcc33}
+  /* v43 Elite Playoffs replay: black & gold */
+  .xrp.g-elite .edge{box-shadow:inset 0 0 0 12px #0b0b0c,inset 0 0 0 15px #D9B45A;border-top-color:#D9B45A}
+  .xrp.g-elite .fr.live{border-color:#D9B45A}.xrp.g-elite .fr .topbar{background:linear-gradient(135deg,#8a6a24 0%,#f6e3a1 22%,#c9a24a 45%,#fff2c2 58%,#b48a33 78%,#6e5219 100%)}.xrp.g-elite .tg.red{background:linear-gradient(135deg,#8a6a24 0%,#f6e3a1 22%,#c9a24a 45%,#fff2c2 58%,#b48a33 78%,#6e5219 100%);color:#16110a}.xrp.g-elite .tg.navy{background:#0b0b0c;color:#F3E7C9}
+  .xrp.g-elite .bug b{background:linear-gradient(135deg,#8a6a24 0%,#f6e3a1 22%,#c9a24a 45%,#fff2c2 58%,#b48a33 78%,#6e5219 100%);color:#16110a}.xrp.g-elite .bug s{background:#0b0b0c}.xrp.g-elite .bug span{background:#F3E7C9;color:#16110a}.xrp.g-elite.frozen .bug b{background:#F3E7C9;color:#16110a}
+  .xrp.g-elite .sub u,.xrp.g-elite .sub .fz,.xrp.g-elite .rsm{color:#D9B45A}.xrp.g-elite .lt .row{background:#0b0b0c;color:#F3E7C9;border-left-color:#D9B45A}.xrp.g-elite .lt .row span{color:#D9B45A}.xrp.g-elite .lt .pr{background:#1d1a14}.xrp.g-elite .lt .pr u{background:linear-gradient(135deg,#8a6a24 0%,#f6e3a1 22%,#c9a24a 45%,#fff2c2 58%,#b48a33 78%,#6e5219 100%)}
+  .xrp.g-elite .lk.top,.xrp.g-elite .lk.st{background:#0b0b0c;border-color:#D9B45A}.xrp.g-elite .lk.top em,.xrp.g-elite .lk.st strong{color:#D9B45A}.xrp.g-elite .scp{background:linear-gradient(135deg,#8a6a24 0%,#f6e3a1 22%,#c9a24a 45%,#fff2c2 58%,#b48a33 78%,#6e5219 100%);color:#16110a}
+  .xrp.g-elite .wall{background:radial-gradient(ellipse at 30% 20%,#1d1a14,#0b0b0c 60%)}.xrp.g-elite .wall .sweep{background:#D9B45A}.xrp.g-elite .wall .sweep2{background:#F3E7C9}
+  .xrps.g-elite .b1{background:#0b0b0c}.xrps.g-elite .b3{background:linear-gradient(135deg,#8a6a24 0%,#f6e3a1 22%,#c9a24a 45%,#fff2c2 58%,#b48a33 78%,#6e5219 100%)}.xrps.g-elite .b2{background:linear-gradient(135deg,#1d1a14,#0b0b0c)}.xrps.g-elite .tx small{color:#D9B45A}.xrps.g-elite .tx b{background:linear-gradient(135deg,#8a6a24 0%,#f6e3a1 22%,#c9a24a 45%,#fff2c2 58%,#b48a33 78%,#6e5219 100%);-webkit-background-clip:text;background-clip:text;color:transparent}
   .xrp.g-heist .edge{box-shadow:inset 0 0 0 12px #12061f,inset 0 0 0 15px #ffe48a;border-top-color:#ff3d8b}
   .xrp.g-heist .fr.live{border-color:#ff3d8b}.xrp.g-heist .fr .topbar{background:#ff3d8b}.xrp.g-heist .tg.red{background:#ff3d8b;color:#fff}.xrp.g-heist .tg.navy{background:#12061f}
   .xrp.g-heist .bug b{background:#ff3d8b;color:#fff}.xrp.g-heist .bug s{background:#12061f}.xrp.g-heist .bug span{background:#2ef2ff;color:#12061f}.xrp.g-heist.frozen .bug b{background:#2ef2ff;color:#12061f}
@@ -288,7 +296,9 @@
     el.style.setProperty('--rc', rc); el.style.setProperty('--tc', t.color || '#4dc3ff');
     const st = a.state || {}, c = st.counts || [];
     const rec = custom ? (st.labels || []).map((x, i) => (c[i] || 0) + ' ' + x.toLowerCase()).join(' · ') : (c[0] || 0) + ' W' + (t.type === 'wdl' ? ' · ' + (c[1] || 0) + ' D' : '') + ' · ' + (c[2] || 0) + ' L ' + (st.scope === 'season' ? 'this season' : 'tonight');
-    el.innerHTML = '<div class="k">' + (custom ? esc(String(t.name).toUpperCase()) : 'FULL TIME') + '</div>' +
+    // v43: on Playoff night, "PLAYOFF MATCH 4 · FULL TIME" (the tracker's own update arrives just after this)
+    const PO = window.BBR_PO, poNo = PO && PO.show && !custom ? Math.min(PO.matches, (PO.played || 0) + 1) : 0;
+    el.innerHTML = '<div class="k">' + (custom ? esc(String(t.name).toUpperCase()) : poNo ? 'PLAYOFF MATCH ' + poNo + ' · FULL TIME' : 'FULL TIME') + '</div>' +
       (l.us != null ? '<div class="box"><div class="t us">' + esc(String(t.name).toUpperCase()) + '</div><div class="s">' + l.us + ' - ' + l.them + '</div><div class="t">' + esc(String(l.opp || 'OPPONENT').toUpperCase()) + '</div></div>' : '') +
       '<div class="r">' + esc(String(a.label).toUpperCase()) + '</div><div class="rec">' + esc(rec) + '</div>';
     stage.appendChild(el);
@@ -511,6 +521,7 @@
   // v32: what each game's replay says (brand on the bug, the sting's small line, the wall's big letters)
   const RPG = {
     football: { brand: 'BOSS SPORTS NEWS', wm: 'BSN', word: 'REPLAY', live: 'LIVE', gx: '' },
+    elite: { brand: 'ELITE PLAYOFFS · REPLAY', wm: 'ELITE', word: 'PLAYOFF REPLAY', live: 'BACK TO THE PLAYOFFS', gx: '' },
     ets: { brand: 'BBR HAULAGE · DASHCAM', wm: 'BBR', word: 'DASHCAM REPLAY', live: 'BACK ON THE ROAD', gx: 'rec' },
     ats: { brand: 'BBR FREIGHT LINES · DASHCAM', wm: 'BBR', word: 'DASHCAM REPLAY', live: 'BACK ON THE ROAD', gx: 'rec' },
     heist: { brand: 'COAST NEWS 24 · CAUGHT ON CAMERA', wm: 'CCTV', word: 'INSTANT REPLAY', live: 'BACK ON THE JOB', gx: 'cctv' },

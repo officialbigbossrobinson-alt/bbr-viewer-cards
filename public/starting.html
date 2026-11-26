@@ -138,6 +138,38 @@
   body.ets .msg{background:rgba(255,255,255,.04)}
   body.ets #ko .b1{background:#0b4fa8}body.ets #ko .b2{background:#ffd400}body.ets #ko .b3{background:#127a3a}
   body.ets #ko .s{color:#111}
+  /* ===== v43 Elite Playoffs: football in black & gold ===== */
+  .elset{background:radial-gradient(70% 60% at 30% 40%,#1c1810 0%,#0b0b0c 55%,#050506 100%)}
+  .elset .beam{position:absolute;top:-120px;width:420px;height:1300px;background:linear-gradient(180deg,rgba(255,226,150,.22),rgba(255,226,150,0) 70%);transform-origin:top center;filter:blur(6px);animation:elBeam 9s ease-in-out infinite}
+  @keyframes elBeam{50%{transform:rotate(var(--r2))}}
+  .elset .dust{position:absolute;inset:0;background:radial-gradient(1.6px 1.6px at 20% 30%,#f6e3a1 98%,transparent),radial-gradient(1.2px 1.2px at 60% 70%,#fff2c2 98%,transparent),radial-gradient(1.4px 1.4px at 80% 20%,#d9b45a 98%,transparent),radial-gradient(1px 1px at 40% 80%,#f6e3a1 98%,transparent);background-size:310px 270px,420px 380px,520px 460px,260px 300px;opacity:.55;animation:elDust 40s linear infinite}
+  @keyframes elDust{to{background-position:310px -540px,-420px -760px,520px -920px,-260px -600px}}
+  .elset .wm{position:absolute;right:560px;top:90px;opacity:.08;filter:blur(.3px)}
+  .elset .floor{position:absolute;left:0;right:0;bottom:0;height:260px;background:linear-gradient(180deg,transparent,rgba(217,180,90,.08) 60%,rgba(217,180,90,.16));border-top:1px solid rgba(217,180,90,.25)}
+  body.elite #shade{background:linear-gradient(90deg,rgba(5,5,6,.85) 0%,rgba(5,5,6,.45) 45%,rgba(5,5,6,0) 62%,rgba(5,5,6,.45) 100%)}
+  body.elite .bug b{background:linear-gradient(135deg,#8a6a24 0%,#f6e3a1 22%,#c9a24a 45%,#fff2c2 58%,#b48a33 78%,#6e5219 100%);color:#16110a}
+  body.elite .bug span{background:#0b0b0c;color:#F3E7C9;border-top:2px solid #D9B45A;border-bottom:2px solid #D9B45A}
+  body.elite .bug i{background:#F3E7C9;color:#16110a}body.elite .bug i:before{background:#b48a33}
+  body.elite .kick{color:#D9B45A}
+  body.elite .title{background:linear-gradient(180deg,#fff8e1 0%,#f3e7c9 45%,#d9b45a 75%,#8a6a24 100%);-webkit-background-clip:text;background-clip:text;color:transparent;text-shadow:none;filter:drop-shadow(0 8px 0 rgba(0,0,0,.55)) drop-shadow(0 0 40px rgba(217,180,90,.25));letter-spacing:4px}
+  body.elite .tonight{color:#F3E7C9}
+  body.elite .chips span{background:rgba(11,11,12,.82);border:1px solid rgba(217,180,90,.5);color:#F3E7C9}
+  body.elite .cd .lb{background:linear-gradient(135deg,#8a6a24 0%,#f6e3a1 22%,#c9a24a 45%,#fff2c2 58%,#b48a33 78%,#6e5219 100%);color:#16110a}
+  body.elite .cd .box{background:#0b0b0c;color:#F3E7C9;box-shadow:0 0 0 2px #050505,0 0 0 5px #D9B45A,0 20px 60px rgba(0,0,0,.6)}
+  body.elite .cd .box .bar{background:linear-gradient(135deg,#8a6a24 0%,#f6e3a1 22%,#c9a24a 45%,#fff2c2 58%,#b48a33 78%,#6e5219 100%)}
+  body.elite .cd .dig{background:linear-gradient(180deg,#fff8e1,#d9b45a 80%);-webkit-background-clip:text;background-clip:text;color:transparent}
+  body.elite .cd .dig.hot{background:linear-gradient(180deg,#fff2c2,#ffcf5a);-webkit-background-clip:text;background-clip:text}
+  body.elite .cd .pg i{background:linear-gradient(135deg,#8a6a24 0%,#f6e3a1 22%,#c9a24a 45%,#fff2c2 58%,#b48a33 78%,#6e5219 100%)}
+  body.elite .arr{background:rgba(11,11,12,.9);border-top:4px solid #D9B45A}
+  body.elite .chat .h b{background:linear-gradient(135deg,#8a6a24 0%,#f6e3a1 22%,#c9a24a 45%,#fff2c2 58%,#b48a33 78%,#6e5219 100%);color:#16110a}
+  body.elite .chat .h span{background:#0b0b0c;color:#F3E7C9;border-top:2px solid #D9B45A;border-bottom:2px solid #D9B45A}
+  body.elite .msg{background:rgba(11,11,12,.9);border-left-color:#D9B45A}
+  body.elite #ko .b1{background:#0b0b0c}body.elite #ko .b2{background:linear-gradient(135deg,#8a6a24 0%,#f6e3a1 22%,#c9a24a 45%,#fff2c2 58%,#b48a33 78%,#6e5219 100%)}body.elite #ko .b3{background:#1d1a14}
+  body.elite #ko .t{background:linear-gradient(180deg,#fff8e1,#d9b45a 70%,#8a6a24);-webkit-background-clip:text;background-clip:text;color:transparent;text-shadow:none;filter:drop-shadow(0 10px 0 rgba(0,0,0,.6))}
+  body.elite #ko .s{color:#16110a}
+  #elCrest{display:none}
+  body.elite .chat .empty{background:rgba(11,11,12,.85);border-left:4px solid #D9B45A;color:#cbbf9f}
+  #elPo{display:none}body.elite #elPo.on{display:block;position:absolute;right:60px;top:52px;z-index:3}body.elite #elPo .el-tr{max-width:560px}
   /* ===== v31 Sunset Heist (GTA-style, original art) ===== */
   .hxset{background:linear-gradient(180deg,#1d0b3a 0%,#5b1a6e 26%,#c2306f 46%,#ff6a5a 60%,#ffb35c 68%,#2a0f3d 68.2%,#120624 100%)}
   .hxset .sun{position:absolute;left:820px;top:260px;width:460px;height:460px;border-radius:50%;background:linear-gradient(#ffe68a,#ff8a5b 70%,#ff4f7b);-webkit-mask:linear-gradient(#000 52%,transparent 52% 56%,#000 56% 63%,transparent 63% 67%,#000 67% 73%,transparent 73% 78%,#000 78% 83%,transparent 83% 89%,#000 89%);mask:linear-gradient(#000 52%,transparent 52% 56%,#000 56% 63%,transparent 63% 67%,#000 67% 73%,transparent 73% 78%,#000 78% 83%,transparent 83% 89%,#000 89%);filter:drop-shadow(0 0 60px rgba(255,120,90,.8))}
@@ -189,9 +221,11 @@
 <body>
 <div id="bg"></div>
 <div id="shade"></div>
+<div id="elPo"></div>
 <div class="bug"><b>BBR</b><span id="bugt">BOSS SPORTS NEWS · PRE-MATCH</span><i id="air">ON AIR SOON</i></div>
 <div class="left">
   <div class="kick" id="kick">TONIGHT ON BIGBOSSROBINSON</div>
+  <div id="elCrest"></div>
   <div class="title" id="title">STARTING SOON</div>
   <div class="tonight" id="tonight"></div>
   <div class="chips" id="chips"></div>
@@ -211,6 +245,7 @@
 <script src="/card.js"></script>
 <script src="/sfx.js"></script>
 <script src="/music.js"></script>
+<script src="/elite.js"></script>
 <script src="/stinger.js"></script>
 <script>
 (function () {
@@ -223,16 +258,16 @@
   // the words for this game (sent by the app); these are only a fallback while it loads
   const WD0 = { bug: 'BOSS SPORTS NEWS · PRE-MATCH', airWait: 'PRE-MATCH', airRun: 'ON AIR SOON', airLive: 'LIVE', kick: 'TONIGHT ON BIGBOSSROBINSON', title: 'STARTING SOON', clock: 'KICK-OFF IN', clockDone: 'KICK-OFF', arrivals: 'ARRIVALS', here: 'IN THE BUILDING', chat: 'THE TERRACE', chatSub: 'LIVE CHAT', go: 'KICK-OFF!', goSub: 'WE ARE LIVE' };
   const WD = () => Object.assign({}, WD0, (st && st.words) || {});
-  let ETS = false, HEIST = false, st = null, skew = 0, lastTick = -1, picIdx = 0, picT = null, picKey = '', spotI = 0, spotT = null, hold = false, alQ = [], alBusy = false, tickerOn = null;
+  let ETS = false, HEIST = false, ELITE = false, st = null, skew = 0, lastTick = -1, picIdx = 0, picT = null, picKey = '', spotI = 0, spotT = null, hold = false, alQ = [], alBusy = false, tickerOn = null;
 
   // ---------- background picture(s) ----------
   function bg() {
     const S = st.S, list = S.pic === 'rotate' ? S.pics : S.pic === 'bsn' ? [] : S.pics.filter((u, i) => S.picIds[i] === S.pic);
     document.body.classList.toggle('zoom', !!S.zoom);
-    const key = JSON.stringify([S.pic, list, S.rotateSecs, ETS, HEIST]);
+    const key = JSON.stringify([S.pic, list, S.rotateSecs, ETS, HEIST, ELITE]);
     if (key === picKey) return; picKey = key;
     clearInterval(picT); $('bg').innerHTML = '';
-    if (!list.length) { const d = document.createElement('div'); if (HEIST) { d.className = 'lay on hxset'; d.innerHTML = '<div class="sun"></div><div class="city"></div><div class="win"></div><div class="sea"></div><div class="glint"></div><div class="road"></div><div class="dash"></div><div class="palm" style="left:1300px;height:520px"></div><div class="palm" style="left:1420px;height:430px;animation-delay:-2s"></div><div class="palm" style="left:1840px;height:560px;animation-delay:-4s"></div>'; } else if (ETS) { d.className = 'lay on etsset'; d.innerHTML = '<div class="hills"></div><div class="rail"></div><div class="road"></div><div class="dash"></div><div class="edge"></div><div class="post" style="left:60px"></div><div class="post" style="left:1222px"></div><div class="gantry"></div>'; } else { d.className = 'lay on bsnset'; d.innerHTML = '<div class="sw"></div><div class="sw2"></div><div class="wm">BSN</div>'; } $('bg').appendChild(d); return; }
+    if (!list.length) { const d = document.createElement('div'); if (HEIST) { d.className = 'lay on hxset'; d.innerHTML = '<div class="sun"></div><div class="city"></div><div class="win"></div><div class="sea"></div><div class="glint"></div><div class="road"></div><div class="dash"></div><div class="palm" style="left:1300px;height:520px"></div><div class="palm" style="left:1420px;height:430px;animation-delay:-2s"></div><div class="palm" style="left:1840px;height:560px;animation-delay:-4s"></div>'; } else if (ELITE) { d.className = 'lay on elset'; d.innerHTML = '<div class="beam" style="left:180px;transform:rotate(14deg);--r2:8deg"></div><div class="beam" style="left:760px;transform:rotate(-6deg);--r2:-12deg;animation-delay:-3s"></div><div class="beam" style="left:1380px;transform:rotate(-16deg);--r2:-9deg;animation-delay:-6s"></div><div class="dust"></div><div class="floor"></div><div class="wm">' + (window.BBR_CREST ? window.BBR_CREST(760) : '') + '</div>'; } else if (ETS) { d.className = 'lay on etsset'; d.innerHTML = '<div class="hills"></div><div class="rail"></div><div class="road"></div><div class="dash"></div><div class="edge"></div><div class="post" style="left:60px"></div><div class="post" style="left:1222px"></div><div class="gantry"></div>'; } else { d.className = 'lay on bsnset'; d.innerHTML = '<div class="sw"></div><div class="sw2"></div><div class="wm">BSN</div>'; } $('bg').appendChild(d); return; }
     const lays = list.map((u) => { const d = document.createElement('div'); d.className = 'lay'; d.style.backgroundImage = 'url("' + u + '")'; $('bg').appendChild(d); return d; });
     picIdx = 0; lays[0].classList.add('on');
     if (lays.length > 1) picT = setInterval(() => { lays[picIdx].classList.remove('on'); picIdx = (picIdx + 1) % lays.length; lays[picIdx].classList.add('on'); }, S.rotateSecs * 1000);
@@ -340,7 +375,9 @@
     // the look follows the game too: trucks = the motorway, GTA = the sunset coast, otherwise the stream theme
     const LK = a.look || '';
     ETS = LK === 'ets' || LK === 'ats' || (!/^(football|heist)$/.test(LK) && a.theme === 'ets'); HEIST = !ETS && (LK === 'heist' || (LK !== 'football' && a.theme === 'heist'));
-    document.body.classList.toggle('ets', ETS); document.body.classList.toggle('heist', HEIST); document.body.dataset.look = LK;
+    ELITE = !ETS && !HEIST && LK === 'elite';   // v43: football in black & gold (everything else stays football)
+    document.body.classList.toggle('ets', ETS); document.body.classList.toggle('heist', HEIST); document.body.classList.toggle('elite', ELITE); document.body.dataset.look = LK;
+    if (ELITE && !$('elCrest').firstChild && window.BBR_CREST) $('elCrest').innerHTML = window.BBR_CREST(130);
     const W = WD();
     $('bugt').textContent = W.bug; $('kick').textContent = W.kick;
     $('arrt').textContent = W.arrivals; $('heret').textContent = W.here;
@@ -361,6 +398,9 @@
   }
   function load() { fetch('/api/starting').then((r) => r.json()).then(apply).catch(() => setTimeout(load, 3000)); }
   load();
+  // v43: the playoff run under the title on Playoff night
+  function drawPo(a) { const el = $('elPo'); const on = !!(a && a.show && window.BBR_TRACKER); el.classList.toggle('on', on); el.innerHTML = on ? window.BBR_TRACKER(a, { compact: true }) : ''; }
+  fetch('/api/playoffs').then((r) => r.json()).then(drawPo).catch(() => {});
   try {
     const es = new EventSource('/events?page=starting');
     es.onmessage = (m) => {
@@ -368,6 +408,7 @@
       if (a.volume != null) try { SFX.setVolume && SFX.setVolume(a.volume); } catch (e) { /* ignore */ }
       if (a.type === 'starting' && a.action === 'kickoff') { MUSIC.set({ on: false }); return kickoff(); }
       if (a.type === 'music') return MUSIC.event(a);
+      if (a.type === 'playoffs') return drawPo(a);
       if (a.type === 'stinger') return STINGER.play(a, { sound: false });
       if (a.type === 'starting') return apply(a);
       if (a.type === 'theme') { load(); return; }

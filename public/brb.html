@@ -39,6 +39,15 @@
   body.football{--a:#e3132c;--at:#fff;--b:#0d2459;--bt:#fff;--hl:#f5c400;--clk:#f6f7fa;--clkt:#061233;--tk:#fff;--tkt:#061233}
   body.football #bg{background:radial-gradient(ellipse at 30% 20%,#16337a,#0d2459 45%,#061233)}
   body.football .frame{border:8px solid #fff;box-shadow:0 20px 60px rgba(0,0,0,.5)}
+  /* v43 Elite Playoffs: black & gold half-time */
+  body.elite{--a:#D9B45A;--at:#16110a;--b:#0b0b0c;--bt:#F3E7C9;--hl:#D9B45A;--clk:#0b0b0c;--clkt:#F3E7C9;--tk:#0b0b0c;--tkt:#D9B45A}
+  body.elite #bg{background:radial-gradient(70% 60% at 30% 30%,#1c1810,#0b0b0c 55%,#050506)}
+  body.elite .title{background:linear-gradient(180deg,#fff8e1,#f3e7c9 45%,#d9b45a 75%,#8a6a24);-webkit-background-clip:text;background-clip:text;color:transparent;filter:drop-shadow(0 8px 0 rgba(0,0,0,.55));letter-spacing:4px}
+  body.elite .clock .dg{box-shadow:0 0 0 2px #050505,0 0 0 5px #D9B45A,0 20px 60px rgba(0,0,0,.6)}
+  body.elite .frame{border:6px solid #0b0b0c;box-shadow:0 0 0 3px #D9B45A,0 20px 60px rgba(0,0,0,.6)}
+  body.elite .el-wm{position:absolute;right:120px;top:120px;opacity:.07}
+  body.elite .el-beam{position:absolute;top:-100px;width:380px;height:1300px;background:linear-gradient(180deg,rgba(255,226,150,.18),transparent 70%);filter:blur(6px)}
+  body.elite .tick{border-top:3px solid #D9B45A}
   body.ets{--a:#ffd400;--at:#111;--b:#0b4fa8;--bt:#fff;--hl:#ffd400;--clk:#ffd400;--clkt:#111;--tk:#ffd400;--tkt:#111}
   body.ets #bg{background:linear-gradient(180deg,#13284d 0%,#2b4f7e 45%,#d9874a 76%,#f0b066 84%)}
   body.ets .main{background:#0b4fa8;border:6px solid #fff;border-radius:18px;padding:28px 40px 34px;box-sizing:border-box;width:1040px;box-shadow:0 18px 40px rgba(0,0,0,.35)}
@@ -116,6 +125,7 @@
 <div class="tick" id="tick"><b id="tickL">WHILE YOU WAIT</b><div class="run" id="run"></div></div>
 <script src="/sfx.js"></script>
 <script src="/music.js"></script>
+<script src="/elite.js"></script>
 <script src="/stinger.js"></script>
 <script>
 (function () {
@@ -128,6 +138,7 @@
     ats: { bugA: 'BBR', bugB: 'BBR FREIGHT LINES · REST AREA', kick: 'NEXT RIGHT · REST AREA', title: 'REST AREA', msg: 'Coffee at the truck stop. Back on the interstate soon.', clk: 'BACK ON THE ROAD IN', tick: 'CB RADIO', deco: '<div class="sun"></div><div class="mesa"></div><div class="road"></div>' },
     arc: { bugA: 'RAIDER', bugB: 'TOPSIDE · STANDBY', kick: 'BIGBOSSROBINSON · STANDING BY', title: 'BACK SOON, RAIDER', msg: 'Restocking in the bunker. Stay out of sight.', clk: 'DEPLOYING IN', tick: 'RAIDER COMMS', deco: '<div class="beam"></div><div class="haz" style="top:0"></div><div class="haz" style="bottom:62px"></div>' },
     mgs: { bugA: '!', bugB: 'CODEC · 140.85', kick: 'SNAKE? SNAAAKE!', title: 'INTERMISSION', msg: 'Stay on this frequency. Mission resumes shortly.', clk: 'MISSION RESUMES IN', tick: 'CODEC', deco: '<div class="radar"></div><div class="scan"></div>' },
+    elite: { bugA: 'ELITE', bugB: 'ELITE PLAYOFFS · HALF-TIME', kick: 'BIGBOSSROBINSON · PLAYOFF NIGHT', title: 'HALF-TIME', msg: 'The playoff run carries on in a moment. Stay right here.', clk: 'SECOND HALF IN', tick: 'ELITE PLAYOFFS', deco: '<div class="el-beam" style="left:260px;transform:rotate(12deg)"></div><div class="el-beam" style="left:1240px;transform:rotate(-12deg)"></div><div class="el-wm">' + (window.BBR_CREST ? window.BBR_CREST(620) : '') + '</div>' },
     heist: { bugA: 'BBR', bugB: 'SUNSET COAST · SAFEHOUSE', kick: 'BIGBOSSROBINSON · LAYING LOW', title: 'LAYING LOW', msg: 'Heat\'s too high. Hiding out at the safehouse, back before the cops clock off.', clk: 'BACK ON THE STREETS IN', tick: 'COAST NEWS 24', deco: '<div class="hsun"></div><div class="hcity"></div><div class="heli"></div><div class="hpalm" style="left:60px;height:460px"></div><div class="hpalm" style="left:180px;height:380px;animation-delay:-2s"></div><div class="hpalm" style="left:1840px;height:520px;animation-delay:-4s"></div>' },
     neon: { bugA: 'BBR', bugB: 'BIGBOSSROBINSON', kick: 'BIGBOSSROBINSON', title: 'BE RIGHT BACK', msg: 'Don\'t go anywhere.', clk: 'BACK IN', tick: 'WHILE YOU WAIT', deco: '<div class="grid"></div>' },
   };
