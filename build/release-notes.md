@@ -1,7 +1,13 @@
-Version 43: Elite Playoffs.
+Version 44: your alerts in BBR, Tangia frames, quick buttons, rearrange.
 
-- NEW: Playoff night (Scenes > Theme, the dock, or /control/playoffs). One switch turns football black & gold everywhere: alerts, chat, the full-time card, Starting Soon (PLAYOFF NIGHT), half-time, replays, the giveaway meter, the news ticker and the stingers, with an original gold laurel crest. A big ELITE PLAYOFFS banner plays when you turn it on.
-- NEW: the playoff tracker. "ELITE PLAYOFFS · MATCH 4 OF 10", a gold slot for every match (W / D / L), your record, and what you need ("NEED 3 MORE WINS FROM 5 FOR RANK I", "WIN ALL 2 LEFT", "RANK I SECURED"). It takes the place of the results bar while Playoff night is on, and shows on Starting Soon and the dock too.
-- Every W / D / L you already press (dock, Results page, Stream Deck, a score like 3-1) counts towards the run. Undo works too. Set the number of matches and an optional wins target; start a new run; fix it by hand.
-- Chat: the run after every result, and !playoffs any time.
-- Also: a long team name no longer squashes the full-time score onto three lines.
+- NEW: BBR alerts (Live > Alerts). Follows, subs, resubs, gifted subs, gift bombs, bits, Power-ups, channel points, raids, Hype Train, charity, shout-outs (Twitch); follows, subs, gifts, Kicks and hosts (Kick); new subscribers, Super Chats, Super Stickers, members, milestones and gifted memberships (YouTube). They play on your BBR overlay instead of Streamlabs. Off until you turn it on.
+- Each alert type: on/off, look (banner, card with their viewer card, or full-screen takeover), length in seconds (0 = as long as its video), your own sounds (several = a random one each time), picture or GIF, video (MP4/WEBM), your own words, the smallest amount that shows it, and their message read out. Bigger versions for bigger amounts (e.g. 1,000+ bits, a 20-gift bomb).
+- The looks follow your theme: Football, Elite Playoffs (black & gold), Trucking and Sunset Heist.
+- Follows close together become one "3 new followers" alert. Re-follows don't alert again. Alerts take turns with your cards and wait while Tangia plays.
+- Pause, skip, replay (any of the last 30), mute sounds, test each type. Read-outs use the voices built into Windows.
+- NEW: Tangia frame. A frame around Tangia while it plays, in the look of the game (or one you pick).
+- NEW: "Check for updates" in the top bar, always visible.
+- NEW: quick buttons on the Live desk and in the dock: shout out the last raider, ad break warning (60 s countdown on screen + chat), refresh every BBR overlay in OBS, clean screen for 5 min, chat lockdown, hide Tangia, and the alert buttons.
+- NEW: Stream Deck pages for Alerts, Ballon d'Or (open/close voting, every screen, the ceremony step by step, remind chat, your vote per nominee) and Playoffs.
+- NEW: Rearrange. Drag the sidebar sections, the pages and the cards into your own order, choose 1, 2 or 3 columns per page, hide cards you don't use. The dock's tabs can be dragged too.
+- Reconnect Twitch (Setup > Platforms) once to allow Hype Train alerts, shout-outs, chat lockdown and the ad buttons.

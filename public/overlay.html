@@ -236,6 +236,8 @@ html,body{margin:0;background:transparent;overflow:hidden}
 <script src="/bp.js"></script>
 <script src="/arc.js"></script>
 <script src="/alerts.js"></script>
+<script src="/ealerts.js"></script>
+<script src="/tframe.js"></script>
 <script src="/giveaway.js"></script>
 <script src="/hud.js"></script>
 <script src="/screen.js"></script>
@@ -251,9 +253,10 @@ html,body{margin:0;background:transparent;overflow:hidden}
   const stage = document.getElementById('stage');
   const esc = BBR.esc;
   const queue = [];
+  let cardsHideUntil = 0, cur = null, busyLimit = 45000, EAS = { on: false, paused: false, muted: false };   // v44: the alert on screen now (so Skip can end it)
   let shownN = 0, busy = false, battleBusy = false, busySince = 0, lastBattleAt = 0, lastErr = '';
   // only these are card alerts: anything else (new screens, chat, states) never goes in the card queue
-  const QUEUED = /^(pack|levelup|show|streakup|checkin|challenge)$/;
+  const QUEUED = /^(pack|levelup|show|streakup|checkin|challenge|ealert)$/;
   const DUR = { pack: 10000, levelup: 8000, show: 7000 };
   const ms = (s) => s * 1000;
 
@@ -282,6 +285,9 @@ html,body{margin:0;background:transparent;overflow:hidden}
     if (stage.classList.contains('rp-on')) { clearTimeout(next.rp); next.rp = setTimeout(next, 1500); return; }   // a replay is on: alerts wait
     const A = (window.BBR_SCREEN && BBR_SCREEN.alerts) || {};
     if (otherBusy && A.on !== false && A.wait !== false) return;
+    // v44: "clean screen" keeps card alerts waiting; "pause alerts" keeps BBR alerts waiting. Play the first one that's allowed.
+    { const hideCards = cardsHideUntil > Date.now(); const okNow = (x) => !(hideCards && x.type !== 'ealert') && !(EAS.paused && x.type === 'ealert' && !x.test && !x.replay);
+      const i = queue.findIndex(okNow); if (i < 0) return; if (i > 0) queue.unshift(...queue.splice(i, 1)); }
     const wait = (queue[0].holdUntil || 0) - Date.now();
     if (wait > 0) { clearTimeout(holdT); holdT = setTimeout(next, wait + 50); return; }
     busy = true; busySince = Date.now();
@@ -300,6 +306,9 @@ html,body{margin:0;background:transparent;overflow:hidden}
       requestAnimationFrame(() => ALERTS.dodge(el, '.reveal, .newtxt, .pack, .wo'));
     } else if (a.type === 'challenge') {
       dur = CH.event(a); el = document.createElement('i');
+    } else if (a.type === 'ealert') {
+      const r = EALERT.play(stage, a, () => cur && cur.a === a && cur.finish());
+      el = r.el; dur = r.dur;
     } else {
       const r = ALERTS.play(stage, a);
       el = r.el; dur = r.dur;
@@ -311,8 +320,17 @@ html,body{margin:0;background:transparent;overflow:hidden}
       if (el && el.remove) el.remove();
       busy = false; setTimeout(next, 400); return;
     }
-    setTimeout(() => { el.remove(); busy = false; if (gapMode && queue.length) setTimeout(next, gapSecs * 1000); else { gapMode = false; next(); } }, dur + 300);
+    busyLimit = Math.max(45000, dur + 15000);
+    const me = { a, el, done: false };
+    me.finish = () => {
+      if (me.done) return; me.done = true; clearTimeout(me.t); if (cur === me) cur = null;
+      if (a.type === 'ealert') { clearTimeout(el._fade); try { el.querySelectorAll('video').forEach((v) => v.pause()); } catch (e) { /* ignore */ } }
+      el.remove(); busy = false; if (gapMode && queue.length) setTimeout(next, gapSecs * 1000); else { gapMode = false; setTimeout(next, a.type === 'ealert' ? 400 : 0); }
+    };
+    me.t = setTimeout(me.finish, dur + 300); cur = me;
   }
+  // v44: a read-out that runs longer than the alert keeps it on screen until it's said
+  EALERT.extend = (id, ms) => { if (!cur || !cur.a || cur.a.id !== id) return; const left = ms - (Date.now() - busySince); if (left <= 0) return; clearTimeout(cur.t); clearTimeout(cur.el._fade); cur.el._fade = setTimeout(() => cur && cur.el.classList.add('out'), Math.max(0, left - 500)); cur.t = setTimeout(cur.finish, left + 300); busyLimit = Math.max(busyLimit, left + 15000); };
 
   function packSounds(a) {
     const t = a.card.tier;
@@ -374,6 +392,7 @@ html,body{margin:0;background:transparent;overflow:hidden}
   LB.init({ stage });
   RN.init({ stage });
   EXTRAS.init({ stage });
+  TFRAME.init({ stage });
   // ---- Boss Sports News: the ticker + goal alerts page, layered under everything else ----
   let bsnFrame = null;
   function bsnSet(a) {
@@ -571,7 +590,11 @@ html,body{margin:0;background:transparent;overflow:hidden}
       if (EXTRAS.handles(a.type)) { const was = EXTRAS.panic(); EXTRAS.event(a); if (was && !EXTRAS.panic()) setTimeout(next, 300); return; }
       if (a.type === 'gfx') { if (window.PEN3D) PEN3D.setLight(a.light); return BC.light(a.light); }
       if (a.type === 'pen3d') { if (window.PEN3D) PEN3D.config(a); return; }
-      if (a.type === 'theme') return setTheme(a.theme);
+      if (a.type === 'theme') { try { EALERT.setTheme(a.theme); TFRAME.theme(a.theme); } catch (e) { /* ignore */ } return setTheme(a.theme); }
+      if (a.type === 'ealertState') { EAS = a; try { TFRAME.state(a); } catch (e) { /* ignore */ } if (!a.paused) setTimeout(next, 200); return; }
+      if (a.type === 'adwarn') { try { EALERT.adWarn(stage, a); } catch (e) { /* ignore */ } return; }
+      if (a.type === 'cardsHide') { cardsHideUntil = a.until || 0; clearTimeout(next.ch); if (cardsHideUntil > Date.now()) next.ch = setTimeout(next, cardsHideUntil - Date.now() + 200); else setTimeout(next, 200); return; }
+      if (a.type === 'ealertSkip') { if (cur && cur.a.type === 'ealert') { EALERT.stopSounds(); cur.finish(); } return; }
       if (a.type === 'stinger') { try { STINGER.play(a, { sound: true }); } catch (e) { /* ignore */ } return; }
       if (a.type === 'playoffs') { try { drawPlayoffs(a); } catch (e) { /* ignore */ } return; }
       if (a.type === 'report') { try { reportState(); } catch (e) { /* ignore */ } return; }
@@ -598,8 +621,8 @@ html,body{margin:0;background:transparent;overflow:hidden}
       if (a.type === 'giveaway' || a.type === 'pot') return GIVE.onMsg(a);
       if (a.type === 'sceneHold') { const was = sceneHold; sceneHold = !!a.hold; gapSecs = a.gapSecs != null ? a.gapSecs : 8; if (was && !sceneHold) { releaseHeld(); next(); } return; }
       if (a.type === 'queueClear') { queue.length = 0; return; }
-      if (a.type === 'alertBusy') { otherBusy = !!a.busy; otherSince = Date.now(); if (!otherBusy) setTimeout(next, 400); return; }
-      { const A = (window.BBR_SCREEN && BBR_SCREEN.alerts) || {}; if (A.on !== false && OWN.test(a.kind || '') && (a.type === 'levelup' || a.type === 'pack')) a.holdUntil = Date.now() + (A.delaySecs != null ? A.delaySecs : 6) * 1000; }
+      if (a.type === 'alertBusy') { try { TFRAME.busy(a); } catch (e) { /* ignore */ } otherBusy = !!a.busy; otherSince = Date.now(); if (!otherBusy) setTimeout(next, 400); return; }
+      { const A = (window.BBR_SCREEN && BBR_SCREEN.alerts) || {}; if (A.on !== false && !EAS.on && OWN.test(a.kind || '') && (a.type === 'levelup' || a.type === 'pack')) a.holdUntil = Date.now() + (A.delaySecs != null ? A.delaySecs : 6) * 1000; }
       if (a.note === 'CARDS LINKED') clearToast();
       if (!QUEUED.test(a.type || '')) return;
       if (queue.length < 30) queue.push(a);
@@ -610,7 +633,7 @@ html,body{margin:0;background:transparent;overflow:hidden}
   // watchdog: nothing can leave the cards stuck. An alert that never finished, or a battle screen that never closed, gets cleared.
   setInterval(() => {
     const now = Date.now();
-    if (busy && now - busySince > 45000) { busy = false; lastErr = 'an alert never finished: cleared'; next(); }
+    if (busy && now - busySince > busyLimit) { busy = false; lastErr = 'an alert never finished: cleared'; next(); }
     if (otherBusy && now - (otherSince || now) > 90000) { otherBusy = false; next(); }
   }, 5000);
   // the app says what's really going on: a battle or replay the overlay still thinks is on, but isn't, gets cleared

@@ -1,4 +1,15 @@
-WHAT'S NEW IN v43 (Elite Playoffs)
+WHAT'S NEW IN v44 (your alerts in BBR, Tangia frames, quick buttons, rearrange)
+   - Live > Alerts: follows, subs, gifts, bits, raids, hosts, Super Chats... from Twitch, Kick and
+     YouTube on the BBR overlay instead of Streamlabs. Turn "BBR alerts on", then untick those in
+     Streamlabs' Alert Box (keep Tips there). Each type: look, length, your sounds / GIF / video,
+     words, minimum amount, read-out, and bigger versions for bigger amounts. Test buttons on each.
+   - Tangia frame (Live > Alerts): a frame round Tangia while it plays, in the game's look.
+   - "Check for updates" is in the top bar. Quick buttons on the Live desk and in the dock.
+   - Rearrange (top bar): drag sections, pages and cards, 1-3 columns, hide cards. Dock tabs drag too.
+   - Stream Deck: new Alerts, Ballon d'Or and Playoffs pages (Buttons & Stream Deck).
+   - Reconnect Twitch once (Setup > Platforms) for Hype Train, shout-outs, lockdown and ads.
+
+WHAT WAS NEW IN v43 (Elite Playoffs)
    - Playoff night: Scenes > Theme (or the dock, or Stream Deck /control/playoffs). Football turns
      black & gold everywhere: alerts, chat, full time, Starting Soon ("PLAYOFF NIGHT"), half-time,
      replays, the giveaway meter, the ticker, stingers. Turn it off and everything goes back.

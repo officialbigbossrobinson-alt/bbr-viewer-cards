@@ -305,6 +305,7 @@ body.pop .bar1,body.pop .bar2{display:none!important}body.pop main{padding:8px!i
 main{max-width:1680px;margin:0 auto;padding:18px 24px!important}
 main.solo{display:block!important}
 main.solo>div .mrow{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:0 20px;align-items:start}
+main.solo>div .mrow.c3{grid-template-columns:repeat(3,minmax(0,1fr))}
 .mcol{min-width:0}
 @media(max-width:1100px){main.solo>div .mrow{grid-template-columns:minmax(0,1fr)}}
 .bar2{display:flex;align-items:center;gap:12px;background:#171a1f;padding-right:24px;flex-wrap:wrap}.bar2 .side{flex:1}
@@ -483,6 +484,62 @@ body.bl-hide .bl-std,body.bl-hide .bl-stdc{visibility:hidden}
 .bl-modes{margin-top:4px;grid-template-columns:1fr!important}
 .bl-ed{display:inline-flex;gap:4px}.bl-ed button{min-height:30px;padding:0 9px}
 @media (max-width:900px){.bl-tiles{grid-template-columns:repeat(2,minmax(0,1fr))}.bl-2{grid-template-columns:1fr}}
+
+/* v44 alerts page */
+.newtag{font-style:normal;font-size:10px;font-weight:700;letter-spacing:.06em;color:var(--ui-ink,#0B1020);background:var(--ui);border-radius:4px;padding:1px 5px;margin-left:auto}
+.ea-master{display:flex;align-items:center;gap:14px;flex-wrap:wrap;margin:10px 0 4px}
+label.tog.big{font-size:16px}
+.ea-steps{margin:6px 0 0;padding-left:20px;line-height:1.6;color:#c9d1db}.ea-steps li.done{color:#3ad27a}
+.ea-tbl-wrap{overflow-x:auto}
+.ea-tbl th{text-align:left;font-size:11.5px;font-weight:600;letter-spacing:.04em;text-transform:uppercase;color:var(--muted);padding:0 8px 8px;border-bottom:1px solid var(--line)}
+.ea-tbl td{padding:8px;border-bottom:1px solid #1c2127;vertical-align:middle}
+.ea-tbl .nm b{display:block}.ea-tbl .nm small{display:block;color:var(--muted);font-size:12px}
+.ea-tbl input[type=number]{width:76px;padding:6px 8px}.ea-tbl select{width:auto;padding:6px 8px}
+.ea-pf{display:inline-flex;gap:3px;margin-top:3px}.ea-pf span{font-size:10px;font-weight:700;border-radius:3px;padding:1px 5px;color:#0b1020}
+.ea-pf .twitch{background:#b794ff}.ea-pf .kick{background:#53fc18}.ea-pf .youtube{background:#ff6b6b}
+.ea-files{font-size:12px;color:var(--muted)}
+.ea-tbl button{min-height:32px;padding:0 10px;font-size:12.5px}
+.ea-tbl tr.off td:not(:first-child):not(:nth-child(2)){opacity:.45}
+.sr{position:absolute;left:-9999px}
+button.sm{min-height:30px;padding:0 10px;font-size:12.5px}
+.ea-hist{display:flex;flex-direction:column;gap:6px;max-height:420px;overflow-y:auto}
+.ea-h{display:flex;align-items:center;gap:10px;padding:8px 10px;border:1px solid var(--line);border-radius:8px}
+.ea-h b{font-weight:600}.ea-h small{color:var(--muted);display:block}.ea-h button{margin-left:auto}
+.ea-ed-grid{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:16px}
+@media(max-width:1000px){.ea-ed-grid{grid-template-columns:1fr}}
+.ea-pick{display:flex;flex-wrap:wrap;gap:6px;margin:6px 0}
+.ea-pick button{min-height:30px;padding:0 10px;font-size:12.5px}.ea-pick button.on{border-color:var(--ui);background:rgba(108,140,255,.16)}
+.ea-var{border:1px solid var(--line);border-radius:10px;padding:10px 12px;margin-top:8px}
+.ea-var .row4 input,.ea-var .row4 select{padding:6px 8px}
+.row4{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px}
+.ea-closed{display:none!important}
+/* v44 rearrange */
+.topbar .ds-box{flex:1 1 150px}
+@media(max-width:1600px){.topbar .pills>*{padding:0 8px!important}}
+.tb-arr{min-height:32px;padding:0 12px;border-radius:8px;font-size:13px;font-weight:600}
+.tb-arr[aria-pressed=true]{background:var(--ui);border-color:var(--ui);color:var(--ui-ink,#0B1020)}
+.arr-bar{position:sticky;top:0;z-index:30;display:flex;align-items:center;gap:12px;flex-wrap:wrap;padding:10px 28px;background:#18203a;border-bottom:1px solid rgba(108,140,255,.45)}
+.arr-bar[hidden]{display:none!important}
+.arr-bar label{display:flex;align-items:center;gap:8px;font-size:13px}.arr-bar select{width:auto;padding:5px 8px}
+.arr-bar button{min-height:32px;padding:0 12px;font-size:13px}
+.arr-chip{display:inline-flex;align-items:center;gap:4px;border:1px dashed #3A4350;border-radius:999px;padding:2px 10px;font-size:12px;color:#c9d1db;background:none;min-height:26px}
+body.arranging main>div section.card{outline:1px dashed #3A4350;outline-offset:3px}
+body.arranging main>div section.card.lay-hidden{opacity:.4}
+.arr-h{display:flex;align-items:center;gap:6px;margin:-6px 0 10px;padding:6px 8px;border-radius:8px;background:#1b2130;font-size:12px;color:#aebbd8;cursor:grab;user-select:none}
+.arr-h .g{font-size:16px;letter-spacing:-2px;color:#7f8fb8}.arr-h button{min-height:26px;padding:0 8px;font-size:12px}.arr-h .sp{flex:1}
+body.arranging #groups [data-group],body.arranging #tabs [data-go].show{cursor:grab;outline:1px dashed #3A4350;outline-offset:-2px}
+.arr-drop{outline:2px solid var(--ui)!important;outline-offset:2px}
+.arr-dragging{opacity:.5}
+.mcol.arr-target{background:rgba(108,140,255,.06);border-radius:12px;min-height:80px}
+.qk-grid{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:10px}
+@media(max-width:1250px){.qk-grid{grid-template-columns:repeat(3,minmax(0,1fr))}}
+.qk{display:flex;flex-direction:column;align-items:flex-start;gap:6px;padding:12px;min-height:88px;border-radius:10px;border:1px solid var(--line);background:#161A1F;text-align:left;font-weight:500}
+.qk svg{width:20px;height:20px;color:var(--ui)}.qk b{font-size:13.5px;font-weight:600}.qk small{color:var(--muted);font-size:11.5px;font-weight:400}
+.qk.on{border-color:rgba(108,140,255,.6);background:rgba(108,140,255,.1)}.qk.hot svg{color:#ff6b7d}
+.tb-upd{min-height:32px;padding:0 12px;border-radius:8px;font-size:13px;font-weight:600;border:1px solid rgba(108,140,255,.55);background:rgba(108,140,255,.12);color:#C9D5FF;white-space:nowrap}
+.tb-upd.ready{background:#3DD68C;border-color:#3DD68C;color:#0B1020}.tb-upd.ok{color:#3DD68C;border-color:rgba(61,214,140,.45);background:rgba(61,214,140,.08)}
+.tb-upd.busy{color:#C9D1DB;border-color:#2C333C;background:#1A1F25}.tb-upd.bad{color:#FF8F99;border-color:rgba(255,77,94,.5);background:transparent}
+.ea-warn{border:1px solid #ffb020;background:rgba(255,176,32,.08);border-radius:8px;padding:10px 12px;margin-top:10px}
 </style>
 </head>
 <body>
@@ -490,6 +547,8 @@ body.bl-hide .bl-std,body.bl-hide .bl-stdc{visibility:hidden}
   <div class="tb-brand"><span class="tb-mark" aria-hidden="true">BBR</span><span>Viewer Cards</span></div>
   <div class="ds-box"><input id="dsQ" type="search" placeholder="Search everything…" autocomplete="off" aria-label="Search the dashboard"><div id="dsOut" class="ds-out" hidden></div></div>
   <div class="pills" id="pills" aria-label="Connections"></div>
+  <button type="button" class="tb-arr" id="tbArr" aria-pressed="false" data-tip="Drag the sidebar sections, pages and cards into your own order, pick how many columns each page has, hide cards you don't use.">Rearrange</button>
+  <button type="button" class="tb-upd" id="tbUpd" data-tip="Looks for a new version of BBR now (it also checks by itself). While you're live, a new version waits until you end the stream.">Check for updates</button>
   <button type="button" class="tb-panic" id="tbPanic" data-tip="Hides every BBR thing on stream at once (cards, alerts, ticker, meters). Press again to bring it all back.">Panic: hide all</button>
   <label class="advsw" data-tip="Shows every setting: all the tuning numbers, OBS details, setup steps and Stream Deck links. Off = just the everyday controls."><input type="checkbox" id="advOn"><span>Advanced</span></label>
 </header>
@@ -506,6 +565,7 @@ body.bl-hide .bl-std,body.bl-hide .bl-stdc{visibility:hidden}
   </nav>
   <nav class="side" id="tabs" aria-label="Pages">
     <button data-go="home" data-grp="live" type="button">Live desk</button>
+    <button data-go="alerts" data-grp="live" type="button">Alerts <em class="newtag">NEW</em></button>
     <button data-go="onscreen" data-grp="live" type="button">On screen</button>
     <button data-go="replay" data-grp="live" type="button">Replay</button>
     <button data-go="deck" data-grp="live" type="button">Buttons &amp; Stream Deck</button>
@@ -577,6 +637,9 @@ body.bl-hide .bl-std,body.bl-hide .bl-stdc{visibility:hidden}
     <div class="au-btns"><button id="auSkip">Skip this version</button><button id="auAfter">After my stream</button><button class="primary" id="auNow">Update now</button></div>
   </div>
 </div>
+<div class="arr-bar" id="arrBar" hidden role="region" aria-label="Rearranging"><b>Rearranging</b><span>Drag the dotted handles (or use the arrows). Saved by itself.</span>
+  <label>Columns on this page <select id="arrCols"><option value="1">1</option><option value="2">2</option><option value="3">3</option></select></label>
+  <span id="arrHidden"></span><button type="button" id="arrResetPage">Reset this page</button><button type="button" id="arrResetAll">Reset everything</button><button type="button" class="primary" id="arrDone">Done</button></div>
 <div class="page-head"><div class="crumb" id="pageCrumb">Live</div><h1 id="pageTitle">Live desk</h1></div>
 <main>
   <div>
@@ -599,6 +662,12 @@ body.bl-hide .bl-std,body.bl-hide .bl-stdc{visibility:hidden}
         <p class="help">Turns on a second, private address on your home network (it needs a secret key in the link, and it can only press these buttons). Open it on a phone on the same Wi-Fi.</p>
         <label class="tog"><input type="checkbox" id="ldPhone"> Phone remote on</label><div class="copy" id="ldPhoneUrl"></div>
       </details>
+    </section>
+    <section data-tab="home" class="card wide" id="ldQuick">
+      <h2>Quick buttons</h2>
+      <p class="help">One press, mid-match. The same buttons are in the OBS dock and on the Stream Deck (Buttons &amp; Stream Deck).</p>
+      <div class="qk-grid" id="qkGrid"></div>
+      <div class="actions"><span class="state" id="qkMsg" role="status" aria-live="polite"></span></div>
     </section>
     <section data-tab="home" class="card" id="botCard">
       <h2>Chat bot</h2>
@@ -1607,9 +1676,10 @@ body.bl-hide .bl-std,body.bl-hide .bl-stdc{visibility:hidden}
     <section data-tab="media" class="card wide">
       <h2>Your photos &amp; music</h2>
       <p class="help">Upload once, use them anywhere: the Be Right Back screen, Starting Soon, Big Cam and the stingers. Photos: PNG, JPG, WEBP or GIF (up to 25 MB). Music: MP3, OGG, M4A or WAV (up to 80 MB). Only use music you're allowed to play on stream (royalty-free or your own). Your Starting Soon pictures show up here too.</p>
-      <div class="actions"><label class="up-btn">Add photos or music <input type="file" id="mdFile" multiple accept="image/png,image/jpeg,image/webp,image/gif,audio/mpeg,audio/ogg,audio/mp4,audio/wav,.mp3,.m4a,.ogg,.wav"></label><span class="state" id="mdMsg"></span></div>
+      <div class="actions"><label class="up-btn">Add photos, music, sounds or videos <input type="file" id="mdFile" multiple accept="image/png,image/jpeg,image/webp,image/gif,audio/mpeg,audio/ogg,audio/mp4,audio/wav,.mp3,.m4a,.ogg,.wav,video/mp4,video/webm,.mp4,.webm,.mov,.m4v"></label><span class="state" id="mdMsg"></span></div>
       <h3 class="sub">Photos</h3><div id="mdPhotos" class="md-grid"></div>
-      <h3 class="sub">Music</h3><div id="mdMusic" class="md-list"></div>
+      <h3 class="sub">Music &amp; sounds</h3><div id="mdMusic" class="md-list"></div>
+      <h3 class="sub">Videos</h3><div id="mdVideos" class="md-list"></div>
     </section>
     <!-- ===== v30: Be right back ===== -->
     <section data-tab="brb" class="card">
@@ -2237,6 +2307,54 @@ body.bl-hide .bl-std,body.bl-hide .bl-stdc{visibility:hidden}
       <p class="help">Off for now. While off there are no tickets, no pot, no giveaway chat commands and nothing about it on screen. Everything saved so far is kept, so switching it back on carries on where it left off.</p>
       <label class="tog"><input id="afOn" type="checkbox"> Fix problems automatically</label>
       <p class="help">Reconnects chat and OBS, resets a stuck battle and puts your OBS scene back if something goes wrong. Every fix is listed on the Diagnostics page.</p>
+    </section>
+
+    <!-- ===== v44: BBR alerts (instead of Streamlabs) ===== -->
+    <section data-tab="alerts" class="card wide" id="eaTop">
+      <h2>Your alerts, played by BBR</h2>
+      <p class="help">Follows, subs, gifts, bits, raids, hosts, Super Chats and more from Twitch, Kick and YouTube, shown on your BBR overlay instead of Streamlabs. Each type has its own look, length, sound, picture or GIF, video and read-out. They take turns with your cards and wait while Tangia plays.</p>
+      <div class="ea-master"><label class="tog big"><input type="checkbox" id="eaOn"> <b>BBR alerts on</b></label><span class="state" id="eaStatus"></span></div>
+      <div class="actions"><button id="eaPause" type="button">Pause alerts</button><button id="eaSkip" type="button">Skip current</button><button id="eaReplay" type="button">Replay last</button><button id="eaMute" type="button">Mute sounds</button><button id="eaTestAll" type="button" class="primary">Test every type</button><span class="state" id="eaMsg" role="status" aria-live="polite"></span></div>
+      <div id="eaWarn"></div>
+      <h3 class="sub">Switching from Streamlabs</h3>
+      <ol class="ea-steps"><li id="eaS1"><b>Turn BBR alerts on</b> (above). Twitch, Kick and YouTube need to be connected on Setup › Platforms.</li><li><b>Turn them off in Streamlabs</b>: Alert Box › untick Follows, Subscriptions, Bits, Raids, Hosts, Super Chats, Members. Leave <b>Tips / Donations</b> on (BBR can't take payments).</li><li><b>Press Test</b> on each row below and watch OBS. Add your own sounds, pictures and videos with Edit.</li></ol>
+    </section>
+    <section data-tab="alerts" class="card wide" id="eaTypes">
+      <h2>Alert types</h2>
+      <p class="help">On, look, how long it stays (seconds; 0 = as long as its video), the smallest amount that shows it and whether their message is read out. Edit for sounds, pictures, videos, the words and bigger versions for bigger amounts.</p>
+      <div class="ea-tbl-wrap"><table class="ea-tbl"><thead><tr><th scope="col">Alert</th><th scope="col">On</th><th scope="col">Look</th><th scope="col">Length</th><th scope="col">From</th><th scope="col">Read out</th><th scope="col">Your files</th><th scope="col"><span class="sr">Buttons</span></th></tr></thead><tbody id="eaRows"></tbody></table></div>
+    </section>
+    <section data-tab="alerts" class="card wide ea-closed" id="eaEdit" aria-labelledby="eaEditT">
+      <h2 id="eaEditT">Edit</h2>
+      <div id="eaEditBody"></div>
+    </section>
+    <section data-tab="alerts" class="card" id="eaQueue">
+      <h2>Last alerts</h2>
+      <p class="help">Replay one if you missed it. Waiting while paused: <b id="eaHeld">0</b> <button type="button" id="eaClearHeld" class="sm">Throw them away</button></p>
+      <div id="eaHist" class="ea-hist"></div>
+    </section>
+    <section data-tab="alerts" class="card" id="eaRules">
+      <h2>Rules</h2>
+      <label class="tog"><input type="checkbox" id="eaMerge"> Merge follows that come close together</label>
+      <div class="row"><div><label for="eaMergeSecs">Merge window (seconds)</label><input id="eaMergeSecs" type="number" min="2" max="60"></div><div><label for="eaGap">Gap between alerts (seconds)</label><input id="eaGap" type="number" min="0" max="10"></div></div>
+      <label for="eaCards">Their viewer card after the alert</label>
+      <select id="eaCards"><option value="changes">Only when their card goes up a tier or gets a ribbon</option><option value="always">Always (the card thank-you as well)</option><option value="never">Never</option></select>
+      <h3 class="sub">Read-outs</h3>
+      <div class="row"><div><label for="eaVoice">Voice</label><select id="eaVoice"></select></div><div><label for="eaTtsVol">Volume <span id="eaTtsVolV"></span></label><input id="eaTtsVol" type="range" min="0" max="100" step="5" style="padding:0;height:40px"></div></div>
+      <div class="row"><div><label for="eaTtsMax">Longest read-out (characters)</label><input id="eaTtsMax" type="number" min="20" max="300"></div><div><label for="eaBlocked">Words never read or shown (comma between)</label><input id="eaBlocked" type="text" autocomplete="off"></div></div>
+      <p class="help" id="eaTtsHelp"></p>
+      <div class="actions"><button id="eaSaveRules" type="button" class="primary">Save</button><span class="state" id="eaRulesMsg"></span></div>
+    </section>
+    <section data-tab="alerts" class="card" id="eaTangia">
+      <h2>Tangia frame</h2>
+      <p class="help">A frame around Tangia while it plays, in the look of the game on stream. BBR hears Tangia through OBS (turn on "Control audio via OBS" on the Tangia browser source).</p>
+      <label class="tog"><input type="checkbox" id="tfOn"> Frame around Tangia</label>
+      <label for="tfLook">Look</label>
+      <select id="tfLook"><option value="auto">Follow the game (football, Elite, trucking, heist)</option><option value="football">Football</option><option value="elite">Elite Playoffs (black &amp; gold)</option><option value="ets">Trucking (dashcam)</option><option value="heist">Sunset Heist (neon)</option></select>
+      <h3 class="sub">Where Tangia plays on screen</h3>
+      <div class="row4"><div><label for="tfX">Left</label><input id="tfX" type="number"></div><div><label for="tfY">Top</label><input id="tfY" type="number"></div><div><label for="tfW">Width</label><input id="tfW" type="number"></div><div><label for="tfH">Height</label><input id="tfH" type="number"></div></div>
+      <p class="help" id="tfFound"></p>
+      <div class="actions"><button id="tfSave" type="button" class="primary">Save</button><button id="tfAuto" type="button">Use the Tangia source's spot</button><button id="tfTest" type="button">Show it now</button><span class="state" id="tfMsg"></span></div>
     </section>
   </div>
 
@@ -2874,6 +2992,7 @@ async function loadMedia() {
   const P = MD.list.filter((m) => m.kind === 'photo'), M = MD.list.filter((m) => m.kind === 'music');
   $('mdPhotos').innerHTML = P.map((m) => '<div class="md-it" style="cursor:default"><img src="' + esc(m.url) + '" alt=""><span>' + esc(m.name) + (m.from ? ' (Starting Soon)' : '') + '</span>' + (m.from ? '' : '<button data-mddel="' + esc(m.id) + '" style="margin:4px 8px 8px">Remove</button>') + '</div>').join('') || '<p class="help">No photos yet.</p>';
   $('mdMusic').innerHTML = M.map((m) => '<div class="md-row"><b>' + esc(m.name) + '</b><audio controls preload="none" src="' + esc(m.url) + '" style="height:34px"></audio><button data-mddel="' + esc(m.id) + '">Remove</button></div>').join('') || '<p class="help">No music yet.</p>';
+  $('mdVideos').innerHTML = MD.list.filter((m) => m.kind === 'video').map((m) => '<div class="md-row"><b>' + esc(m.name) + '</b><video controls preload="metadata" src="' + esc(m.url) + '" style="height:90px;max-width:160px;border-radius:6px;background:#000"></video><button data-mddel="' + esc(m.id) + '">Remove</button></div>').join('') || '<p class="help">No videos yet (alerts can use them).</p>';
   document.querySelectorAll('[data-mddel]').forEach((b) => { b.onclick = async () => { if (!await ask('Remove this file?')) return; await post('/api/media', { action: 'remove', id: b.dataset.mddel }); loadMedia(); }; });
 }
 $('mdFile').onchange = async (e) => { await mdUpload(Array.from(e.target.files), $('mdMsg')); e.target.value = ''; loadMedia(); };
@@ -4651,25 +4770,35 @@ document.querySelectorAll('#groups [data-group]').forEach((b) => { b.onclick = (
 // pages with tables, big lists or wide controls take the full width; the rest sit in two columns
 // two-column layout for the page on show: wide sections run across, the rest go into the shorter column
 let ORIG = null;
+const LAY = { dash: {} };   // v44 your layout
+try { LAY.dash = JSON.parse(localStorage.getItem('bbr-layout') || '{}') || {}; } catch (e) { LAY.dash = {}; }
 function layoutTab(t) {
   const host = document.querySelector('main > div'); if (!host) return;
-  if (!ORIG) ORIG = Array.from(host.children);
+  if (!ORIG) { ORIG = Array.from(host.children); const seen = {}; ORIG.forEach((el) => { if (!el.dataset || !el.dataset.tab) return; const n = seen[el.dataset.tab] = (seen[el.dataset.tab] || 0) + 1; el.dataset.lk = el.id || el.dataset.tab + ':' + n; }); }
   host.querySelectorAll('.mrow').forEach((r) => r.remove());
-  ORIG.forEach((el) => host.appendChild(el));
+  ORIG.forEach((el) => { host.appendChild(el); el.classList.remove('lay-hidden'); });
   if (t === 'viewers') return;
-  const mine = ORIG.filter((el) => el.dataset && el.dataset.tab === t && el.id !== 'heldCard');
-  const firstPos = mine[0]; if (!firstPos || mine.length < 2) return;
+  // v44: your own order / columns / hidden cards for this page (Rearrange)
+  const P = (LAY.dash.pages || {})[t] || {}, cols = Math.max(1, Math.min(3, +P.cols || 2)), arranging = document.body.classList.contains('arranging');
+  let mine = ORIG.filter((el) => el.dataset && el.dataset.tab === t && el.id !== 'heldCard');
+  if (Array.isArray(P.order) && P.order.length) { const pos = (el) => { const i = P.order.indexOf(el.dataset.lk); return i < 0 ? 1000 + mine.indexOf(el) : i; }; mine = mine.slice().sort((a, b) => pos(a) - pos(b)); }
+  const hid = new Set(P.hidden || []);
+  mine.forEach((el) => { if (hid.has(el.dataset.lk)) el.classList.add('lay-hidden'); });
+  if (!arranging) mine = mine.filter((el) => !hid.has(el.dataset.lk));
+  if (!mine.length) return;
   const frag = document.createDocumentFragment(); let row = null;
   const out = [];
   for (const el of mine) {
-    if (el.classList.contains('wide') || el.classList.contains('cols2') || el.classList.contains('plats')) { row = null; out.push(el); continue; }
-    if (!row) { row = document.createElement('div'); row.className = 'mrow'; row.innerHTML = '<div class="mcol"></div><div class="mcol"></div>'; out.push(row); }
+    if (cols > 1 && !P.col?.[el.dataset.lk] && (el.classList.contains('wide') || el.classList.contains('cols2') || el.classList.contains('plats'))) { row = null; out.push(el); continue; }
+    if (cols === 1) { out.push(el); continue; }
+    if (!row) { row = document.createElement('div'); row.className = 'mrow c' + cols; row.innerHTML = '<div class="mcol"></div>'.repeat(cols); out.push(row); }
     row.items = (row.items || []).concat(el);
   }
   out.forEach((x) => frag.appendChild(x)); host.insertBefore(frag, host.firstChild);
   const held = document.getElementById('heldCard'); if (held && t === 'home') host.insertBefore(held, host.firstChild.nextSibling);
-  const fill = () => host.querySelectorAll('.mrow').forEach((r) => { const [a, b] = r.children; (r.items || []).forEach((el) => { (a.offsetHeight <= b.offsetHeight ? a : b).appendChild(el); }); });
+  const fill = () => host.querySelectorAll('.mrow').forEach((r) => { const C = Array.from(r.children); (r.items || []).forEach((el) => { const want = P.col && P.col[el.dataset.lk]; const c = want && C[want - 1] ? C[want - 1] : C.reduce((a, b) => (b.offsetHeight < a.offsetHeight ? b : a)); c.appendChild(el); }); });
   fill();
+  if (arranging) arrDecorate(t);
 }
 function markWide() {
   document.querySelectorAll('main > div > section.card').forEach((sec) => {
@@ -4724,6 +4853,7 @@ function showTab(t) {
   if (t === 'ballon' && window.blLoad) window.blLoad();
   if (t === 'app' && window.apLoad) setTimeout(() => window.apLoad(), 50);
   if (t === 'tangia') loadTangia();
+  if (t === 'alerts' && window.eaLoad) window.eaLoad();
   if (t === 'calc') viewerList();
   if (t === 'bsnsquad') loadStories();
   if (t === 'home') { loadFeatured(); loadReady(); loadUndo(); }
@@ -4805,10 +4935,33 @@ setInterval(renderGlance, 3000); setTimeout(renderGlance, 800);
 const AP = { s: null, prevAsked: false, timer: null, modal: false };
 const apMB = (b) => (b >= 1073741824 ? (b / 1073741824).toFixed(1) + ' GB' : (b / 1048576).toFixed(b > 104857600 ? 0 : 1) + ' MB');
 const apWhy = { 'before-update': 'Before an update', 'before-goback': 'Before going back', 'before-restore': 'Before putting a backup back', 'stream-start': 'Start of a stream', manual: 'By hand' };
+// v44: the "Check for updates" button in the top bar, always there
+const TBU = { said: 0, text: '' };
+function tbUpdDraw(s) {
+  const b = $('tbUpd'); if (!b) return; const u = (s && s.update) || {};
+  b.className = 'tb-upd'; b.disabled = false;
+  if (!s || !s.desktop) { b.textContent = 'Check for updates'; b.dataset.st = 'web'; return; }
+  if (u.phase === 'ready') { b.textContent = 'Update to v' + u.version + (s.live ? ' · after stream' : ''); b.classList.add('ready'); b.dataset.st = 'ready'; return; }
+  if (u.phase === 'checking') { b.textContent = 'Checking…'; b.classList.add('busy'); b.dataset.st = 'checking'; return; }
+  if (u.phase === 'downloading') { b.textContent = 'Downloading v' + (u.version || '') + ' · ' + (u.percent || 0) + '%'; b.classList.add('busy'); b.dataset.st = 'downloading'; return; }
+  if (u.phase === 'installing') { b.textContent = 'Installing…'; b.classList.add('busy'); b.dataset.st = 'installing'; return; }
+  if (u.phase === 'error' && Date.now() - TBU.said < 15000) { b.textContent = 'Update check failed'; b.classList.add('bad'); b.title = u.error || ''; b.dataset.st = 'error'; return; }
+  if ((u.phase === 'none' || u.phase === 'idle' || u.phase === 'skipped') && Date.now() - TBU.said < 8000) { b.textContent = 'Up to date · v' + (s.version || u.current || ''); b.classList.add('ok'); b.dataset.st = 'none'; return; }
+  b.textContent = 'Check for updates'; b.dataset.st = 'idle';
+}
+$('tbUpd').onclick = async () => {
+  const b = $('tbUpd');
+  if (b.dataset.st === 'ready') return apOpenModal();
+  if (b.dataset.st === 'web') { const r = await fetch('/api/app/status').then((x) => x.json()).catch(() => ({})); b.textContent = 'v' + (r.version || '?') + ': updates come with the BBR app'; setTimeout(() => { b.textContent = 'Check for updates'; }, 6000); return; }
+  if (b.dataset.st === 'checking' || b.dataset.st === 'downloading' || b.dataset.st === 'installing') return showTab('app');
+  b.disabled = true; b.textContent = 'Checking…'; b.className = 'tb-upd busy'; TBU.said = Date.now();
+  await apDo('check'); TBU.said = Date.now(); const s = await apGet(); tbUpdDraw(s); setTimeout(async () => tbUpdDraw(await apGet()), 8500);
+};
 async function apGet() { try { return await fetch('/api/app').then((r) => r.json()); } catch (e) { return null; } }
 async function apDo(action, args) { const r = await post('/api/app', { action, args: args || {} }).catch(() => ({ error: 'The app is restarting. Give it a few seconds.' })); setTimeout(apLoad, 400); return r || {}; }
 async function apLoad() {
   const s = await apGet(); if (!s) return;
+  try { tbUpdDraw(s); } catch (e) { /* ignore */ }
   document.body.classList.toggle('desk', !!s.desktop);
   if (!s.desktop || s.error) { if (s.error && AP.s) $('apStatus').innerHTML = '<span class="bad">' + esc(s.error) + '</span>'; return; }
   AP.s = s; apBanner(); apModal();
@@ -5037,6 +5190,229 @@ setTimeout(apLoad, 300);
   if (document.querySelector('#tabs [data-go="ballon"].on')) load();   // opened straight on this page
   $('blCopy').onclick = async () => { try { await navigator.clipboard.writeText($('blUrl').textContent); msg({ msg: 'Copied ' + $('blUrl').textContent }); } catch (e) { msg({ msg: 'Copy this: ' + $('blUrl').textContent }); } };
 })();
+// ===== v44: BBR alerts page (Live › Alerts) =====
+(function () {
+  const EA = { s: null, open: null, form: 0 };
+  const PFN = { twitch: 'TW', kick: 'KICK', youtube: 'YT' };
+  const LOOKN = { banner: 'Banner', card: 'Card', takeover: 'Takeover' };
+  const msg = (r, el) => { const e = $(el || 'eaMsg'); if (!e) return; e.textContent = r && r.error ? r.error : (r && r.msg) || ''; e.className = 'state' + (r && r.error ? ' bad' : ''); };
+  async function act(body) { const r = await post('/api/ealerts', body).catch((e) => ({ error: e.message })); if (r && r.settings) { EA.s = r; render(); } return r; }
+  const T = () => EA.s.settings.types;
+  const mediaName = (id) => { const m = MD.list.find((x) => x.id === id); return m ? m.name : '(missing file)'; };
+  function files(t) { const L = []; if (t.sounds.length) L.push(t.sounds.length + ' sound' + (t.sounds.length > 1 ? 's' : '')); if (t.image) L.push('picture'); if (t.video) L.push('video'); if (t.vars.length) L.push(t.vars.length + ' bigger version' + (t.vars.length > 1 ? 's' : '')); return L.join(' · ') || 'BBR sounds'; }
+  function render() {
+    const S = EA.s, st = S.settings;
+    if (!EA.form) { $('eaOn').checked = st.on; $('eaMerge').checked = st.merge; $('eaMergeSecs').value = st.mergeSecs; $('eaGap').value = st.gapSecs; $('eaCards').value = st.cards; $('eaTtsVol').value = st.ttsVol; $('eaTtsVolV').textContent = st.ttsVol; $('eaTtsMax').value = st.ttsMax; $('eaBlocked').value = st.blocked;
+      $('tfOn').checked = st.tangia.on !== false; $('tfLook').value = st.tangia.look || 'auto'; const r = S.tangiaRect || {}; $('tfX').value = r.x; $('tfY').value = r.y; $('tfW').value = r.w; $('tfH').value = r.h; }
+    const V = (S.tts && S.tts.voices) || [];
+    $('eaVoice').innerHTML = '<option value="">Default voice</option>' + V.map((v) => '<option' + (v === st.ttsVoice ? ' selected' : '') + '>' + esc(v) + '</option>').join('');
+    $('eaTtsHelp').textContent = S.tts && S.tts.engine === 'windows' ? 'Uses the voices built into Windows (' + V.length + ' found). Add more in Windows Settings › Time & language › Speech.' : S.tts && S.tts.engine ? 'Read-outs use ' + S.tts.engine + '.' : 'No voice found on this PC: OBS tries its own (may be silent). Read-outs work on Windows.';
+    $('eaStatus').textContent = !st.on ? 'Off: Streamlabs (or nothing) does your alerts' : st.paused ? 'PAUSED: alerts wait until you resume' : 'On' + (st.muted ? ' · sounds muted' : '') + (S.overlay ? '' : ' · no overlay open in OBS');
+    $('eaPause').textContent = st.paused ? 'Resume alerts' : 'Pause alerts'; $('eaPause').classList.toggle('primary', st.paused);
+    $('eaMute').textContent = st.muted ? 'Unmute sounds' : 'Mute sounds';
+    $('eaS1').classList.toggle('done', st.on);
+    const W = [];
+    if (S.twitch.needLogin) W.push('Reconnect Twitch (Setup › Platforms › Twitch › Connect) to allow Hype Train alerts, shout-outs, chat lockdown and the ad buttons.');
+    if (st.on && !S.overlay) W.push('No BBR overlay is open: add http://127.0.0.1:' + location.port + '/overlay to OBS as a Browser Source (1920 × 1080).');
+    $('eaWarn').innerHTML = W.map((w) => '<div class="ea-warn">' + esc(w) + '</div>').join('');
+    $('eaHeld').textContent = S.held || 0;
+    $('eaRows').innerHTML = S.info.types.map((d) => { const t = st.types[d.id]; return '<tr class="' + (t.on ? '' : 'off') + '" data-k="' + d.id + '">' +
+      '<td class="nm"><b>' + esc(d.label) + '</b>' + (d.sub ? '<small>' + esc(d.sub) + '</small>' : '') + '<span class="ea-pf">' + d.pf.map((p) => '<span class="' + p + '">' + PFN[p] + '</span>').join('') + '</span></td>' +
+      '<td><input type="checkbox" data-f="on"' + (t.on ? ' checked' : '') + ' aria-label="' + esc(d.label) + ' on"></td>' +
+      '<td><select data-f="look" aria-label="' + esc(d.label) + ' look">' + S.info.looks.map((l) => '<option value="' + l + '"' + (l === t.look ? ' selected' : '') + '>' + LOOKN[l] + '</option>').join('') + '</select></td>' +
+      '<td><input type="number" data-f="secs" min="0" max="60" value="' + t.secs + '" aria-label="' + esc(d.label) + ' length in seconds"> s</td>' +
+      '<td>' + (d.amt ? '<input type="number" data-f="min" min="0" value="' + t.min + '" aria-label="' + esc(d.label) + ' from (' + d.amt + ')"> <small class="ea-files">' + esc(d.amt) + '</small>' : '<span class="ea-files">every one</span>') + '</td>' +
+      '<td>' + (d.tts ? '<input type="checkbox" data-f="tts"' + (t.tts ? ' checked' : '') + ' aria-label="Read out ' + esc(d.label) + ' messages">' : '<span class="ea-files">no message</span>') + '</td>' +
+      '<td class="ea-files">' + esc(files(t)) + '</td>' +
+      '<td style="white-space:nowrap"><button type="button" data-ed="' + d.id + '">Edit</button> <button type="button" data-test="' + d.id + '">Test</button></td></tr>'; }).join('');
+    $('eaRows').querySelectorAll('[data-f]').forEach((el) => { el.onchange = async () => { const k = el.closest('tr').dataset.k, f = el.dataset.f; const v = el.type === 'checkbox' ? el.checked : el.type === 'number' ? +el.value : el.value; const r = await act({ settings: { types: { [k]: { [f]: v } } } }); msg(r.error ? r : { msg: 'Saved' }); }; });
+    $('eaRows').querySelectorAll('[data-test]').forEach((b) => { b.onclick = async () => msg(await act({ action: 'test', kind: b.dataset.test })); });
+    $('eaRows').querySelectorAll('[data-ed]').forEach((b) => { b.onclick = () => openEdit(b.dataset.ed); });
+    $('eaHist').innerHTML = (S.history || []).map((h) => '<div class="ea-h"><div><b>' + esc(h.title) + '</b><small>' + esc(h.label) + ' · ' + new Date(h.at).toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' }) + (h.test ? ' · test' : '') + '</small></div><button type="button" class="sm" data-rp="' + esc(h.id) + '">Replay</button></div>').join('') || '<p class="help">Nothing yet tonight.</p>';
+    $('eaHist').querySelectorAll('[data-rp]').forEach((b) => { b.onclick = async () => msg(await act({ action: 'replay', id: b.dataset.rp })); });
+    const F = S.tangiaFound || [];
+    $('tfFound').textContent = (F.length ? 'Tangia source in OBS: ' + F.map((x) => x.name + (x.full ? ' (full screen: using the area above)' : '') + (x.heard ? ', heard' : ', not heard yet')).join('; ') : 'No Tangia source found in the scene on air.') + (S.meters ? '' : ' OBS sound levels aren\'t coming through yet (connect OBS on the Battle screen page).');
+    if (EA.open) drawEdit();
+  }
+  // ---------- edit one type ----------
+  function pickList(kind, sel, multi, key) {
+    const L = MD.list.filter((m) => m.kind === kind);
+    return '<div class="ea-pick" data-pk="' + key + '">' + (multi ? '' : '<button type="button" data-id=""' + (!sel.length ? ' class="on"' : '') + '>None</button>') + L.map((m) => '<button type="button" data-id="' + esc(m.id) + '" class="' + (sel.includes(m.id) ? 'on' : '') + '" aria-pressed="' + sel.includes(m.id) + '">' + esc(m.name) + '</button>').join('') + (L.length ? '' : '<span class="help">None uploaded yet.</span>') + '</div>';
+  }
+  const accept = { music: '.mp3,.wav,.ogg,.m4a,audio/*', photo: 'image/png,image/jpeg,image/webp,image/gif', video: '.mp4,.webm,.mov,.m4v,video/mp4,video/webm' };
+  const upBtn = (kind, key) => '<label class="up-btn sm">Upload <input type="file" data-up="' + key + '" data-kind="' + kind + '" accept="' + accept[kind] + '"' + (kind === 'music' ? ' multiple' : '') + '></label>';
+  function openEdit(k) { EA.open = k; EA.draft = JSON.parse(JSON.stringify(T()[k])); $('eaEdit').classList.remove('ea-closed'); drawEdit(); $('eaEdit').scrollIntoView({ behavior: 'smooth', block: 'start' }); }
+  function drawEdit() {
+    const k = EA.open, d = EA.s.info.types.find((x) => x.id === k), t = EA.draft; if (!d || !t) return;
+    $('eaEditT').textContent = 'Edit: ' + d.label;
+    const V = t.vars.map((v, i) => '<div class="ea-var" data-vi="' + i + '"><div class="row4"><div><label>From (' + esc(d.amt || 'amount') + ')</label><input type="number" min="0" data-vf="min" value="' + v.min + '"></div>' +
+      (d.tiers ? '<div><label>Sub tier</label><select data-vf="tier">' + ['any', '1', '2', '3', 'prime'].map((x) => '<option value="' + x + '"' + (x === v.tier ? ' selected' : '') + '>' + (x === 'any' ? 'Any' : x === 'prime' ? 'Prime' : 'Tier ' + x) + '</option>').join('') + '</select></div>' : '<div></div>') +
+      '<div><label>Look</label><select data-vf="look"><option value="">Same</option>' + EA.s.info.looks.map((l) => '<option value="' + l + '"' + (l === v.look ? ' selected' : '') + '>' + LOOKN[l] + '</option>').join('') + '</select></div>' +
+      '<div><label>Length (s)</label><input type="number" min="0" max="60" data-vf="secs" value="' + (v.secs == null ? '' : v.secs) + '" placeholder="same"></div></div>' +
+      '<label>Words (blank = same)</label><input type="text" data-vf="text" value="' + esc(v.text || '') + '" placeholder="' + esc(t.text) + '">' +
+      '<label>Sounds</label>' + pickList('music', v.sounds, true, 'v' + i + 'sounds') + '<label>Picture / GIF</label>' + pickList('photo', v.image ? [v.image] : [], false, 'v' + i + 'image') + '<label>Video</label>' + pickList('video', v.video ? [v.video] : [], false, 'v' + i + 'video') +
+      '<div class="actions"><button type="button" class="sm" data-vdel="' + i + '">Remove this version</button></div></div>').join('');
+    $('eaEditBody').innerHTML = '<div class="ea-ed-grid"><div>' +
+      '<label for="eaTxt">Words on screen</label><input id="eaTxt" type="text" value="' + esc(t.text) + '"><p class="help">{name} = who, {amount} = how many' + (d.amt === 'money' ? ', {money} = the amount with currency' : '') + (d.tiers ? ', {tier} = " at Tier 2" / " with Prime"' : '') + (k === 'redeem' || k === 'powerup' ? ', {what} = the reward' : '') + ', {s} = "s" when it\'s more than one.</p>' +
+      '<div class="row"><div><label for="eaSecs">Length (seconds, 0 = the video\'s length)</label><input id="eaSecs" type="number" min="0" max="60" value="' + t.secs + '"></div><div><label for="eaVol">Sound volume <span id="eaVolV">' + t.vol + '</span></label><input id="eaVol" type="range" min="0" max="100" step="5" value="' + t.vol + '" style="padding:0;height:40px"></div></div>' +
+      (k === 'redeem' ? '<label for="eaRewards">Only these rewards (comma between, blank = every reward)</label><input id="eaRewards" type="text" value="' + esc(t.rewards || '') + '">' : '') +
+      '<label>Sounds (several = a different one each time)</label>' + pickList('music', t.sounds, true, 'sounds') + upBtn('music', 'sounds') +
+      '</div><div>' +
+      '<label>Picture or GIF</label>' + pickList('photo', t.image ? [t.image] : [], false, 'image') + upBtn('photo', 'image') +
+      '<label>Video (MP4 / WEBM)</label>' + pickList('video', t.video ? [t.video] : [], false, 'video') + upBtn('video', 'video') +
+      '<label class="tog"><input type="checkbox" id="eaVidSnd"' + (t.videoSound ? ' checked' : '') + '> Play the video\'s own sound</label>' +
+      '</div></div>' +
+      '<h3 class="sub">Bigger versions for bigger amounts</h3><p class="help">The biggest "from" that fits is used: e.g. bits from 1,000 get their own sound and the takeover look.</p>' + V +
+      '<div class="actions"><button type="button" id="eaVarAdd">Add a bigger version</button></div>' +
+      '<div class="actions"><button type="button" class="primary" id="eaEdSave">Save</button><button type="button" id="eaEdTest">Save + test</button>' + (t.vars.length ? '<button type="button" id="eaEdTestBig">Save + test the biggest version</button>' : '') + '<button type="button" id="eaEdClose">Close</button><span class="state" id="eaEdMsg"></span></div>';
+    const B = $('eaEditBody');
+    B.querySelectorAll('.ea-pick').forEach((pk) => { pk.querySelectorAll('button').forEach((b) => { b.onclick = () => { const key = pk.dataset.pk, id = b.dataset.id; const m = /^v(\d+)(\w+)$/.exec(key); const o = m ? t.vars[+m[1]] : t, f = m ? m[2] : key;
+      if (f === 'sounds') o.sounds = o.sounds.includes(id) ? o.sounds.filter((x) => x !== id) : o.sounds.concat(id); else o[f] = id; drawEdit(); }; }); });
+    B.querySelectorAll('[data-up]').forEach((inp) => { inp.onchange = async () => { const key = inp.dataset.up; const before = new Set(MD.list.map((x) => x.id)); await mdUpload(Array.from(inp.files), $('eaEdMsg')); const added = MD.list.filter((x) => !before.has(x.id) && x.kind === inp.dataset.kind).map((x) => x.id);
+      if (added.length) { if (key === 'sounds') t.sounds = t.sounds.concat(added); else t[key] = added[0]; } drawEdit(); }; });
+    B.querySelectorAll('[data-vf]').forEach((el) => { el.oninput = el.onchange = () => { const i = +el.closest('[data-vi]').dataset.vi, f = el.dataset.vf; t.vars[i][f] = el.type === 'number' ? (el.value === '' ? null : +el.value) : el.value; }; });
+    B.querySelectorAll('[data-vdel]').forEach((b) => { b.onclick = () => { t.vars.splice(+b.dataset.vdel, 1); drawEdit(); }; });
+    $('eaVarAdd').onclick = () => { t.vars.push({ min: (t.vars.length ? t.vars[t.vars.length - 1].min * 5 : Math.max(10, (t.min || 1) * 10)), tier: 'any', look: 'takeover', secs: null, sounds: [], image: '', video: '', text: '' }); drawEdit(); };
+    $('eaVol').oninput = () => { $('eaVolV').textContent = $('eaVol').value; t.vol = +$('eaVol').value; };
+    // keep what you typed when the editor redraws (after an upload or adding a version)
+    $('eaTxt').oninput = () => { t.text = $('eaTxt').value; }; $('eaSecs').oninput = () => { t.secs = +$('eaSecs').value; }; $('eaVidSnd').onchange = () => { t.videoSound = $('eaVidSnd').checked; };
+    if ($('eaRewards')) $('eaRewards').oninput = () => { t.rewards = $('eaRewards').value; };
+    const collect = () => { t.text = $('eaTxt').value; t.secs = +$('eaSecs').value; t.vol = +$('eaVol').value; t.videoSound = $('eaVidSnd').checked; if ($('eaRewards')) t.rewards = $('eaRewards').value; return t; };
+    $('eaEdSave').onclick = async () => { const r = await act({ settings: { types: { [k]: collect() } } }); msg(r.error ? r : { msg: 'Saved' }, 'eaEdMsg'); EA.draft = JSON.parse(JSON.stringify(T()[k])); drawEdit(); msg(r.error ? r : { msg: 'Saved' }, 'eaEdMsg'); };
+    const saveTest = async (amount) => { await act({ settings: { types: { [k]: collect() } } }); EA.draft = JSON.parse(JSON.stringify(T()[k])); const r = await act(Object.assign({ action: 'test', kind: k }, amount != null ? { amount } : {})); drawEdit(); msg(r, 'eaEdMsg'); };
+    $('eaEdTest').onclick = () => saveTest(null);
+    if ($('eaEdTestBig')) $('eaEdTestBig').onclick = () => saveTest(Math.max(...t.vars.map((v) => +v.min || 0)));
+    $('eaEdClose').onclick = () => { EA.open = null; $('eaEdit').classList.add('ea-closed'); };
+  }
+  async function load() { await mdLoad(); const r = await fetch('/api/ealerts').then((x) => x.json()).catch(() => null); if (r) { EA.s = r; render(); } }
+  window.eaLoad = load;
+  $('eaOn').onchange = async () => { const r = await act({ settings: { on: $('eaOn').checked } }); msg({ msg: $('eaOn').checked ? 'BBR alerts ON. Now turn them off in Streamlabs (step 2).' : 'BBR alerts off' }); return r; };
+  $('eaPause').onclick = async () => msg(await act({ action: 'pause' }));
+  $('eaSkip').onclick = async () => msg(await act({ action: 'skip' }));
+  $('eaReplay').onclick = async () => msg(await act({ action: 'replay' }));
+  $('eaMute').onclick = async () => msg(await act({ action: 'mute' }));
+  $('eaClearHeld').onclick = async () => msg(await act({ action: 'clearHeld' }));
+  $('eaTestAll').onclick = async () => { const L = EA.s.info.types.filter((d) => T()[d.id].on).map((d) => d.id); for (const k of L) await act({ action: 'test', kind: k }); msg({ msg: L.length + ' test alerts queued: they play one after another' }); };
+  $('eaTtsVol').oninput = () => { $('eaTtsVolV').textContent = $('eaTtsVol').value; };
+  document.querySelectorAll('#eaRules input, #eaRules select, #eaTangia input, #eaTangia select').forEach((el) => { el.addEventListener('input', () => { EA.form = Date.now(); }); });
+  $('eaSaveRules').onclick = async () => { const r = await act({ settings: { merge: $('eaMerge').checked, mergeSecs: +$('eaMergeSecs').value, gapSecs: +$('eaGap').value, cards: $('eaCards').value, ttsVoice: $('eaVoice').value, ttsVol: +$('eaTtsVol').value, ttsMax: +$('eaTtsMax').value, blocked: $('eaBlocked').value } }); EA.form = 0; msg(r.error ? r : { msg: 'Saved' }, 'eaRulesMsg'); };
+  $('tfSave').onclick = async () => { await act({ settings: { tangia: { on: $('tfOn').checked, look: $('tfLook').value } } }); const r = await act({ action: 'tangiaArea', rect: { x: $('tfX').value, y: $('tfY').value, w: $('tfW').value, h: $('tfH').value } }); EA.form = 0; msg(r, 'tfMsg'); };
+  $('tfAuto').onclick = async () => { const r = await act({ action: 'tangiaArea', auto: true, rect: { x: $('tfX').value, y: $('tfY').value, w: $('tfW').value, h: $('tfH').value } }); EA.form = 0; render(); msg({ msg: 'Using the Tangia source in OBS when it isn\'t full screen' }, 'tfMsg'); return r; };
+  $('tfTest').onclick = async () => { await act({ settings: { tangia: { on: $('tfOn').checked, look: $('tfLook').value } } }); msg(await act({ action: 'tangiaTest' }), 'tfMsg'); };
+  setInterval(() => { if (document.querySelector('#tabs [data-go="alerts"].on') && !EA.open && !document.querySelector('section[data-tab="alerts"] input:focus, section[data-tab="alerts"] select:focus') && Date.now() - EA.form > 20000) { EA.form = 0; fetch('/api/ealerts').then((x) => x.json()).then((r) => { EA.s = r; render(); }).catch(() => {}); } }, 5000);
+  if (document.querySelector('#tabs [data-go="alerts"].on')) load();
+})();
+
+// ===== v44: quick buttons on the Live desk =====
+(function () {
+  const P = { pause: '<path d="M8 5v14M16 5v14"/>', skip: '<path d="M5 4l10 8-10 8zM19 5v14"/>', replay: '<path d="M3 12a9 9 0 1 0 3-6.7L3 8M3 3v5h5"/>', mute: '<path d="M11 5 6 9H2v6h4l5 4zM22 9l-6 6M16 9l6 6"/>', mega: '<path d="M3 11v2a1 1 0 0 0 1 1h2l5 4V6L6 10H4a1 1 0 0 0-1 1zM15 9a3 3 0 0 1 0 6"/>', clip: '<rect x="3" y="6" width="13" height="12" rx="2"/><path d="m16 10 5-3v10l-5-3"/>', flag: '<path d="M4 22V4M4 4h12l-2 4 2 4H4"/>', tv: '<rect x="3" y="7" width="18" height="12" rx="2"/><path d="m8 3 4 4 4-4"/>', refresh: '<path d="M21 12a9 9 0 0 1-15.5 6.2L3 16M3 12a9 9 0 0 1 15.5-6.2L21 8M21 3v5h-5M3 21v-5h5"/>', eye: '<path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/>', shield: '<path d="M12 3 4 6v6c0 5 3.5 8 8 9 4.5-1 8-4 8-9V6z"/>', scene: '<rect x="3" y="5" width="18" height="14" rx="2"/><path d="M3 9h18"/>' };
+  const ic = (k) => '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">' + P[k] + '</svg>';
+  const Q = [['pause', '/control/alerts-pause', 'Pause alerts', 'Hold the queue'], ['skip', '/control/alerts-skip', 'Skip alert', 'Clear what\'s on screen'], ['replay', '/control/alerts-replay', 'Replay last', 'If you missed it'], ['mute', '/control/alerts-mute', 'Mute alert sounds', 'Visuals keep showing'],
+    ['mega', '/control/so-raider', 'Shout out last raider', 'Chat + Twitch shout-out'], ['clip', '/control/replay', 'Clip that', 'Clip + replay'], ['flag', '/control/marker', 'Stream marker', 'For highlights'], ['tv', '/control/ad-warn?secs=60', 'Ad break in 60 s', 'Warns chat + countdown'],
+    ['refresh', '/control/refresh-overlays', 'Refresh overlays', 'Reloads every BBR page'], ['eye', '/control/cards-hide5?mins=5', 'Clean screen 5 min', 'Card alerts wait'], ['shield', '/control/lockdown', 'Chat lockdown', 'Followers-only + slow'], ['scene', '/control/tangia-hide', 'Hide Tangia', 'Hide + mute it in OBS']];
+  function draw(st) {
+    const E = (st && st.ealerts) || {};
+    $('qkGrid').innerHTML = Q.map(([k, u, t, sub]) => { const on = (k === 'pause' && E.paused) || (k === 'mute' && E.muted) || (k === 'eye' && st && st.cardsHideUntil) || (k === 'shield' && st && st.lockdown);
+      return '<button type="button" class="qk' + (on ? ' on' : '') + (k === 'scene' ? ' hot' : '') + '" data-qk="' + u + '" aria-pressed="' + !!on + '">' + ic(k) + '<b>' + (k === 'pause' && E.paused ? 'Resume alerts' : k === 'mute' && E.muted ? 'Unmute sounds' : k === 'eye' && st && st.cardsHideUntil ? 'Cards back now' : t) + '</b><small>' + (k === 'mega' && E.raider ? esc(E.raider) : sub) + '</small></button>'; }).join('');
+    $('qkGrid').querySelectorAll('[data-qk]').forEach((b) => { b.onclick = async () => { $('qkMsg').textContent = '…'; const t = await fetch(b.dataset.qk).then((r) => r.text()).catch(() => 'Could not reach the app'); $('qkMsg').textContent = t; load(); }; });
+  }
+  async function load() { const st = await fetch('/api/dock').then((r) => r.json()).catch(() => null); draw(st); }
+  draw(null); load();
+  setInterval(() => { if (document.querySelector('#tabs [data-go="home"].on')) load(); }, 8000);
+})();
+
+// ===== v44: Rearrange: your own order of sidebar sections, pages, cards and columns =====
+function arrSave() { try { localStorage.setItem('bbr-layout', JSON.stringify(LAY.dash)); } catch (e) { /* ignore */ } clearTimeout(arrSave.t); arrSave.t = setTimeout(() => post('/api/dashlayout', { dash: LAY.dash }).catch(() => {}), 400); }
+const curTab = () => (document.querySelector('#tabs [data-go].on') || {}).dataset?.go || 'home';
+function arrPage(t) { LAY.dash.pages = LAY.dash.pages || {}; return (LAY.dash.pages[t] = LAY.dash.pages[t] || {}); }
+function arrApplyNav() {
+  const D = LAY.dash, G = $('groups'), T = $('tabs');
+  if (Array.isArray(D.groups)) D.groups.forEach((g) => { const b = G.querySelector('[data-group="' + g + '"]'); if (b) G.appendChild(b); });
+  if (D.tabGrp) for (const [go, g] of Object.entries(D.tabGrp)) { const b = T.querySelector('[data-go="' + go + '"]'); if (b && G.querySelector('[data-group="' + g + '"]')) b.dataset.grp = g; }
+  if (Array.isArray(D.tabs)) D.tabs.forEach((go) => { const b = T.querySelector('[data-go="' + go + '"]'); if (b) T.appendChild(b); });
+  const on = G.querySelector('[data-group].on'); if (on) on.after(T);
+  navCounts();
+}
+function arrNavSave() { LAY.dash.groups = Array.from($('groups').querySelectorAll('[data-group]')).map((b) => b.dataset.group); LAY.dash.tabs = Array.from($('tabs').querySelectorAll('[data-go]')).map((b) => b.dataset.go); LAY.dash.tabGrp = {}; $('tabs').querySelectorAll('[data-go]').forEach((b) => { LAY.dash.tabGrp[b.dataset.go] = b.dataset.grp; }); arrSave(); }
+let ARRDRAG = null;
+function arrDnd(el, kind, id) {
+  el.draggable = true;
+  el.ondragstart = (e) => { ARRDRAG = { kind, id, el }; el.classList.add('arr-dragging'); try { e.dataTransfer.setData('text/plain', id); e.dataTransfer.effectAllowed = 'move'; } catch (x) { /* ignore */ } };
+  el.ondragend = () => { el.classList.remove('arr-dragging'); document.querySelectorAll('.arr-drop,.arr-target').forEach((x) => x.classList.remove('arr-drop', 'arr-target')); ARRDRAG = null; };
+}
+function arrOrder(t) { const P = arrPage(t); const keys = ORIG.filter((el) => el.dataset.tab === t && el.id !== 'heldCard').map((el) => el.dataset.lk); return P.order && P.order.length ? P.order.filter((k) => keys.includes(k)).concat(keys.filter((k) => !P.order.includes(k))) : keys; }
+function arrMoveCard(t, key, toKey, col) {
+  const P = arrPage(t);
+  let order = arrOrder(t).filter((k) => k !== key);
+  const i = toKey ? order.indexOf(toKey) : -1; if (i < 0) order.push(key); else order.splice(i, 0, key);
+  P.order = order; if (col) { P.col = P.col || {}; P.col[key] = col; } arrSave(); layoutTab(t);
+}
+function arrDecorate(t) {
+  const P = arrPage(t), cols = Math.max(1, Math.min(3, +P.cols || 2));
+  $('arrCols').value = String(cols);
+  const hid = P.hidden || [];
+  $('arrHidden').innerHTML = hid.length ? 'Hidden: ' + hid.map((k) => { const el = ORIG.find((x) => x.dataset.lk === k); const n = el ? ((el.querySelector('h2') || {}).textContent || k) : k; return '<button type="button" class="arr-chip" data-show="' + esc(k) + '">+ ' + esc(n.slice(0, 30)) + '</button>'; }).join(' ') : '';
+  $('arrHidden').querySelectorAll('[data-show]').forEach((b) => { b.onclick = () => { P.hidden = (P.hidden || []).filter((k) => k !== b.dataset.show); arrSave(); layoutTab(t); }; });
+  const cards = Array.from(document.querySelectorAll('main > div section.card[data-tab="' + t + '"]')).filter((c) => c.id !== 'heldCard');
+  cards.forEach((c, i) => {
+    let h = c.querySelector(':scope > .arr-h'); if (h) h.remove();
+    h = document.createElement('div'); h.className = 'arr-h';
+    const nm = ((c.querySelector('h2') || {}).textContent || 'Card').slice(0, 40);
+    h.innerHTML = '<span class="g" aria-hidden="true">⋮⋮</span><span>' + esc(nm) + '</span><span class="sp"></span>' +
+      '<button type="button" data-a="up" aria-label="Move ' + esc(nm) + ' up">↑</button><button type="button" data-a="down" aria-label="Move ' + esc(nm) + ' down">↓</button>' +
+      (cols > 1 ? '<button type="button" data-a="left" aria-label="Move ' + esc(nm) + ' to the column on the left">←</button><button type="button" data-a="right" aria-label="Move ' + esc(nm) + ' to the column on the right">→</button>' : '') +
+      '<button type="button" data-a="hide">' + (hid.includes(c.dataset.lk) ? 'Show' : 'Hide') + '</button>';
+    c.insertBefore(h, c.firstChild);
+    const key = c.dataset.lk;
+    h.querySelectorAll('[data-a]').forEach((b) => { b.onclick = () => {
+      const a = b.dataset.a, list = arrOrder(t), k = list.indexOf(key);
+      if (a === 'hide') { P.hidden = hid.includes(key) ? hid.filter((x) => x !== key) : hid.concat(key); arrSave(); return layoutTab(t); }
+      if (a === 'up' && k > 0) return arrMoveCard(t, key, list[k - 1]);
+      if (a === 'down' && k < list.length - 1) return arrMoveCard(t, key, list[k + 2] || null);
+      if (a === 'left' || a === 'right') { const colEl = c.closest('.mcol'); const now = colEl ? Array.from(colEl.parentNode.children).indexOf(colEl) + 1 : 1; const to = Math.max(1, Math.min(cols, now + (a === 'left' ? -1 : 1))); P.col = P.col || {}; P.col[key] = to; arrSave(); return layoutTab(t); }
+    }; });
+    arrDnd(h, 'card', key); h.ondragstart = ((f) => (e) => { f(e); ARRDRAG.el = c; })(h.ondragstart);
+    c.ondragover = (e) => { if (!ARRDRAG || ARRDRAG.kind !== 'card' || ARRDRAG.id === key) return; e.preventDefault(); c.classList.add('arr-drop'); };
+    c.ondragleave = () => c.classList.remove('arr-drop');
+    c.ondrop = (e) => { if (!ARRDRAG || ARRDRAG.kind !== 'card') return; e.preventDefault(); e.stopPropagation(); const colEl = c.closest('.mcol'); const col = colEl ? Array.from(colEl.parentNode.children).indexOf(colEl) + 1 : null; arrMoveCard(t, ARRDRAG.id, key, col); };
+  });
+  document.querySelectorAll('main > div .mcol').forEach((mc) => {
+    mc.ondragover = (e) => { if (!ARRDRAG || ARRDRAG.kind !== 'card') return; e.preventDefault(); mc.classList.add('arr-target'); };
+    mc.ondragleave = () => mc.classList.remove('arr-target');
+    mc.ondrop = (e) => { if (!ARRDRAG || ARRDRAG.kind !== 'card') return; e.preventDefault(); const col = Array.from(mc.parentNode.children).indexOf(mc) + 1; P.col = P.col || {}; P.col[ARRDRAG.id] = col; arrSave(); layoutTab(t); };
+  });
+}
+function arrNav(on) {
+  $('groups').querySelectorAll('[data-group]').forEach((b) => {
+    if (!on) { b.draggable = false; b.ondragover = b.ondrop = b.ondragstart = null; return; }
+    arrDnd(b, 'group', b.dataset.group);
+    b.ondragover = (e) => { if (!ARRDRAG || (ARRDRAG.kind !== 'group' && ARRDRAG.kind !== 'tab') || ARRDRAG.id === b.dataset.group) return; e.preventDefault(); b.classList.add('arr-drop'); };
+    b.ondragleave = () => b.classList.remove('arr-drop');
+    b.ondrop = (e) => { if (!ARRDRAG) return; e.preventDefault();
+      if (ARRDRAG.kind === 'group') { $('groups').insertBefore(ARRDRAG.el, b); }
+      else if (ARRDRAG.kind === 'tab') { ARRDRAG.el.dataset.grp = b.dataset.group; $('tabs').appendChild(ARRDRAG.el); showTab(ARRDRAG.el.dataset.go); }
+      arrNavSave(); arrApplyNav(); };
+  });
+  $('tabs').querySelectorAll('[data-go]').forEach((b) => {
+    if (!on) { b.draggable = false; b.ondragover = b.ondrop = b.ondragstart = null; return; }
+    arrDnd(b, 'tab', b.dataset.go);
+    b.ondragover = (e) => { if (!ARRDRAG || ARRDRAG.kind !== 'tab' || ARRDRAG.id === b.dataset.go) return; e.preventDefault(); b.classList.add('arr-drop'); };
+    b.ondragleave = () => b.classList.remove('arr-drop');
+    b.ondrop = (e) => { if (!ARRDRAG || ARRDRAG.kind !== 'tab') return; e.preventDefault(); ARRDRAG.el.dataset.grp = b.dataset.grp; $('tabs').insertBefore(ARRDRAG.el, b); arrNavSave(); arrApplyNav(); showGroup(b.dataset.grp); };
+  });
+}
+function arrange(on) {
+  document.body.classList.toggle('arranging', on); $('arrBar').hidden = !on; $('tbArr').setAttribute('aria-pressed', String(on)); $('tbArr').textContent = on ? 'Done rearranging' : 'Rearrange';
+  if (!on) document.querySelectorAll('.arr-h').forEach((h) => h.remove());
+  arrNav(on); layoutTab(curTab());
+}
+$('tbArr').onclick = () => arrange(!document.body.classList.contains('arranging'));
+$('arrDone').onclick = () => arrange(false);
+$('arrCols').onchange = () => { const t = curTab(), P = arrPage(t); P.cols = +$('arrCols').value; P.col = {}; arrSave(); layoutTab(t); };
+$('arrResetPage').onclick = async () => { if (!await ask('Put this page back to how it came?')) return; const t = curTab(); delete (LAY.dash.pages || {})[t]; arrSave(); layoutTab(t); };
+$('arrResetAll').onclick = async () => { if (!await ask('Put the whole dashboard back to how it came (sidebar, pages, cards)?')) return; LAY.dash = {}; try { localStorage.removeItem('bbr-layout'); } catch (e) { /* ignore */ } await post('/api/dashlayout', { reset: 'dash' }).catch(() => {}); location.reload(); };
+arrApplyNav();
+fetch('/api/dashlayout').then((r) => r.json()).then((r) => { const d = (r.layout && r.layout.dash) || null; if (d && JSON.stringify(d) !== JSON.stringify(LAY.dash)) { LAY.dash = d; try { localStorage.setItem('bbr-layout', JSON.stringify(d)); } catch (e) { /* ignore */ } arrApplyNav(); layoutTab(curTab()); } }).catch(() => {});
 </script>
 </body>
 </html>

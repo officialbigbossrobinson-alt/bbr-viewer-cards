@@ -196,6 +196,11 @@
     }
     h += '<h3>SCREENS</h3><div class="g3">' + B('/control/brb', d.brb && d.brb.on ? 'I\'M BACK' : 'BE RIGHT BACK', 'bc', ' style="min-height:56px;border-color:#c58bff' + (d.brb && d.brb.on ? ';background:#c58bff;color:#12061f' : '') + '"') + B('/control/bigcam-go', 'BIG CAM', 'bc', ' style="min-height:56px;border-color:#4dc3ff"') + B('/control/links-now', 'LINKS', 'bc', ' style="min-height:56px;border-color:#9146ff"') + '</div>' +
       '<div class="g3">' + B('/control/bigcam-next', 'Next Big Cam set') + B('/control/stinger', 'Stinger') + B('/control/music-mute', d.musicMuted ? 'Music: off' : 'Music: on') + '</div>' + (d.gmeter && !d.gmeter.on && d.gmeter.enabled !== false ? '<div class="g2">' + B('/control/gmeter-start', d.gmeter && d.gmeter.mode === 'timer' ? 'GIVEAWAY TIMER' : 'GIVEAWAY METER', '', ' style="border-color:#ffd23f;color:#ffd23f;min-height:52px"') + B('/control/gmeter-restart', 'New giveaway (from 0)', '', ' style="min-height:52px"') + '</div>' : '') + (d.bigcam ? '<p class="muted" style="margin:0;font-size:12px">Big Cam: ' + esc(d.bigcam) + (d.linksNext != null ? ' · links again in ' + Math.round(d.linksNext / 60000) + ' min' : '') + '</p>' : '');
+    // v44: alerts + quick buttons
+    const E = d.ealerts || {};
+    h += '<h3>ALERTS' + (E.on ? (E.paused ? ' · PAUSED' + (E.held ? ' (' + E.held + ' waiting)' : '') : '') + (E.muted ? ' · MUTED' : '') : ' · BBR alerts off') + '</h3>' +
+      '<div class="g4">' + B('/control/alerts-pause', E.paused ? '▶ RESUME' : '❚❚ PAUSE', '', E.paused ? ' style="border-color:#e8c468;background:#e8c468;color:#1a1300"' : ' style="border-color:#e8c468;color:#e8c468"') + B('/control/alerts-skip', 'SKIP') + B('/control/alerts-replay', 'REPLAY') + B('/control/alerts-mute', E.muted ? 'UNMUTE' : 'MUTE') + '</div>' +
+      '<div class="g4">' + B('/control/so-raider', 'SHOUT OUT' + (E.raider ? '<small style="display:block;font-size:10px;opacity:.75">' + esc(E.raider) + '</small>' : ''), '', ' style="border-color:#9146ff"') + B('/control/ad-warn?secs=60', 'AD IN 60') + B('/control/cards-hide5?mins=5', d.cardsHideUntil ? 'CARDS BACK' : 'CLEAN 5 MIN') + B('/control/tangia-hide', 'TANGIA') + '</div>';
     h += '<h3>QUICK BUTTONS</h3><div class="g2">' +
       '<button class="big" data-u="/control/replay" style="border-color:#4dc3ff;background:#0f2230"><b style="color:#4dc3ff">CLIP IT</b><small>last ' + ((d.replay && d.replay.secs) || 30) + ' s · plays when ready</small></button>' +
       (d.battlesOff ? '<button class="big" data-u="/control/battles-on" style="border-color:#5a6270;background:#16191e"><b style="color:#a7b0ba">BATTLES ARE OFF</b><small>tap to turn them on</small></button></div>' :
@@ -421,7 +426,20 @@
     say(r.error || 'Done: ' + r.viewers + ' cards put back to before this stream'); load();
   }
   document.addEventListener('click', (e) => { const t = e.target.closest('[data-t],[data-tab]'); if (!t) return; tab = t.dataset.t || t.dataset.tab; try { localStorage.setItem('bbr-dock29', tab); } catch (err) { /* ignore */ } shown = ''; if (D) draw(); });
-  async function load() { try { D = await fetch('/api/dock', { cache: 'no-store' }).then((r) => r.json()); draw(); } catch (e) { say('App not running?'); } }
+  async function load() { try { D = await fetch('/api/dock', { cache: 'no-store' }).then((r) => r.json()); tabOrder(D.uiLayout); draw(); } catch (e) { say('App not running?'); } }
+  // v44: drag the tabs at the bottom into your own order (saved in the app, so it stays after OBS restarts)
+  let tabsSet = '';
+  function tabOrder(L) { const want = (L && Array.isArray(L.tabs) && L.tabs) || (() => { try { return JSON.parse(localStorage.getItem('bbr-dock-tabs') || 'null'); } catch (e) { return null; } })(); if (!want) return; const k = want.join(); if (k === tabsSet) return; tabsSet = k; want.forEach((t) => { const b = document.querySelector('.tabs [data-t="' + t + '"]'); if (b) $('tabs').appendChild(b); }); }
+  let dragT = null;
+  document.querySelectorAll('.tabs [data-t]').forEach((b) => {
+    b.draggable = true;
+    b.addEventListener('dragstart', (e) => { dragT = b; b.style.opacity = '.5'; try { e.dataTransfer.setData('text/plain', b.dataset.t); } catch (x) { /* ignore */ } });
+    b.addEventListener('dragend', () => { b.style.opacity = ''; dragT = null; document.querySelectorAll('.tabs [data-t]').forEach((x) => { x.style.outline = ''; }); });
+    b.addEventListener('dragover', (e) => { if (dragT && dragT !== b) { e.preventDefault(); b.style.outline = '2px solid #6c8cff'; } });
+    b.addEventListener('dragleave', () => { b.style.outline = ''; });
+    b.addEventListener('drop', (e) => { if (!dragT || dragT === b) return; e.preventDefault(); b.style.outline = ''; const r = b.getBoundingClientRect(); $('tabs').insertBefore(dragT, e.clientX > r.left + r.width / 2 ? b.nextSibling : b);
+      const order = Array.from(document.querySelectorAll('.tabs [data-t]')).map((x) => x.dataset.t); tabsSet = order.join(); try { localStorage.setItem('bbr-dock-tabs', JSON.stringify(order)); } catch (x) { /* ignore */ } post('/api/dashlayout', { dock: { tabs: order } }).catch(() => {}); say('Tab order saved'); });
+  });
   load(); setInterval(load, 1500);
 })();
 </script>

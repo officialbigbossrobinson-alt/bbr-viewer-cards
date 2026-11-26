@@ -18,7 +18,7 @@ const TU = require('./lib/tuning');
 const { OBS } = require('./lib/obs');
 const { Diag } = require('./lib/diag');
 const { BSN, BSN_IMAGES, normTokens, fillStory, LEFTOVER_RE } = require('./lib/bsn');
-const APP_VERSION = '43';
+const APP_VERSION = '44';
 const ARCX = require('./lib/arc');
 const RLX = require('./lib/race');
 const BTX = require('./lib/battle');
@@ -175,7 +175,7 @@ function push(alert) {
   if (alert.type === 'battle' && (alert.phase === 'join' || alert.phase === 'matchup' || (alert.phase === 'arc' || alert.phase === 'race' || alert.phase === 'shootout'))) alert.cmds = battleCommands(alert.mode);
   alert.accent = accent();
   alert.volume = volume();
-  if (sceneHeld && HOLDABLE.test(alert.type)) { heldList.push({ type: alert.type, kind: alert.kind || null, who: (alert.card && alert.card.display) || (alert.ch && alert.ch.name) || (alert.list ? alert.list.length + ' viewers' : ''), at: Date.now() }); if (heldList.length > 100) heldList.shift(); }
+  if (sceneHeld && HOLDABLE.test(alert.type)) { heldList.push({ type: alert.type, kind: alert.kind || null, who: (alert.card && alert.card.display) || (alert.type === 'ealert' && alert.name) || (alert.ch && alert.ch.name) || (alert.list ? alert.list.length + ' viewers' : ''), at: Date.now() }); if (heldList.length > 100) heldList.shift(); }
   const line = 'data: ' + JSON.stringify(alert) + '\n\n';
   for (const res of clients) res.write(line);
   try { feedFrom(alert); moveFrom(alert); hypeFrom(alert); predictFrom(alert); } catch (e) { /* ignore */ }
@@ -188,8 +188,10 @@ const { CardSafety } = require('./lib/cardsafety');
 const safety = new CardSafety({ store, card: (v) => S.compute(v, R), cfg: () => cfg, saveCfg: () => saveCfg(), TK, feedAdd: (a, b) => feedAdd(a, b), push: (e) => push(e), streakRules: () => R.cards });
 function feedFrom(a) {
   const nm = (a.card && a.card.display) || '';
-  if (a.type === 'levelup' && a.kind && a.kind !== 'upgrade' && a.kind !== 'battle') feedAdd(nm + ': ' + (a.reason || a.kind) + (a.gift ? ' (' + a.gift.allTime + ' all time)' : ''), /gift/.test(a.kind) ? '#c58bff' : /bits|kicks|superchat/.test(a.kind) ? '#ffb020' : '#9146ff');
+  if (a.type === 'levelup' && a.eal) { /* the BBR alert already said it */ }
+  else if (a.type === 'levelup' && a.kind && a.kind !== 'upgrade' && a.kind !== 'battle') feedAdd(nm + ': ' + (a.reason || a.kind) + (a.gift ? ' (' + a.gift.allTime + ' all time)' : ''), /gift/.test(a.kind) ? '#c58bff' : /bits|kicks|superchat/.test(a.kind) ? '#ffb020' : '#9146ff');
   else if (a.type === 'pack') feedAdd(nm + ' ' + (a.kind === 'follow' ? 'followed' : 'joined'), '#3dff9a');
+  else if (a.type === 'ealert' && !a.test && !a.replay) feedAdd(a.title, '#e8c468');
   else if (a.type === 'challenge' && (a.kind === 'accepted' || a.kind === 'complete')) feedAdd((a.kind === 'accepted' ? (a.by ? a.by + ' set ' : 'New: ') : 'Done: ') + a.ch.name, '#ffb020');
   else if (a.type === 'camfx' && a.phase === 'start' && a.fx !== 'reset') feedAdd('Camera: ' + (a.label || a.fx) + (a.by ? ' (' + a.by + ')' : ''), '#ff5aa0');
   else if (a.type === 'checkin') feedAdd(((a.list || []).length) + ' checked in', '#4dc3ff');
@@ -285,14 +287,28 @@ async function update(platform, login, display, mutate, opts) {
   const tierUp = after.tier !== before.tier && after.ovr > before.ovr;
   const newRibbon = after.ribbons.find((r) => !before.ribbons.includes(r)) || null;
 
+  // v44: BBR's own alert for this event (instead of Streamlabs) plays first, then the card if something changed
+  let eal = false, packWait = 0;
+  if (opts.ealert && typeof ealerts !== 'undefined') {
+    try {
+      await withAvatar(v);
+      const r = await ealerts.fire(opts.ealert.type, Object.assign({ name: v.display || display || login, platform, login, avatar: v.avatar || '', card: card(v), tier: v.subTier || 1, prime: !!v.subPrime }, opts.ealert));
+      eal = !!(r && (r.ok || r.held || r.buffered));
+      if (r && r.buffered) packWait = ealerts.S().mergeSecs * 1000 + 400;   // the merged follow alert goes first, then the new cards
+    } catch (e) { console.error('[ealerts]', e.message); }
+  }
+  const eS = eal ? ealerts.S().cards : null;
+  if (eal && eS === 'never' && !(opts.pack && !v.packShown)) return { v, card: after };
+  if (eal && eS === 'changes' && !(opts.pack && !v.packShown) && !(tierUp || newRibbon)) return { v, card: after };   // a new tier or ribbon is still worth its own moment
   if (opts.pack && !v.packShown) {
     v.packShown = true;
     lastPackAt = now;
     await withAvatar(v);
-    push({ type: 'pack', kind: opts.kind || 'follow', card: card(v) });
+    const pk = { type: 'pack', kind: opts.kind || 'follow', card: card(v) };
+    if (packWait) setTimeout(() => push(pk), packWait); else push(pk);
   } else if (opts.alert ? (raised.length || tierUp || newRibbon || opts.always || /^(bits|kicks|superchat|sub|resub|gift|giftbomb|giftsub|raid)$/.test(opts.kind || '')) : (tierUp || newRibbon)) {   // support always shows the card (a thank-you), even when no stat moved
     await withAvatar(v);
-    push({ type: 'levelup', gift: opts.gift ? opts.gift(v) : undefined, kind: opts.kind || (opts.reason && /won|mvp/i.test(opts.reason) ? 'battle' : 'upgrade'), amount: opts.amount || null, card: card(v), raised, ovrFrom: before.ovr, tierUp, tierFrom: before.tier, newRibbon, banked: after.banked, reason: opts.reason || 'Card upgraded' });
+    push({ type: 'levelup', eal: eal || undefined, gift: opts.gift ? opts.gift(v) : undefined, kind: opts.kind || (opts.reason && /won|mvp/i.test(opts.reason) ? 'battle' : 'upgrade'), amount: opts.amount || null, card: card(v), raised, ovrFrom: before.ovr, tierUp, tierFrom: before.tier, newRibbon, banked: after.banked, reason: opts.reason || 'Card upgraded' });
   }
   return { v, card: after };
 }
@@ -867,7 +883,7 @@ setInterval(async () => {
 // ---------- Boss Sports News (ticker, live scores, goal alerts) ----------
 // ---------- hold everything while the overlay isn't on air (Starting soon, Big Cam, BRB, end video) ----------
 let sceneHeld = false, sceneHeldName = '', heldList = [], playAnywayScene = null;
-const HOLDABLE = /^(levelup|pack|show|streakup|checkin|challenge|raidmsg)$/;
+const HOLDABLE = /^(levelup|pack|show|streakup|checkin|challenge|raidmsg|ealert)$/;
 setInterval(async () => {
   let held = false;
   try {
@@ -892,6 +908,12 @@ const connectHooks = [() => ({ type: 'sceneHold', hold: sceneHeld, scene: sceneH
 const { Media, musicCfg, musicSet } = require('./lib/media');
 const SCR = require('./lib/screens');
 const media = new Media({ dir: path.join(DATA, 'media'), store, extraPhotos: () => stS().pics.map((p) => ({ id: 'st-' + p.id, kind: 'photo', name: 'Starting Soon picture', url: '/starting-pic/' + p.id + '.' + p.ext, from: 'starting' })) });
+// ---------- v44: BBR alerts (lib/ealerts.js) instead of Streamlabs, with your own sounds / pictures / videos, and read-outs (lib/tts.js) ----------
+const EAL = require('./lib/ealerts');
+const { TTS } = require('./lib/tts');
+const tts = new TTS(path.join(DATA, 'tts'));
+const ealerts = new EAL.EAlerts({ cfg: () => cfg, saveCfg: () => saveCfg(), push: (a) => push(a), media, tts: (t, v) => tts.say(t, v) });
+connectHooks.push(() => { const S = ealerts.S(); return { type: 'ealertState', on: S.on, paused: S.paused, muted: S.muted, cards: S.cards, tangia: S.tangia }; });
 // v33 giveaway meter (lib/gmeter.js): on-screen meter + countdown, fills from subs / gifts / bits / follows / chat entries
 const gmeter = new (require('./lib/gmeter').GMeter)({ cfg: () => cfg, saveCfg: () => saveCfg(), push: (e) => push(e), file: path.join(DATA, 'gmeter.json'),
   gameLook: () => screens.look('auto'), feed: (a, b) => feedAdd(a, b), say: (m) => sayAll(m) });
@@ -1291,6 +1313,20 @@ function actionList() {
   add('Stream', 'links-now', 'Show my links now', '/control/links-now', '#9146ff'); add('Stream', 'links-toggle', 'Links timer on / off', '/control/links-toggle', '#9146ff'); add('Stream', 'stinger', 'Play the stinger', '/control/stinger', '#ffd400');
   add('Stream', 'music-mute', 'Music on / off', '/control/music-mute', '#a7b0ba'); add('Stream', 'music-skip', 'Next song', '/control/music-skip', '#a7b0ba');
   for (const sc of (screens.scenes || []).slice(0, 15)) add('Camera', 'scene:' + sc, 'Stinger to: ' + sc, '/control/stinger-to?scene=' + encodeURIComponent(sc), '#ffd400');
+  // v44: alerts, quick buttons, Ballon d'Or, Elite theme
+  add('Alerts', 'alerts-pause', 'Alerts: pause / resume', '/control/alerts-pause', '#e8c468'); add('Alerts', 'alerts-skip', 'Alerts: skip the one on screen', '/control/alerts-skip', '#e8c468');
+  add('Alerts', 'alerts-replay', 'Alerts: replay the last one', '/control/alerts-replay', '#e8c468'); add('Alerts', 'alerts-mute', 'Alerts: mute / unmute sounds', '/control/alerts-mute', '#e8c468');
+  add('Alerts', 'alerts-toggle', 'BBR alerts: on / off', '/control/alerts-toggle', '#e8c468');
+  for (const k of ['follow', 'sub', 'gift', 'giftbomb', 'bits', 'raid', 'kicks', 'host', 'superchat', 'member']) add('Alerts', 'alerts-test:' + k, 'Test alert: ' + EAL.TYPES[k].label, '/control/alerts-test?kind=' + k, '#e8c468');
+  add('Alerts', 'tangia-hide', 'Tangia: hide + mute / back on', '/control/tangia-hide', '#ff7a45');
+  add('Stream', 'so-raider', 'Shout out the last raider', '/control/so-raider', '#9146ff'); add('Stream', 'ad-warn', 'Ad break warning (60 s countdown)', '/control/ad-warn?secs=60', '#f5c400'); add('Stream', 'ad-warn-30', 'Ad break warning (30 s)', '/control/ad-warn?secs=30', '#f5c400'); add('Stream', 'ad-cancel', 'Ad warning: cancel', '/control/ad-cancel', '#f5c400');
+  add('Stream', 'refresh-overlays', 'Refresh every BBR overlay in OBS', '/control/refresh-overlays', '#a7b0ba'); add('Stream', 'cards-hide5', 'Clean screen: card alerts wait 5 min', '/control/cards-hide5?mins=5', '#a7b0ba');
+  add('Stream', 'lockdown', 'Chat lockdown on / off (followers-only + slow)', '/control/lockdown', '#ff6b7d'); add('Stream', 'update-check', 'Check for updates', '/control/update-check', '#6c8cff');
+  add('Ballon d\'Or', 'ballon-toggle', 'Ballon d\'Or: open / close voting', '/control/ballon-toggle', '#e8c468'); add('Ballon d\'Or', 'ballon-open', 'Ballon d\'Or: open voting', '/control/ballon-open', '#e8c468'); add('Ballon d\'Or', 'ballon-close', 'Ballon d\'Or: close voting', '/control/ballon-close', '#e8c468');
+  add('Ballon d\'Or', 'ballon-vote', 'Ballon d\'Or: voting screen on / off', '/control/ballon-show?screen=vote', '#e8c468'); add('Ballon d\'Or', 'ballon-corner', 'Ballon d\'Or: corner reminder on / off', '/control/ballon-show?screen=corner', '#e8c468'); add('Ballon d\'Or', 'ballon-all', 'Ballon d\'Or: every nominee\'s votes on / off', '/control/ballon-show?screen=all', '#e8c468');
+  add('Ballon d\'Or', 'ballon-next', 'Ceremony: next reveal (3rd → 2nd → winner → fans)', '/control/ballon-next', '#e8c468'); add('Ballon d\'Or', 'ballon-back', 'Ceremony: back one step', '/control/ballon-back', '#e8c468'); add('Ballon d\'Or', 'ballon-off', 'Ballon d\'Or: screen off', '/control/ballon-off', '#e8c468'); add('Ballon d\'Or', 'ballon-remind', 'Ballon d\'Or: remind chat (with the nominees)', '/control/ballon-remind', '#e8c468');
+  try { ballon.state().noms.slice(0, 10).forEach((n, i) => add('Ballon d\'Or', 'ballon-myvote:' + (i + 1), 'My vote: #' + (i + 1) + ' ' + n.name, '/control/ballon-myvote?n=' + (i + 1), '#e8c468')); } catch (e) { /* ignore */ }
+  add('Stream', 'theme-elite', 'Theme: Elite Playoffs (black & gold)', '/control/playoffs-on', '#d9b45a');
   add('Stream', 'theme-ets', 'Theme: Euro Truck Simulator', '/control/theme-ets', '#ffd400'); add('Stream', 'theme-football', 'Theme: Football', '/control/theme-football', '#e3132c'); add('Stream', 'theme-heist', 'Theme: Sunset Heist (GTA-style)', '/control/theme-heist', '#ff3d8b');
   return A;
 }
@@ -1340,6 +1376,20 @@ function deckPack() {
   k('Fix it', 'RESET CAMERA', 'CAM', '#ff5aa0', '/control/cam-reset'); k('Fix it', 'SAVE CAM SPOT', 'SPOT', '#ff5aa0', '/control/cam-savespot');
   k('Fix it', 'FREEZE CARDS', '❄', '#ffb020', '/control/cards-freeze'); k('Fix it', 'APPLY HELD', '✓', '#3dff9a', '/control/cards-apply'); k('Fix it', 'THROW AWAY', '✕', '#ff6b7d', '/control/cards-discard');
   k('Fix it', 'UNDO 10 MIN', '10', '#ffb020', '/control/cards-undo10'); k('Fix it', 'RECONNECT', '⟳', '#a7b0ba', '/control/reconnect'); k('Fix it', 'STOP GAMES', '■', '#ff6b7d', '/control/stop-games');
+  // v44: alerts + quick buttons
+  k('Alerts', 'PAUSE ALERTS', '❚❚', '#e8c468', '/control/alerts-pause'); k('Alerts', 'SKIP ALERT', '>>', '#e8c468', '/control/alerts-skip'); k('Alerts', 'REPLAY ALERT', '↺', '#e8c468', '/control/alerts-replay');
+  k('Alerts', 'MUTE SOUNDS', 'M', '#e8c468', '/control/alerts-mute'); k('Alerts', 'ALERTS ON/OFF', 'A', '#e8c468', '/control/alerts-toggle'); k('Alerts', 'HIDE TANGIA', 'T', '#ff7a45', '/control/tangia-hide');
+  k('Alerts', 'SHOUT OUT RAIDER', 'SO', '#9146ff', '/control/so-raider'); k('Alerts', 'AD IN 60', 'AD', '#f5c400', '/control/ad-warn?secs=60'); k('Alerts', 'CLEAN SCREEN', '5m', '#a7b0ba', '/control/cards-hide5?mins=5');
+  k('Alerts', 'LOCKDOWN', 'LOCK', '#ff6b7d', '/control/lockdown'); k('Alerts', 'REFRESH OVERLAYS', '⟳', '#a7b0ba', '/control/refresh-overlays'); k('Alerts', 'CHECK UPDATES', 'UPD', '#6c8cff', '/control/update-check');
+  k('Alerts', 'TEST FOLLOW', 'T1', '#3dff9a', '/control/alerts-test?kind=follow'); k('Alerts', 'TEST SUB', 'T2', '#6c8cff', '/control/alerts-test?kind=sub'); k('Alerts', 'TEST RAID', 'T3', '#ff8a1f', '/control/alerts-test?kind=raid');
+  // v44: Ballon d'Or
+  k('Ballon d\'Or', 'VOTING OPEN/CLOSE', 'VOTE', '#e8c468', '/control/ballon-toggle'); k('Ballon d\'Or', 'VOTE SCREEN', 'FULL', '#e8c468', '/control/ballon-show?screen=vote'); k('Ballon d\'Or', 'CORNER', '◳', '#e8c468', '/control/ballon-show?screen=corner');
+  k('Ballon d\'Or', 'ALL VOTES', '%', '#e8c468', '/control/ballon-show?screen=all'); k('Ballon d\'Or', 'NEXT REVEAL', '▶', '#e8c468', '/control/ballon-next'); k('Ballon d\'Or', 'REVEAL BACK', '◀', '#e8c468', '/control/ballon-back');
+  k('Ballon d\'Or', 'SCREEN OFF', '■', '#a7b0ba', '/control/ballon-off'); k('Ballon d\'Or', 'REMIND CHAT', '!', '#e8c468', '/control/ballon-remind');
+  try { ballon.state().noms.slice(0, 7).forEach((n, i) => k('Ballon d\'Or', 'MY VOTE #' + (i + 1), String(n.name).toUpperCase().slice(0, 6), '#e8c468', '/control/ballon-myvote?n=' + (i + 1))); } catch (e) { /* ignore */ }
+  // v44: Elite Playoffs
+  k('Playoffs', 'PLAYOFF NIGHT', 'PO', '#d9b45a', '/control/playoffs'); k('Playoffs', 'NEW RUN', 'NEW', '#d9b45a', '/control/playoffs-newrun'); k('Playoffs', 'WIN', 'W', '#3dff9a', '/control/result-win');
+  k('Playoffs', 'DRAW', 'D', '#ffd23f', '/control/result-draw'); k('Playoffs', 'LOSS', 'L', '#ff6b7d', '/control/result-loss'); k('Playoffs', 'UNDO', '↶', '#a7b0ba', '/control/result-undo');
   // Scenes with the stinger
   for (const sc of (screens.scenes || []).slice(0, 15)) k('Scenes', String(sc).toUpperCase().slice(0, 14), '>>', '#ffd400', '/control/stinger-to?scene=' + encodeURIComponent(sc));
   return P;
@@ -1387,6 +1437,9 @@ function dockState() {
   try { const B = screens.brbState(); st.brb = { on: B.on, running: B.running, left: B.left, look: B.look }; st.bigcam = screens.bigState().name; st.linksNext = screens.linksNext(); st.musicMuted = !!cfg.musicMuted; } catch (e) { /* ignore */ }
   try { st.nextBattleMs = battlesOff() || cfg.battlesEnabled === false || cfg.battlesPaused ? null : nextInMs(); } catch (e) { /* ignore */ }
   st.battlesOff = battlesOff();
+  try { const E = ealerts.S(); st.ealerts = { on: E.on, paused: E.paused, muted: E.muted, held: ealerts.pending.length, raider: ealerts.lastRaider ? ealerts.lastRaider.name : null }; } catch (e) { /* ignore */ }
+  st.cardsHideUntil = cardsHideUntil > Date.now() ? cardsHideUntil : 0; st.lockdown = lockdownOn;
+  try { st.uiLayout = (cfg.uiLayout || {}).dock || null; } catch (e) { /* ignore */ }
   return st;
 }
 
@@ -1515,7 +1568,9 @@ const clubStats = new ClubStats({ store, cfg: () => cfg, saveCfg, push: (a) => p
 const MOVEX = require('./lib/move');
 const move = new MOVEX.Move({ obs, cfg: () => cfg, saveCfg, log: (m) => console.log(m) });
 function moveFrom(a) {
-  if (a.type === 'levelup') { if (a.kind === 'giftbomb') move.fire('giftbomb'); if (a.kind === 'raid') move.fire('raid'); if (a.tierUp) move.fire('tierup'); }
+  if (a.type === 'ealert' && !a.test && !a.replay) { if (a.kind === 'giftbomb') move.fire('giftbomb'); if (a.kind === 'raid' || a.kind === 'host') move.fire('raid'); }
+  else if (a.type === 'levelup' && a.eal) { if (a.tierUp) move.fire('tierup'); }
+  else if (a.type === 'levelup') { if (a.kind === 'giftbomb') move.fire('giftbomb'); if (a.kind === 'raid') move.fire('raid'); if (a.tierUp) move.fire('tierup'); }
   else if (a.type === 'challenge' && a.kind === 'complete') move.fire('challengeDone');
   else if (a.type === 'raidnight' && a.kind === 'briefing') move.fire('briefing');
   else if (a.type === 'raidnight' && a.kind === 'result') move.fire(a.result.win ? 'raidWin' : 'raidLoss');
@@ -2814,10 +2869,102 @@ setInterval(() => {
   }
 }, 60000);
 
+async function ealState() {
+  const T = await tts.voices().catch(() => ({ engine: null, voices: [] }));
+  return { settings: ealerts.S(), info: ealerts.info(), history: ealerts.list(), held: ealerts.pending.length, tts: T, overlay: overlaysOpen(),
+    twitch: { connected: !!twitch.connected, needLogin: twitch.configured() && !!cfg.twitchTokens && twitch.needsV44(), cant: Array.from(twitch.cantListen || []) },
+    youtube: { connected: !!youtube.connected }, kick: { connected: !!kick.connected },
+    lastRaider: ealerts.lastRaider, tangiaRect: tangiaRect(), tangiaCustom: !!(((cfg.screen || {}).alerts || {}).zones || {}).tangia && !!cfg.screen.alerts.zones.tangia.custom, ad: Object.assign({ run: false, length: 60, secs: 60 }, cfg.adWarn || {}), lockdown: lockdownOn, cardsHideUntil,
+    tangiaFound: (obs.alertList || []).filter((a) => a.kind === 'tangia').map((a) => ({ name: a.name, full: a.full, heard: a.heard })), meters: obs.meters };
+}
+// ---------- v44 quick buttons: alerts, shout-out the raider, ad warning, refresh, clean screen, lockdown, Tangia, updates, Ballon d'Or ----------
+let cardsHideUntil = 0, adWarnT = null, lockdownOn = false;
+connectHooks.push(() => ({ type: 'cardsHide', until: cardsHideUntil }));
+async function shoutoutRaider() {
+  const r = ealerts.lastRaider; if (!r || Date.now() - r.at > 3 * 3600000) return 'No raid or host yet tonight';
+  const url = r.platform === 'kick' ? 'kick.com/' + r.login : r.platform === 'youtube' ? 'youtube.com' : 'twitch.tv/' + r.login;
+  sayAll('📣 Go and show ' + r.name + ' some love: ' + url + ' Thanks for the ' + (r.platform === 'kick' ? 'host' : 'raid') + '!');
+  let extra = '';
+  if (r.platform === 'twitch' && twitch.connected) { try { await twitch.shoutout(r.login); extra = ' + a Twitch shout-out'; } catch (e) { extra = ' (Twitch shout-out: ' + (/403|401|scope|permission/i.test(e.message) ? 'reconnect Twitch to allow it' : /429|cooldown/i.test(e.message) ? 'wait for the Twitch cooldown' : e.message.slice(0, 60)) + ')'; } }
+  feedAdd('Shouted out ' + r.name, '#9146ff');
+  return 'Shouted out ' + r.name + ' in chat' + extra;
+}
+function adWarn(secs) {
+  secs = Math.max(10, Math.min(300, +secs || 60));
+  clearTimeout(adWarnT);
+  const S = cfg.adWarn || {};
+  sayAll('📺 Ad break in ' + secs + ' seconds! Grab a drink, we\'ll be right back. Subs on Twitch skip the ads.');
+  push({ type: 'adwarn', secs, endsAt: Date.now() + secs * 1000 });
+  adWarnT = setTimeout(async () => {
+    push({ type: 'adwarn', secs: 0, endsAt: 0 });
+    if (S.run && twitch.connected) { try { const c = await twitch.commercial(S.length || 60); feedAdd('Ad started: ' + ((c && c.length) || S.length || 60) + ' s', '#a7b0ba'); } catch (e) { feedAdd('Couldn\'t start the ad: ' + e.message.slice(0, 60), '#ff6b7d'); } }
+  }, secs * 1000); if (adWarnT.unref) adWarnT.unref();
+  return 'Ad warning: ' + secs + ' s on screen and in chat' + (S.run ? ', then the ad starts' : '');
+}
+async function lockdown(on) {
+  lockdownOn = on == null ? !lockdownOn : !!on;
+  if (!twitch.connected) return 'Twitch isn\'t connected';
+  try {
+    await twitch.chatSettings(lockdownOn ? { follower_mode: true, follower_mode_duration: 10, slow_mode: true, slow_mode_wait_time: 10 } : { follower_mode: false, slow_mode: false });
+    feedAdd(lockdownOn ? 'Chat lockdown ON' : 'Chat lockdown off', '#ff6b7d');
+    return lockdownOn ? 'Chat lockdown ON: followers of 10+ minutes only, 10 s slow mode' : 'Chat lockdown off';
+  } catch (e) { lockdownOn = !lockdownOn; return 'Couldn\'t change chat settings: ' + (/403|401/.test(e.message) ? 'reconnect Twitch (Setup › Platforms) to allow it' : e.message.slice(0, 80)); }
+}
+function ballonNext(dir) {
+  const st = ballon.state(), sh = st.show || {};
+  if (st.status === 'open') return { error: 'Close voting before the ceremony' };
+  const stage = sh.screen === 'ceremony' ? Math.max(0, Math.min(4, (sh.stage || 0) + dir)) : 0;
+  const r = ballon.setShow('ceremony', stage);
+  return r.error ? r : { msg: ['Ceremony on screen', '3rd place revealed', '2nd place revealed', 'WINNER revealed', "Fans' favourite revealed"][stage] };
+}
+async function control44(a, q) {
+  const said = (r) => (r && r.error ? r.error : (r && r.msg) || 'ok');
+  switch (a) {
+    case 'alerts-pause': return ealerts.pause() ? 'Alerts paused' : 'Alerts back on';
+    case 'alerts-resume': ealerts.pause(false); return 'Alerts back on';
+    case 'alerts-skip': ealerts.skip(); return 'Skipped the alert on screen';
+    case 'alerts-replay': { const r = ealerts.replay(); return r.error || 'Replaying: ' + r.alert.title; }
+    case 'alerts-mute': return ealerts.mute() ? 'Alert sounds muted' : 'Alert sounds on';
+    case 'alerts-toggle': return ealerts.set({ on: !ealerts.S().on }).on ? 'BBR alerts ON' : 'BBR alerts OFF';
+    case 'alerts-test': { const k = q.get('kind') || 'follow'; if (!EAL.TYPES[k]) return 'Unknown alert type'; const D = EAL.TYPES[k]; await ealerts.fire(k, { name: 'TestViewer', platform: D.pf[0], amount: D.amt ? ({ months: 6, subs: 5, bits: 500, viewers: 25, level: 2, money: 5, kicks: 100, memberships: 3 }[D.amt] || 1) : 1, money: D.amt === 'money' ? '$5' : '', what: 'Hydrate!' }, { test: true }); return 'Test ' + D.label; }
+    case 'so-raider': return shoutoutRaider();
+    case 'ad-warn': return adWarn(q.get('secs') || 60);
+    case 'ad-cancel': clearTimeout(adWarnT); push({ type: 'adwarn', secs: 0, endsAt: 0 }); return 'Ad warning cancelled';
+    case 'refresh-overlays': { push({ type: 'reload' }); let n = 0; try { if (obs.ready) n = await obs.refreshBBR(PORT); } catch (e) { /* ignore */ } return 'Refreshed every BBR page' + (n ? ' (' + n + ' OBS sources)' : ''); }
+    case 'cards-hide5': { const mins = Math.max(1, Math.min(60, +q.get('mins') || 5)); cardsHideUntil = cardsHideUntil > Date.now() ? 0 : Date.now() + mins * 60000; push({ type: 'cardsHide', until: cardsHideUntil }); return cardsHideUntil ? 'Card alerts wait ' + mins + ' min (clean screen)' : 'Card alerts back'; }
+    case 'lockdown': return lockdown();
+    case 'tangia-hide': try { const r = await obs.toggleTangia(); return r.shown ? 'Tangia back on' : 'Tangia hidden and muted'; } catch (e) { return e.message; }
+    case 'update-check': { if (!DESK.on) return 'Updates are in the BBR app (not running in the app now)'; const r = await deskAsk({ action: 'check', args: {} }, 60000); const u = (r && r.update) || {}; return u.phase === 'ready' ? 'Version ' + u.version + ' is ready: install it from the dashboard (or it waits for the end of the stream)' : u.phase === 'downloading' || u.phase === 'checking' ? 'Version ' + (u.version || 'new') + ' is downloading' : u.phase === 'error' ? 'Update check: ' + (u.error || 'failed') : 'Up to date (v' + APP_VERSION + ')'; }
+    case 'ballon-open': return said(ballon.open('Stream Deck'));
+    case 'ballon-close': return said(ballon.close('Stream Deck'));
+    case 'ballon-toggle': return said(ballon.state().status === 'open' ? ballon.close('Stream Deck') : ballon.open('Stream Deck'));
+    case 'ballon-show': { const sc = q.get('screen') || 'vote'; const cur = (ballon.state().show || {}).screen; const r = ballon.setShow(cur === sc && q.get('toggle') !== '0' ? 'off' : sc); return r.error || (cur === sc ? "Ballon d'Or screen off" : "Ballon d'Or: " + sc + ' on screen'); }
+    case 'ballon-off': ballon.setShow('off'); return "Ballon d'Or screen off";
+    case 'ballon-next': return said(ballonNext(1));
+    case 'ballon-back': return said(ballonNext(-1));
+    case 'ballon-remind': { const st = ballon.state(); if (st.status !== 'open') return 'Voting isn\'t open'; sayAll('🏆 ' + st.title + ' voting is open: type !vote and a number. ' + st.noms.map((n, i) => (i + 1) + '. ' + n.name).join(' · ').slice(0, 380)); return 'Reminder sent to chat'; }
+    case 'ballon-myvote': { const n = +q.get('n'); const nom = ballon.state().noms[n - 1]; if (!nom) return 'No nominee ' + n; return said(ballon.bossVote(nom.id)); }
+    default: return null;
+  }
+}
+// v44: where Tangia plays (its OBS source if it isn't full screen, otherwise the Tangia area you set)
+function tangiaRect() { const S = screenSettings(), z = S.alerts.zones.tangia, f = (obs.alertList || []).find((a) => a.kind === 'tangia' && !a.full && a.rect); const r = f && !z.custom ? f.rect : z; return { x: Math.round(r.x), y: Math.round(r.y), w: Math.round(r.w), h: Math.round(r.h) }; }
+// v44: what each event's BBR alert is
+function ealGiftType(platform, total) { if (platform === 'youtube') return 'giftmember'; const G = ealerts.S().types.giftbomb; return G.on && total >= Math.max(2, G.min || 5) ? 'giftbomb' : 'gift'; }
+function ealCheer(platform, e) {
+  const type = EAL.typeFor('cheer', platform, e);
+  if (platform === 'youtube') { const m = /Super (?:Chat|Sticker) (.+)$/.exec(e.reason || ''); return { type, amount: Math.round((e.bits || 0)) / 100, money: m ? m[1] : EAL.money((e.bits || 0) / 100), message: e.text || '' }; }
+  if (type === 'powerup') { const m = /^Power-up: (.+?) \(/.exec(e.reason || ''); return { type, amount: e.bits || 0, what: m ? m[1] : 'a Power-up' }; }
+  return { type, amount: e.bits || 0, message: e.text || '' };
+}
 // ---------- platform events (identical handling for every platform) ----------
 function wire(src, platform) {
-  src.on('follow', (e) => update(platform, e.login, e.display, (v) => { if (!v.followedAt) { v.followedAt = e.at; streamLog.event('follow', 1, v.key, { who: e.display || e.login }); } },
-    { pack: true, alert: true, kind: 'follow', reason: platform === 'youtube' ? 'Subscribed to the channel' : 'Followed the channel' }));
+  src.on('follow', (e) => {
+    // v44: a re-follow (unfollow + follow again) doesn't get a second alert
+    const k0 = store.resolveKey(platform, e.login), v0 = k0 && store.data.viewers[k0], again = !!(v0 && v0.followedAt);
+    return update(platform, e.login, e.display, (v) => { if (e.avatar && !v.avatar) v.avatar = e.avatar; if (!v.followedAt) { v.followedAt = e.at; streamLog.event('follow', 1, v.key, { who: e.display || e.login }); } },
+      { pack: true, alert: true, kind: 'follow', reason: platform === 'youtube' ? 'Subscribed to the channel' : 'Followed the channel', ealert: again ? null : { type: 'follow' } });
+  });
   src.on('sub', (e) => {
     battle.boost(platform, e.login, 5);
     if (!e.isGift) potIn(TK.potSettings(cfg).subValue, (e.display || e.login) + ' subscribed');
@@ -2827,7 +2974,7 @@ function wire(src, platform) {
       // v29: a gifted sub is already counted (and paid for) in the gifter's 'gift' event: counting it again here doubled the money
       if (!e.isGift) { streamLog.event('sub', 1, v.key, { tier: v.subTier, prime: v.subPrime, who: e.display || e.login }); earnAdd(v, platform, 'sub', 1, v.subPrime ? 'prime' : (v.subTier || 1)); logSup(v, 'sub', 1); }
       S.addXp(v, 'SUB', tierMonths(v.subTier), R, true, now);
-    }, { alert: true, kind: e.isGift ? 'giftsub' : 'sub', reason: e.label || (e.isGift ? 'Received a gifted sub' : 'Subscribed') });
+    }, { alert: true, kind: e.isGift ? 'giftsub' : 'sub', reason: e.label || (e.isGift ? 'Received a gifted sub' : 'Subscribed'), ealert: { type: EAL.typeFor('sub', platform, e), tier: e.tier || undefined } });
   });
   src.on('resub', (e) => {
     battle.boost(platform, e.login, 5);
@@ -2840,7 +2987,7 @@ function wire(src, platform) {
       streamLog.event('sub', 1, v.key, { tier: v.subTier, prime: v.subPrime, who: e.display || e.login }); earnAdd(v, platform, 'sub', 1, v.subPrime ? 'prime' : (v.subTier || 1));
       S.addXp(v, 'SUB', Math.max(0, v.subMonths - prev) * tierMonths(v.subTier), R, true, now);
       logSup(v, 'sub', 1);
-    }, { alert: true, kind: 'resub', amount: e.months, reason: (e.label || 'Resubbed') + ' · month ' + e.months });
+    }, { alert: true, kind: 'resub', amount: e.months, reason: (e.label || 'Resubbed') + ' · month ' + e.months, ealert: { type: EAL.typeFor('resub', platform, e), amount: e.months, message: e.text || '', tier: e.tier || undefined } });
   });
   src.on('subinfo', (e) => {
     const key = store.resolveKey(platform, e.login), v = key && store.data.viewers[key];
@@ -2848,7 +2995,7 @@ function wire(src, platform) {
   });
   src.on('gift', (e) => {
     // v35: anonymous gifts: money + stats only (no card for "an anonymous gifter")
-    if (e.anonymous) { potIn(TK.potSettings(cfg).subValue * e.total, 'Anonymous gift x' + e.total); streamLog.event('gift', e.total, null, { who: 'Anonymous' }); try { earnings.add(platform, 'gift', e.total, e.tier || 1); } catch (x) { /* ignore */ } feedAdd('Anonymous gift: ' + e.total + ' sub' + (e.total === 1 ? '' : 's'), '#c58bff'); return; }
+    if (e.anonymous) { ealerts.fire(ealGiftType(platform, e.total), { name: 'An anonymous gifter', platform, amount: e.total, tier: e.tier || 1 }).catch(() => {}); potIn(TK.potSettings(cfg).subValue * e.total, 'Anonymous gift x' + e.total); streamLog.event('gift', e.total, null, { who: 'Anonymous' }); try { earnings.add(platform, 'gift', e.total, e.tier || 1); } catch (x) { /* ignore */ } feedAdd('Anonymous gift: ' + e.total + ' sub' + (e.total === 1 ? '' : 's'), '#c58bff'); return; }
     battle.boost(platform, e.login, Math.min(10, 5 * e.total));
     // a big gift: clip the moment (the alert and your reaction) for the clip list
     if (replay.S().on && replay.S().autoGifts && e.total >= replay.S().giftMin && isLive()) setTimeout(() => replayNow({ label: 'GIFT BOMB · ' + String(e.display || e.login).toUpperCase() + ' x' + e.total, auto: true }).catch(() => {}), 9000);
@@ -2860,11 +3007,11 @@ function wire(src, platform) {
       // Twitch tells us their all-time total for the channel: older gifts (before the cards) become the base
       if (e.cumulative != null && e.cumulative > S.giftsAllTime(v)) v.giftsBase = e.cumulative - (v.giftedSubs || 0);
       logSup(v, 'gift', e.total); streamLog.event('gift', e.total, v.key, { who: e.display || e.login }); earnAdd(v, platform, 'gift', e.total, e.tier || 1);
-    }, { alert: true, always: true, gift: giftInfo, kind: e.total >= 5 ? 'giftbomb' : 'gift', amount: e.total, reason: 'Gifted ' + e.total + (platform === 'youtube' ? ' membership' : ' sub') + (e.total === 1 ? '' : 's') });
+    }, { alert: true, always: true, gift: giftInfo, kind: e.total >= 5 ? 'giftbomb' : 'gift', amount: e.total, ealert: { type: ealGiftType(platform, e.total), amount: e.total, tier: e.tier || 1 }, reason: 'Gifted ' + e.total + (platform === 'youtube' ? ' membership' : ' sub') + (e.total === 1 ? '' : 's') });
   });
   // bits (Twitch), Kicks (Kick) and Super Chats/Stickers (YouTube, converted at $1 = 100) all feed SUP (support)
   src.on('cheer', (e) => {
-    if (e.anonymous) { streamLog.event('bits', e.bits, null, { who: 'Anonymous' }); try { earnings.add(platform, 'bits', e.bits); } catch (x) { /* ignore */ } feedAdd('Anonymous cheer: ' + e.bits + ' bits', '#9146ff'); return; }
+    if (e.anonymous) { ealerts.fire(ealCheer(platform, e).type, Object.assign({ name: 'An anonymous cheerer', platform }, ealCheer(platform, e))).catch(() => {}); streamLog.event('bits', e.bits, null, { who: 'Anonymous' }); try { earnings.add(platform, 'bits', e.bits); } catch (x) { /* ignore */ } feedAdd('Anonymous cheer: ' + e.bits + ' bits', '#9146ff'); return; }
     battle.boost(platform, e.login, Math.floor(e.bits / 100), e.text || ' ');
     potIn(TK.potSettings(cfg).per100Value * e.bits / 100, (e.display || e.login) + ' sent ' + e.bits + (platform === 'kick' ? ' Kicks' : platform === 'youtube' ? ' (Super Chat)' : ' bits'));
     update(platform, e.login, e.display, (v, now) => {
@@ -2873,12 +3020,12 @@ function wire(src, platform) {
       if (platform === 'twitch') v.twBits = (v.twBits == null ? ((v.cheers && v.cheers.bits) || 0) : v.twBits) + e.bits;
       logSup(v, platform === 'kick' ? 'kicks' : platform === 'youtube' ? 'superchat' : 'bits', e.bits);
       streamLog.event(platform === 'kick' ? 'kicks' : platform === 'youtube' ? 'sc' : 'bits', e.bits, v.key, { who: e.display || e.login }); earnAdd(v, platform, platform === 'kick' ? 'kicks' : platform === 'youtube' ? 'sc' : 'bits', e.bits);
-    }, { alert: !e.silent, kind: platform === 'kick' ? 'kicks' : platform === 'youtube' ? 'superchat' : 'bits', amount: e.bits, reason: e.reason || ('Cheered ' + e.bits + ' bits') });
+    }, { alert: !e.silent, kind: platform === 'kick' ? 'kicks' : platform === 'youtube' ? 'superchat' : 'bits', amount: e.bits, reason: e.reason || ('Cheered ' + e.bits + ' bits'), ealert: e.silent || e.tangia ? null : ealCheer(platform, e) });
   });
   src.on('raid', (e) => update(platform, e.login, e.display, (v, now) => {
     if (e.viewers >= R.raidMinViewers) { v.raids = (v.raids || 0) + 1; S.addXp(v, 'RAI', 1, R, false, now); }
     streamLog.event('raid', e.viewers || 0, v.key, { who: e.display || e.login });
-  }, { alert: true, kind: 'raid', amount: e.viewers, reason: (platform === 'kick' ? 'Hosted' : 'Raided') + ' with ' + e.viewers + ' viewers' }));
+  }, { alert: true, kind: 'raid', amount: e.viewers, reason: (platform === 'kick' ? 'Hosted' : 'Raided') + ' with ' + e.viewers + ' viewers', ealert: { type: EAL.typeFor('raid', platform, e), amount: e.viewers || 0 } }));
   src.on('chat', (e) => onChat(platform, e).catch((err) => console.error('[chat]', err)));
   src.on('ban', (e) => onBanned(platform, e));
   // v33: the giveaway meter counts these too
@@ -2891,6 +3038,14 @@ function wire(src, platform) {
 }
 for (const [k, p] of Object.entries(PLATFORMS)) wire(p, k);
 
+// v44: the Twitch events that only BBR alerts use (and channel points, if you list rewards)
+twitch.on('hypetrain', (e) => { if (e.phase !== 'end') ealerts.fire('hypetrain', { name: 'Hype Train', platform: 'twitch', amount: e.level || 1 }).catch(() => {}); if (e.phase === 'begin') feedAdd('Hype Train started!', '#9146ff'); });
+twitch.on('shoutout', (e) => { ealerts.fire('shoutout', { name: e.display || e.login, login: e.login, platform: 'twitch', amount: e.viewers || 0 }).catch(() => {}); feedAdd((e.display || e.login) + ' shouted you out', '#9146ff'); });
+twitch.on('charity', (e) => { ealerts.fire('charity', { name: e.display || e.login, login: e.login, platform: 'twitch', amount: e.amount, money: EAL.money(e.amount, e.currency), what: e.charity }).catch(() => {}); feedAdd((e.display || e.login) + ' donated ' + EAL.money(e.amount, e.currency) + ' to charity', '#3dff9a'); });
+twitch.on('redeem', (e) => { ealerts.fire('redeem', { name: e.display || e.login, login: e.login, platform: 'twitch', what: e.reward, message: e.input || '' }).catch(() => {}); });
+twitch.on('adbreak', (e) => { feedAdd('Ad break: ' + (e.secs || 0) + ' s' + (e.auto ? ' (Twitch scheduled it)' : ''), '#a7b0ba'); push({ type: 'adbreak', secs: e.secs || 0, phase: 'on' }); });
+// YouTube new subscribers: checked every 2 minutes while you're live there (1 quota unit each time)
+setInterval(() => { if (youtube.live && youtube.connected) youtube.newSubscribers().catch(() => {}); }, 120000).unref();
 // ---------- sharing the screen with Tangia + Streamlabs ----------
 // When one of them is playing (OBS hears its sound, or a channel point was just redeemed), our cards wait.
 let redeemUntil = 0, alertBusy = false, busySince = 0;
@@ -2906,7 +3061,7 @@ setInterval(() => {
   let busy = !!who;
   if (busy && !alertBusy) busySince = now;
   if (busy && now - busySince > A.maxWaitSecs * 1000) busy = false;   // never hold cards forever
-  if (busy !== alertBusy) { alertBusy = busy; push({ type: 'alertBusy', busy, who }); }
+  if (busy !== alertBusy) { alertBusy = busy; push({ type: 'alertBusy', busy, who, rect: who === 'tangia' ? tangiaRect() : null }); }
 }, 300).unref();
 setInterval(async () => {
   try { if (obs.ready) { const before = JSON.stringify(obs.alertList.map((a) => [a.name, a.rect && Math.round(a.rect.x), a.full])); await obs.findAlerts(screenSettings().alerts.names); if (JSON.stringify(obs.alertList.map((a) => [a.name, a.rect && Math.round(a.rect.x), a.full])) !== before) pushScreen(); } } catch (e) { /* OBS busy */ }
@@ -3058,7 +3213,7 @@ function importList(platform, text, kind) {
 // ---------- web server ----------
 const TYPES = { '.html': 'text/html; charset=utf-8', '.js': 'text/javascript; charset=utf-8', '.css': 'text/css; charset=utf-8' };
 const PAGES = { '/gmeter': 'gmeter.html', '/gmeter.js': 'gmeter.js', '/brb': 'brb.html', '/bigcam': 'bigcam.html', '/music.js': 'music.js', '/links.js': 'links.js', '/stinger.js': 'stinger.js', '/': 'dashboard.html', '/overlay': 'overlay.html', '/credits': 'credits.html', '/card.js': 'card.js', '/card.css': 'card.css', '/sfx.js': 'sfx.js',
-  '/race.js': 'race.js', '/scene3d.js': 'scene3d.js', '/penalty.js': 'penalty.js', '/teampens.js': 'teampens.js', '/bp.js': 'bp.js', '/starting': 'starting.html', '/ballon': 'ballon.html', '/spin': 'spin.html', '/spin.js': 'spin.js', '/elite.js': 'elite.js', '/arc.js': 'arc.js', '/alerts.js': 'alerts.js', '/textures.js': 'textures.js', '/giveaway.js': 'giveaway.js', '/hud.js': 'hud.js', '/challenges.js': 'challenges.js', '/camfx.js': 'camfx.js', '/boards.js': 'boards.js', '/raidnight.js': 'raidnight.js', '/landmarks.js': 'landmarks.js', '/screen.js': 'screen.js', '/extras.js': 'extras.js', '/broadcast.js': 'broadcast.js', '/scenes': 'scenes.html', '/teeth-tracker': 'teeth.html', '/dock': 'dock.html', '/analysis': 'analysis.html', '/draw.js': 'draw.js', '/stadium3d.js': 'stadium3d.js', '/kits.js': 'kits.js', '/pen3d.js': 'pen3d.js' };
+  '/race.js': 'race.js', '/scene3d.js': 'scene3d.js', '/penalty.js': 'penalty.js', '/teampens.js': 'teampens.js', '/bp.js': 'bp.js', '/starting': 'starting.html', '/ballon': 'ballon.html', '/spin': 'spin.html', '/spin.js': 'spin.js', '/elite.js': 'elite.js', '/arc.js': 'arc.js', '/alerts.js': 'alerts.js', '/ealerts.js': 'ealerts.js', '/tframe.js': 'tframe.js', '/textures.js': 'textures.js', '/giveaway.js': 'giveaway.js', '/hud.js': 'hud.js', '/challenges.js': 'challenges.js', '/camfx.js': 'camfx.js', '/boards.js': 'boards.js', '/raidnight.js': 'raidnight.js', '/landmarks.js': 'landmarks.js', '/screen.js': 'screen.js', '/extras.js': 'extras.js', '/broadcast.js': 'broadcast.js', '/scenes': 'scenes.html', '/teeth-tracker': 'teeth.html', '/dock': 'dock.html', '/analysis': 'analysis.html', '/draw.js': 'draw.js', '/stadium3d.js': 'stadium3d.js', '/kits.js': 'kits.js', '/pen3d.js': 'pen3d.js' };
 // your own textures / sounds: the user folder first, then the ones that come with the app
 const TEX_DIRS = [...new Set([path.join(HOME, 'textures'), path.join(ROOT, 'textures')])];
 const IMG = { '.jpg': 'image/jpeg', '.jpeg': 'image/jpeg', '.png': 'image/png', '.webp': 'image/webp' };
@@ -3326,7 +3481,9 @@ const server = http.createServer(async (req, res) => {
     if (ctl) {
       const a = ctl[1], q = url.searchParams;
       let msg = 'ok';
-      if (a === 'pause') { pauseBattles(true); msg = 'Battles paused'; }
+      const q44 = await control44(a, q);
+      if (q44 != null) msg = q44;
+      else if (a === 'pause') { pauseBattles(true); msg = 'Battles paused'; }
       else if (a === 'resume') { pauseBattles(false); msg = 'Battles resumed'; }
       else if (a === 'toggle') msg = battlesOff() ? 'Battles are switched OFF: turn them on first' : pauseBattles(!cfg.battlesPaused) ? 'Battles paused' : 'Battles resumed';
       else if (a === 'battles-off') msg = setBattlesOff(true);
@@ -3533,6 +3690,7 @@ const server = http.createServer(async (req, res) => {
     }
     // ----- v30: media library -----
     { const m = /^\/media\/([a-f0-9]{12}\.[a-z0-9]{2,5})$/.exec(p); if (m && req.method === 'GET') return media.serve(req, res, m[1]); }
+    { const m = /^\/tts\/([a-f0-9]{12}\.wav)$/.exec(p); if (m && req.method === 'GET') return tts.serve(req, res, m[1]); }
     if (p === '/api/media/upload' && req.method === 'POST') return send(res, 200, await media.upload(req, url.searchParams.get('name') || 'file'));
     if (p === '/api/media') {
       if (req.method === 'POST') { const b = await readBody(req); const r = b.action === 'remove' ? media.remove(String(b.id)) : b.action === 'rename' ? media.rename(String(b.id), b.name) : { error: 'unknown action' }; return send(res, 200, Object.assign(r, { list: media.list() })); }
@@ -3646,6 +3804,42 @@ const server = http.createServer(async (req, res) => {
       const S0 = botcheck.S(); const q = String(url.searchParams.get('q') || '').toLowerCase();
       return send(res, 200, { settings: S0, defaults: require('./lib/botcheck').DEF_POINTS, labels: require('./lib/botcheck').LABEL, trusted: S0.trusted.length,
         log: botcheck.d.log.filter((x) => !q || String(x.display || '').toLowerCase().includes(q) || String(x.key).includes(q)).slice(0, 100) });
+    }
+    // ----- v44: your own layout (dashboard groups / tabs / cards / columns, dock tabs) -----
+    if (p === '/api/dashlayout') {   // (not /api/layout: that's the on-screen boxes)
+      if (req.method === 'POST') {
+        const b = await readBody(req) || {}; const L = cfg.uiLayout = cfg.uiLayout || {};
+        const clean = (x, n) => { const t = JSON.stringify(x || {}, (k, v) => (typeof v === 'string' ? v.slice(0, 80) : v)); return t.length > (n || 40000) ? null : JSON.parse(t); };
+        if (b.reset === 'dash' || b.reset === 'all') delete L.dash;
+        if (b.reset === 'dock' || b.reset === 'all') delete L.dock;
+        if (b.dash && typeof b.dash === 'object') { const x = clean(b.dash); if (!x) return send(res, 200, { error: 'Layout too big' }); L.dash = x; }
+        if (b.dock && typeof b.dock === 'object') { const x = clean(b.dock, 4000); if (!x) return send(res, 200, { error: 'Layout too big' }); L.dock = x; }
+        saveCfg(); return send(res, 200, { ok: true, layout: L });
+      }
+      return send(res, 200, { layout: cfg.uiLayout || {} });
+    }
+    // ----- v44 BBR alerts -----
+    if (p === '/api/ealerts') {
+      if (req.method === 'POST') {
+        const b = await readBody(req) || {}; let r = {};
+        if (b.settings && typeof b.settings === 'object') { ealerts.set(b.settings); r.msg = 'Saved'; }
+        const A = b.action;
+        if (A === 'test') { const t = String(b.kind || 'follow'); const D = EAL.TYPES[t]; const amt = b.amount != null ? +b.amount : D && D.amt ? ({ months: 6, subs: 5, bits: 500, viewers: 25, level: 2, money: 5, kicks: 100, memberships: 3 }[D.amt] || 1) : 1;
+          const x = await ealerts.fire(t, { name: String(b.name || 'TestViewer').slice(0, 30), platform: (D && D.pf[0]) || 'twitch', amount: amt, money: D && D.amt === 'money' ? EAL.money(amt) : '', what: t === 'redeem' ? 'Hydrate!' : t === 'powerup' ? 'Gigantify an emote' : t === 'charity' ? 'Charity' : '', message: D && D.tts ? 'This is a test message, nice one Boss!' : '', tier: +b.tier || 1, prime: !!b.prime }, { test: true });
+          r = x.error ? { error: x.error } : { msg: 'Test ' + ((D && D.label) || t) + ' sent to the overlay' + (overlaysOpen() ? '' : ' (no overlay open: add it to OBS)'), alert: x.alert && { id: x.alert.id, title: x.alert.title, look: x.alert.look, secs: x.alert.secs, variation: x.alert.variation } }; }
+        else if (A === 'pause') r.msg = ealerts.pause(b.on) ? 'Alerts paused: they wait until you resume' : 'Alerts back on (' + ealerts.pending.length + ' waiting played)';
+        else if (A === 'mute') r.msg = ealerts.mute(b.on) ? 'Alert sounds muted' : 'Alert sounds on';
+        else if (A === 'skip') { ealerts.skip(); r.msg = 'Skipped'; }
+        else if (A === 'replay') { const x = ealerts.replay(b.id); r = x.error ? { error: x.error } : { msg: 'Replaying: ' + x.alert.title }; }
+        else if (A === 'clearHeld') { ealerts.pending = []; r.msg = 'Thrown away'; }
+        else if (A === 'tangiaTest') { const rect = tangiaRect(); push({ type: 'alertBusy', busy: true, who: 'tangia', rect, test: true }); setTimeout(() => { if (!alertBusy) push({ type: 'alertBusy', busy: false, who: null }); }, 6000); r.msg = 'Tangia frame on screen for 6 seconds'; }
+        else if (A === 'tangiaArea') { const c = (v, lo, hi) => Math.round(Math.max(lo, Math.min(hi, +v || 0))); const z = b.rect || {}; cfg.screen = cfg.screen || {}; cfg.screen.alerts = cfg.screen.alerts || {}; cfg.screen.alerts.zones = cfg.screen.alerts.zones || {};
+          cfg.screen.alerts.zones.tangia = Object.assign({}, (cfg.screen.alerts.zones.tangia || {}), { on: true, x: c(z.x, 0, 1880), y: c(z.y, 0, 1040), w: c(z.w, 120, 1920), h: c(z.h, 90, 1080), custom: b.auto ? false : true }); saveCfg(); pushScreen(); r.msg = 'Tangia area saved'; }
+        else if (A === 'adSettings') { cfg.adWarn = { run: !!(b.ad && b.ad.run), length: Math.max(30, Math.min(180, +(b.ad && b.ad.length) || 60)), secs: Math.max(10, Math.min(300, +(b.ad && b.ad.secs) || 60)) }; saveCfg(); r.msg = 'Saved'; }
+        else if (A) r = { error: 'Unknown action' };
+        return send(res, 200, Object.assign(await ealState(), r));
+      }
+      return send(res, 200, await ealState());
     }
     if (p === '/api/spin') {
       if (req.method === 'POST') {
